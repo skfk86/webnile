@@ -40,7 +40,7 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
         with:
-          packages: platform-tools platforms;android-34 build-tools;34.0.0
+          packages: platform-tools platforms;android-36 build-tools;36.0.0
 
       - name: Setup Gradle (with cache)
         uses: gradle/actions/setup-gradle@v4
@@ -95,7 +95,9 @@ jobs:
           NAME=$(node -p "require('./package.json').version")
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" android/app/build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"$NAME\"/" android/app/build.gradle
-          grep -nE "versionCode|versionName" android/app/build.gradle
+          sed -i "s/compileSdkVersion [0-9]*/compileSdkVersion 36/" android/app/build.gradle
+          sed -i "s/targetSdkVersion [0-9]*/targetSdkVersion 36/" android/app/build.gradle
+          grep -nE "versionCode|versionName|compileSdk|targetSdk" android/app/build.gradle
 
       # ---------- Debug (كل push على main) ----------
       - name: Build debug APK
