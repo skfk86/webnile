@@ -517,7 +517,7 @@ try{Object.assign(S,JSON.parse(localStorage.getItem('webnile')||'{}'))}catch(e){
 const save=()=>{try{localStorage.setItem('webnile',JSON.stringify(S))}catch(e){}};
 let V={n:'home'};
 let tt;function toast(m,c=''){const t=$('#toast');t.textContent=m;t.className='toast show '+c;clearTimeout(tt);tt=setTimeout(()=>t.className='toast',2600)}
-function go(n,id){const back=n==='home'&&V.n==='lesson';V={n,id};render();scrollTo(0,0);if(back){const x=document.querySelector('.node.next');if(x)x.scrollIntoView({block:'center'})}}
+function go(n,id){const back=n==='home'&&V.n==='lesson';V={n,id};render();scrollTo(0,0);if(back){const x=document.querySelector('.node.next');if(x)x.scrollIntoView({block:'center'})};if(n==='home'||n==='settings')amBannerShow();else amBannerHide()}
 const doneCount=()=>LESSONS.filter(l=>S.done[l.id]).length;
 const nextL=()=>LESSONS.find(l=>!S.done[l.id]);
 const wrap=code=>/<html[\s>]/i.test(code)?code:'<!doctype html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><base target="_blank"><style>body{font-family:system-ui,sans-serif;margin:14px;line-height:1.7}</style></head><body>'+code+'</body></html>';
@@ -700,7 +700,7 @@ function bindLesson(){
     const r=l.checks.map(c=>{try{return!!c[1](d)}catch(e){return false}});
     [...$('#chk').children].forEach((li,j)=>li.className=r[j]?'ok':'no');
     if(r.every(Boolean)){
-      if(!S.done[l.id]){S.done[l.id]=1;S.xp+=20;const t=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();S.streak=S.last===t?S.streak:(S.last===y?S.streak+1:1);S.last=t;save()}
+      if(!S.done[l.id]){S.done[l.id]=1;S.xp+=20;const t=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();S.streak=S.last===t?S.streak:(S.last===y?S.streak+1:1);S.last=t;save();amOnLessonDone()}
       toast('أحسنت! أنجزت الدرس +20 نقطة','good');$('#nx').classList.remove('hide');$('#nx').scrollIntoView({behavior:'smooth',block:'center'});
     }else toast('قريب! راجع البنود الحمراء','bad');
   }
@@ -731,6 +731,79 @@ document.addEventListener('click',e=>{
 });
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
 try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.addListener('backButton',()=>{V.n!=='home'?go('home'):A.exitApp()})}catch(e){}
+
+// ── AdMob — استراتيجية ذكية ────────────────────────────────────────
+const AD={
+  banner:  'ca-app-pub-3940256099942544/6300978111',  // اختبار
+  inter:   'ca-app-pub-3940256099942544/1033173712',  // اختبار
+  reward:  'ca-app-pub-3940256099942544/5224354917',  // اختبار
+  // إنتاج: استبدل بمعرّفاتك الحقيقية
+};
+const IS_TEST=true; // false عند النشر على Play Store
+
+let _am=null,_interLoaded=false,_rewardLoaded=false;
+let _lessonsAfterAd=0; // عدّاد الدروس منذ آخر إعلان
+const INTER_EVERY=3;   // إعلان تخللي كل 3 دروس
+
+async function amInit(){
+  try{
+    if(!window.Capacitor||!Capacitor.Plugins.AdMob)return;
+    _am=Capacitor.Plugins.AdMob;
+    await _am.initialize({initializeForTesting:IS_TEST});
+
+    // بانر في الشاشة الرئيسية فقط (يُظهر/يُخفى مع التنقل)
+    _am.addListener('interstitialAdLoaded',  ()=>{_interLoaded=true});
+    _am.addListener('interstitialAdDismissed',()=>{_interLoaded=false;_amLoadInter()});
+    _am.addListener('rewardVideoAdLoaded',   ()=>{_rewardLoaded=true});
+    _am.addListener('rewardVideoAdDismissed',()=>{_rewardLoaded=false});
+    _amLoadInter();
+    _amLoadReward();
+  }catch(e){}
+}
+
+async function _amLoadInter(){
+  try{if(_am)await _am.prepareInterstitial({adId:AD.inter,isTesting:IS_TEST})}catch(e){}
+}
+async function _amLoadReward(){
+  try{if(_am)await _am.prepareRewardVideoAd({adId:AD.reward,isTesting:IS_TEST})}catch(e){}
+}
+
+// يُستدعى عند إتمام درس — يعرض إعلاناً كل 3 دروس
+async function amOnLessonDone(){
+  _lessonsAfterAd++;
+  if(_lessonsAfterAd<INTER_EVERY||!_interLoaded)return;
+  _lessonsAfterAd=0;
+  try{await _am.showInterstitial()}catch(e){}
+}
+
+// بانر: أظهر في الرئيسية، أخفِ في الدروس
+async function amBannerShow(){
+  if(!_am)return;
+  try{
+    await _am.showBanner({adId:AD.banner,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:0,isTesting:IS_TEST});
+    document.body.style.paddingBottom='calc(130px + var(--sb))';
+  }catch(e){}
+}
+async function amBannerHide(){
+  if(!_am)return;
+  try{
+    await _am.hideBanner();
+    document.body.style.paddingBottom='calc(76px + var(--sb))';
+  }catch(e){}
+}
+
+// مكافأة: يُستدعى عند ضغط زر "شاهد إعلاناً لفتح الدرس"
+async function amShowReward(onGranted){
+  if(!_am||!_rewardLoaded){onGranted();return} // أعطِه المكافأة إذا لم يتوفر إعلان
+  try{
+    _am.addListener('rewardVideoAdRewarded',()=>{_rewardLoaded=false;_amLoadReward();onGranted()});
+    await _am.showRewardVideoAd();
+  }catch(e){onGranted()}
+}
+
+amInit();
+// ───────────────────────────────────────────────────────────────────
+
 render();
 </script>
 </body>
