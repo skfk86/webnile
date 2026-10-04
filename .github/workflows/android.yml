@@ -96,8 +96,7 @@ jobs:
           APP_ID="${{ secrets.ADMOB_APP_ID }}"
           # استخدم معرّف الاختبار إذا لم يُضف Secret بعد
           if [ -z "$APP_ID" ]; then
-            APP_ID="ca-app-pub-3940256099942544~3347511713"
-            echo "⚠️ Using AdMob TEST App ID — add ADMOB_APP_ID secret for production"
+            APP_ID="ca-app-pub-7608701150166997~6726677483"
           fi
           sed -i "s|</application>|    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"$APP_ID\"/>\n        </application>|" "$MANIFEST"
           echo "✓ AdMob App ID set"

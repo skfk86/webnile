@@ -101,7 +101,7 @@ nav{position:fixed;bottom:0;right:0;left:0;height:calc(66px + var(--sb));padding
 nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--mute)}
 nav button .i{width:24px;height:24px;margin-bottom:2px}
 nav button.on{color:var(--nile)}
-.toast{position:fixed;left:50%;bottom:calc(86px + var(--sb));transform:translate(-50%,20px);background:var(--deep);color:#fff;padding:11px 20px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:99;max-width:90%;text-align:center;pointer-events:none}
+.toast{position:fixed;left:50%;bottom:calc(86px + var(--sb));--bh:0px;bottom:calc(86px + var(--sb) + var(--bh));transform:translate(-50%,20px);background:var(--deep);color:#fff;padding:11px 20px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:99;max-width:90%;text-align:center;pointer-events:none}
 .toast.show{opacity:1;transform:translate(-50%,0)}.toast.good{background:var(--nile)}.toast.bad{background:var(--bad)}
 .big{font-size:34px;font-weight:900;margin:0}
 .tr{margin:10px 0}.tr .b{height:10px;border-radius:10px;background:var(--line);overflow:hidden;margin-top:4px}.tr .b i{display:block;height:100%;background:var(--nile2);border-radius:10px}
@@ -734,12 +734,12 @@ try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.ad
 
 // ── AdMob — استراتيجية ذكية ────────────────────────────────────────
 const AD={
-  banner:  'ca-app-pub-3940256099942544/6300978111',  // اختبار
-  inter:   'ca-app-pub-3940256099942544/1033173712',  // اختبار
-  reward:  'ca-app-pub-3940256099942544/5224354917',  // اختبار
+  banner:  'ca-app-pub-7608701150166997/2300347316',
+  inter:   'ca-app-pub-7608701150166997/1719650975',
+  reward:  'ca-app-pub-7608701150166997/4734938967',
   // إنتاج: استبدل بمعرّفاتك الحقيقية
 };
-const IS_TEST=true; // false عند النشر على Play Store
+const IS_TEST=false;
 
 let _am=null,_interLoaded=false,_rewardLoaded=false;
 let _lessonsAfterAd=0; // عدّاد الدروس منذ آخر إعلان
@@ -777,17 +777,26 @@ async function amOnLessonDone(){
 }
 
 // بانر: أظهر في الرئيسية، أخفِ في الدروس
+const BANNER_H=60; // ارتفاع البانر التقريبي بالـ px
 async function amBannerShow(){
   if(!_am)return;
   try{
     await _am.showBanner({adId:AD.banner,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:0,isTesting:IS_TEST});
-    document.body.style.paddingBottom='calc(130px + var(--sb))';
+    // ارفع شريط التنقل والتوست فوق البانر
+    const nav=document.getElementById('nav');
+    if(nav) nav.style.bottom=BANNER_H+'px';
+    document.documentElement.style.setProperty('--bh', BANNER_H+'px');
+    // الجسم يأخذ nav + banner + safe area
+    document.body.style.paddingBottom=`calc(${66+BANNER_H}px + var(--sb))`;
   }catch(e){}
 }
 async function amBannerHide(){
   if(!_am)return;
   try{
     await _am.hideBanner();
+    const nav=document.getElementById('nav');
+    if(nav) nav.style.bottom='';
+    document.documentElement.style.setProperty('--bh','0px');
     document.body.style.paddingBottom='calc(76px + var(--sb))';
   }catch(e){}
 }
