@@ -1,0 +1,737 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no">
+<meta name="theme-color" content="#0B1F2A">
+<title>ويب نايل</title>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#F1F6F5;--card:#fff;--ink:#0B1F2A;--mute:#5E7480;--line:#DCE7E6;--nile:#0E7C86;--nile2:#12B5A6;--sun:#F5B83D;--bad:#D64545;--deep:#0B1F2A;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);--mono:ui-monospace,'SF Mono',Menlo,Consolas,'Roboto Mono',monospace}
+@media(prefers-color-scheme:dark){:root{--bg:#08161D;--card:#102630;--ink:#EAF4F3;--mute:#8FA8B2;--line:#1D3844;--deep:#050E13}}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;background:var(--bg);color:var(--ink);font-family:'Cairo','Tajawal',system-ui,sans-serif;font-size:16px;line-height:1.75}
+body{padding-bottom:calc(76px + var(--sb));min-height:100vh}
+button{font:inherit;color:inherit;cursor:pointer;border:0;background:none}
+.i{width:1.2em;height:1.2em;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;flex:none;vertical-align:-.22em}
+.hero{background:var(--deep);color:#EAF4F3;padding:calc(var(--st) + 22px) 20px 30px;border-radius:0 0 32px 32px;position:relative;overflow:hidden}
+.hero:after{content:"";position:absolute;left:-40px;bottom:-26px;width:260px;height:60px;border-radius:50%;border-top:3px solid rgba(18,181,166,.5);box-shadow:0 14px 0 -1px rgba(18,181,166,.25),0 28px 0 -2px rgba(18,181,166,.12)}
+.logo{display:flex;align-items:center;gap:10px;font-weight:900;font-size:26px}
+.logo .i{width:34px;height:34px;padding:6px;border-radius:12px;background:var(--nile);color:#fff}
+.logo b{color:var(--sun)}
+.hero p{margin:6px 0 18px;color:#9DB8C0;font-size:14px}
+.stats{display:flex;gap:10px}
+.stat{flex:1;background:rgba(255,255,255,.07);border-radius:16px;padding:10px 12px}
+.stat span{display:flex;align-items:center;gap:5px;font-size:12px;color:#9DB8C0}
+.stat b{font-size:20px;font-weight:900}
+.stat.f .i{color:var(--sun)}.stat.z .i{color:var(--nile2)}
+.bar{height:8px;border-radius:8px;background:rgba(255,255,255,.12);margin-top:16px;overflow:hidden}
+.bar i{display:block;height:100%;background:linear-gradient(-90deg,var(--nile2),var(--sun));border-radius:8px;transition:width .5s}
+.h2{font-size:19px;font-weight:900;margin:26px 18px 4px}
+.path{position:relative;padding:12px 0 6px}
+.path:before{content:"";position:absolute;top:0;bottom:0;right:50%;border-right:3px dashed var(--line)}
+.node{position:relative;display:flex;align-items:center;gap:12px;width:260px;margin:0 auto 18px;text-align:right}
+.node:nth-child(even){transform:translateX(-46px)}.node:nth-child(odd){transform:translateX(46px)}
+.dot{flex:none;width:62px;height:62px;border-radius:50%;background:var(--card);border:3px solid var(--line);display:grid;place-items:center;color:var(--mute);z-index:1;transition:transform .15s}
+.dot .i{width:26px;height:26px}
+.node:active .dot{transform:scale(.93)}
+.node.done .dot{background:var(--nile);border-color:var(--nile);color:#fff}
+.node.next .dot{border-color:var(--sun);color:var(--ink);box-shadow:0 0 0 6px rgba(245,184,61,.22);animation:pl 2.4s ease-in-out infinite}
+@keyframes pl{50%{box-shadow:0 0 0 12px rgba(245,184,61,0)}}
+.node .t{background:var(--card);border-radius:14px;padding:6px 12px;font-weight:700;font-size:14px;line-height:1.45;box-shadow:0 1px 0 var(--line)}
+.node .t small{display:block;color:var(--mute);font-weight:400;font-size:12px}
+.page{padding:0 16px}
+.bar2{display:flex;align-items:center;gap:10px;padding:calc(var(--st) + 12px) 12px 8px;position:sticky;top:0;background:var(--bg);z-index:5}
+.bar2 h1{font-size:18px;margin:0;font-weight:900;flex:1;line-height:1.3}
+.bar2 h1 small{display:block;font-size:12px;color:var(--mute);font-weight:600}
+.ib{width:42px;height:42px;border-radius:14px;background:var(--card);box-shadow:0 1px 0 var(--line);display:grid;place-items:center}
+.card{background:var(--card);border-radius:20px;padding:16px;margin:0 0 12px;box-shadow:0 1px 0 var(--line)}
+.card p{margin:0 0 10px}.card p:last-child{margin:0}
+code{direction:ltr;unicode-bidi:embed;font-family:var(--mono);font-size:.86em;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:1px 6px;color:var(--nile)}
+@media(prefers-color-scheme:dark){code{color:var(--nile2)}}
+.ex{direction:ltr;text-align:left;margin:4px 0 12px;padding:12px 14px;background:var(--deep);color:#D8EEF0;border-radius:14px;font:13px/1.65 var(--mono);white-space:pre;overflow-x:auto}
+.tip{display:flex;gap:10px;background:rgba(245,184,61,.14);border-radius:14px;padding:10px 12px;margin:0 0 10px;font-size:14px}
+.tip .i{color:#C98A0B;margin-top:3px}
+.task{border:2px solid var(--sun);background:transparent}
+.task h3{display:flex;align-items:center;gap:6px;margin:0 0 8px;font-size:15px;font-weight:900}
+.task h3 .i{color:var(--sun)}
+.chk{list-style:none;margin:8px 0 0;padding:0}
+.chk li{display:flex;gap:8px;align-items:center;font-size:14px;color:var(--mute);padding:2px 0}
+.chk li:before{content:"";width:18px;height:18px;border-radius:50%;border:2px solid var(--line);flex:none}
+.chk li.ok{color:var(--ink)}.chk li.ok:before{background:var(--nile2);border-color:var(--nile2);box-shadow:inset 0 0 0 3px var(--card)}
+.chk li.no:before{border-color:var(--bad)}
+.seg{display:flex;background:var(--card);border-radius:14px;padding:4px;margin:4px 0 10px}
+.seg button{flex:1;padding:7px;border-radius:11px;font-weight:700;font-size:14px;color:var(--mute);display:flex;align-items:center;justify-content:center;gap:6px}
+.seg button.on{background:var(--deep);color:#fff}
+.ide,.pv{background:#0A1A22;border-radius:18px;overflow:hidden;box-shadow:0 8px 24px -12px rgba(0,0,0,.5)}
+.tabs{display:flex;align-items:center;gap:10px;background:#07141A;padding:9px 14px;direction:ltr}
+.dots{display:flex;gap:6px}.dots i{width:10px;height:10px;border-radius:50%;background:#FF5F57}.dots i:nth-child(2){background:#FEBC2E}.dots i:nth-child(3){background:#28C840}
+.fn{font:12px var(--mono);color:#9DB8C0;background:#0A1A22;padding:3px 10px;border-radius:8px}
+.code{position:relative;display:flex;height:270px;direction:ltr}
+.gut{flex:none;width:40px;padding:12px 8px 12px 0;text-align:right;color:#3E5966;font:14px/22px var(--mono);white-space:pre;overflow:hidden;background:#08171E;user-select:none}
+.wrap{position:relative;flex:1}
+.hl,.ed{position:absolute;inset:0;margin:0;padding:12px;border:0;font:14px/22px var(--mono);white-space:pre;tab-size:2;letter-spacing:0;direction:ltr;text-align:left;word-wrap:normal}
+.hl{overflow:hidden;color:#D8EEF0;pointer-events:none}
+.ed{overflow:auto;background:transparent;color:transparent;-webkit-text-fill-color:transparent;caret-color:var(--sun);resize:none;outline:0}
+.ed::selection{background:rgba(18,181,166,.35)}
+.hl i{font-style:normal}
+.hl .c{color:#5E7A86;font-style:italic}.hl .t{color:#FF7B9C}.hl .a{color:#F5B83D}.hl .s{color:#86EFAC}.hl .p{color:#6F8C98}.hl .sl{color:#7DD3FC}.hl .pr{color:#C4B5FD}.hl .n{color:#FDBA74}
+.ex .c{color:#5E7A86;font-style:italic}.ex .t{color:#FF7B9C}.ex .a{color:#F5B83D}.ex .s{color:#86EFAC}.ex .p{color:#6F8C98}.ex .sl{color:#7DD3FC}.ex .pr{color:#C4B5FD}.ex .n{color:#FDBA74}
+.ex i{font-style:normal}.ex .c{font-style:italic}
+.frame{width:100%;height:270px;border:0;background:#fff;display:block}
+.addr{font:12px var(--mono);color:#9DB8C0;flex:1;text-align:center;background:#0A1A22;padding:3px;border-radius:8px}
+.keys{display:flex;gap:6px;overflow-x:auto;padding:8px 0;direction:ltr;scrollbar-width:none}
+.keys button{flex:none;min-width:42px;height:38px;border-radius:10px;background:var(--card);font:700 15px var(--mono);box-shadow:0 1px 0 var(--line)}
+.sug{display:flex;gap:6px;overflow-x:auto;padding:8px 0 0;direction:ltr;scrollbar-width:none;min-height:46px;align-items:center}
+.sug button{flex:none;height:38px;padding:0 12px;border-radius:10px;background:var(--deep);color:#D8EEF0;font:600 14px var(--mono);border-left:3px solid var(--nile2)}
+.sug button[data-t=t]{border-color:#FF7B9C}.sug button[data-t=a]{border-color:#F5B83D}.sug button[data-t=s],.sug button[data-t=v]{border-color:#86EFAC}.sug button[data-t=p]{border-color:#C4B5FD}
+.sug .h{color:var(--mute);font-size:12px;direction:rtl}
+.con{margin:0;padding:12px 14px;min-height:230px;max-height:320px;overflow:auto;background:#07141A;color:#D8EEF0;font:14px/1.7 var(--mono);direction:ltr;text-align:left;white-space:pre-wrap}
+.con div{border-bottom:1px solid rgba(255,255,255,.05)}.con .er{color:#FF7B9C}.con .mu{color:#6F8C98;font-family:'Cairo',system-ui,sans-serif;direction:rtl;text-align:right;border:0}
+.frame.sm{height:170px}
+.hide{display:none}
+.off{position:absolute;right:-9999px;top:0;width:320px;opacity:0;pointer-events:none}
+.row{display:flex;gap:8px;margin-top:8px}
+.btn{flex:1;padding:12px;border-radius:14px;font-weight:900;background:var(--card);box-shadow:0 1px 0 var(--line);display:flex;align-items:center;justify-content:center;gap:8px}
+.btn.p{background:var(--nile);color:#fff}.btn.s{background:var(--sun);color:#0B1F2A}
+.btn:active{transform:scale(.97)}
+.chips{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.chips button{padding:6px 14px;border-radius:99px;background:var(--card);font-size:13px;font-weight:700;box-shadow:0 1px 0 var(--line);display:flex;gap:4px;align-items:center}
+nav{position:fixed;bottom:0;right:0;left:0;height:calc(66px + var(--sb));padding-bottom:var(--sb);background:var(--card);display:flex;border-top:1px solid var(--line);z-index:20}
+nav button{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;font-size:12px;font-weight:700;color:var(--mute)}
+nav button .i{width:24px;height:24px;margin-bottom:2px}
+nav button.on{color:var(--nile)}
+.toast{position:fixed;left:50%;bottom:calc(86px + var(--sb));transform:translate(-50%,20px);background:var(--deep);color:#fff;padding:11px 20px;border-radius:99px;font-weight:700;font-size:14px;opacity:0;transition:.25s;z-index:99;max-width:90%;text-align:center;pointer-events:none}
+.toast.show{opacity:1;transform:translate(-50%,0)}.toast.good{background:var(--nile)}.toast.bad{background:var(--bad)}
+.big{font-size:34px;font-weight:900;margin:0}
+.tr{margin:10px 0}.tr .b{height:10px;border-radius:10px;background:var(--line);overflow:hidden;margin-top:4px}.tr .b i{display:block;height:100%;background:var(--nile2);border-radius:10px}
+.tr div:first-child{display:flex;justify-content:space-between;font-weight:700;font-size:14px}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+<symbol id="i-waves" viewBox="0 0 24 24"><path d="M2 6c.6.5 1.2 1 2.5 1C7 7 7 5 9.5 5c2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 12c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/><path d="M2 18c.6.5 1.2 1 2.5 1 2.5 0 2.5-2 5-2 2.6 0 2.4 2 5 2 2.5 0 2.5-2 5-2 1.3 0 1.9.5 2.5 1"/></symbol>
+<symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
+<symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
+<symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-back" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
+<symbol id="i-next" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
+<symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
+<symbol id="i-zap" viewBox="0 0 24 24"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></symbol>
+<symbol id="i-book" viewBox="0 0 24 24"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></symbol>
+<symbol id="i-target" viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></symbol>
+<symbol id="i-bulb" viewBox="0 0 24 24"><path d="M15 14c.2-1 .7-1.7 1.5-2.5 1-.9 1.5-2.2 1.5-3.5A6 6 0 0 0 6 8c0 1 .2 2.2 1.5 3.5.7.7 1.3 1.5 1.5 2.5"/><path d="M9 18h6"/><path d="M10 22h4"/></symbol>
+<symbol id="i-play" viewBox="0 0 24 24"><polygon points="6 3 20 12 6 21 6 3"/></symbol>
+<symbol id="i-reset" viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/></symbol>
+<symbol id="i-plus" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="M12 5v14"/></symbol>
+<symbol id="i-eye" viewBox="0 0 24 24"><path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></symbol>
+<symbol id="i-heading" viewBox="0 0 24 24"><path d="M6 12h12"/><path d="M6 4v16"/><path d="M18 4v16"/></symbol>
+<symbol id="i-bold" viewBox="0 0 24 24"><path d="M6 12h9a4 4 0 0 1 0 8H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1h7a4 4 0 0 1 0 8"/></symbol>
+<symbol id="i-link" viewBox="0 0 24 24"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+<symbol id="i-image" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><circle cx="9" cy="9" r="2"/><path d="m21 15-3.09-3.09a2 2 0 0 0-2.82 0L6 21"/></symbol>
+<symbol id="i-list" viewBox="0 0 24 24"><path d="M8 6h13"/><path d="M8 12h13"/><path d="M8 18h13"/><path d="M3 6h.01"/><path d="M3 12h.01"/><path d="M3 18h.01"/></symbol>
+<symbol id="i-cursor" viewBox="0 0 24 24"><path d="M17 22h-1a4 4 0 0 1-4-4V6a4 4 0 0 1 4-4h1"/><path d="M7 22h1a4 4 0 0 0 4-4v-1"/><path d="M7 2h1a4 4 0 0 1 4 4v1"/></symbol>
+<symbol id="i-palette" viewBox="0 0 24 24"><circle cx="13.5" cy="6.5" r=".5"/><circle cx="17.5" cy="10.5" r=".5"/><circle cx="8.5" cy="7.5" r=".5"/><circle cx="6.5" cy="12.5" r=".5"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10c.93 0 1.65-.75 1.65-1.69 0-.44-.18-.83-.44-1.12-.29-.29-.44-.65-.44-1.13a1.64 1.64 0 0 1 1.67-1.67h2c3.05 0 5.55-2.5 5.55-5.55C21.97 6.01 17.46 2 12 2z"/></symbol>
+<symbol id="i-type" viewBox="0 0 24 24"><polyline points="4 7 4 4 20 4 20 7"/><line x1="9" x2="15" y1="20" y2="20"/><line x1="12" x2="12" y1="4" y2="20"/></symbol>
+<symbol id="i-box" viewBox="0 0 24 24"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/></symbol>
+<symbol id="i-layers" viewBox="0 0 24 24"><path d="m12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83Z"/><path d="m22 17.65-9.17 4.16a2 2 0 0 1-1.66 0L2 17.65"/><path d="m22 12.65-9.17 4.16a2 2 0 0 1-1.66 0L2 12.65"/></symbol>
+<symbol id="i-columns" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M12 3v18"/></symbol>
+<symbol id="i-grid" viewBox="0 0 24 24"><rect width="7" height="7" x="3" y="3" rx="1"/><rect width="7" height="7" x="14" y="3" rx="1"/><rect width="7" height="7" x="14" y="14" rx="1"/><rect width="7" height="7" x="3" y="14" rx="1"/></symbol>
+<symbol id="i-phone" viewBox="0 0 24 24"><rect width="14" height="20" x="5" y="2" rx="2"/><path d="M12 18h.01"/></symbol>
+<symbol id="i-layout" viewBox="0 0 24 24"><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M9 21V9"/></symbol>
+<symbol id="i-table" viewBox="0 0 24 24"><path d="M12 3v18"/><rect width="18" height="18" x="3" y="3" rx="2"/><path d="M3 9h18"/><path d="M3 15h18"/></symbol>
+<symbol id="i-tag" viewBox="0 0 24 24"><path d="M12.59 2.59A2 2 0 0 0 11.17 2H4a2 2 0 0 0-2 2v7.17a2 2 0 0 0 .59 1.41l8.7 8.7a2.43 2.43 0 0 0 3.42 0l6.58-6.58a2.43 2.43 0 0 0 0-3.42z"/><circle cx="7.5" cy="7.5" r=".5"/></symbol>
+<symbol id="i-pointer" viewBox="0 0 24 24"><path d="M4.04 4.69a.5.5 0 0 1 .65-.65l16 6.5a.5.5 0 0 1-.06.95l-6.12 1.58a2 2 0 0 0-1.44 1.43l-1.58 6.13a.5.5 0 0 1-.95.06z"/></symbol>
+<symbol id="i-ruler" viewBox="0 0 24 24"><path d="M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z"/><path d="m14.5 12.5 2-2"/><path d="m11.5 9.5 2-2"/><path d="m8.5 6.5 2-2"/><path d="m17.5 15.5 2-2"/></symbol>
+<symbol id="i-move" viewBox="0 0 24 24"><path d="M12 2v20"/><path d="m15 19-3 3-3-3"/><path d="m19 9 3 3-3 3"/><path d="M2 12h20"/><path d="m5 9-3 3 3 3"/><path d="m9 5 3-3 3 3"/></symbol>
+<symbol id="i-braces" viewBox="0 0 24 24"><path d="M8 3H7a2 2 0 0 0-2 2v5a2 2 0 0 1-2 2 2 2 0 0 1 2 2v5c0 1.1.9 2 2 2h1"/><path d="M16 21h1a2 2 0 0 0 2-2v-5c0-1.1.9-2 2-2a2 2 0 0 1-2-2V5a2 2 0 0 0-2-2h-1"/></symbol>
+<symbol id="i-sparkles" viewBox="0 0 24 24"><path d="M9.94 15.5A2 2 0 0 0 8.5 14.06l-6.14-1.58a.5.5 0 0 1 0-.96L8.5 9.94A2 2 0 0 0 9.94 8.5l1.58-6.14a.5.5 0 0 1 .96 0L14.06 8.5A2 2 0 0 0 15.5 9.94l6.14 1.58a.5.5 0 0 1 0 .96L15.5 14.06a2 2 0 0 0-1.44 1.44l-1.58 6.14a.5.5 0 0 1-.96 0z"/></symbol>
+<symbol id="i-rocket" viewBox="0 0 24 24"><path d="M4.5 16.5c-1.5 1.26-2 5-2 5s3.74-.5 5-2c.71-.84.7-2.13-.09-2.91a2.18 2.18 0 0 0-2.91-.09z"/><path d="m12 15-3-3a22 22 0 0 1 2-3.95A12.88 12.88 0 0 1 22 2c0 2.72-.78 7.5-6 11a22.35 22.35 0 0 1-4 2z"/><path d="M9 12H4s.55-3.03 2-4c1.62-1.08 5 0 5 0"/><path d="M12 15v5s3.03-.55 4-2c1.08-1.62 0-5 0-5"/></symbol>
+<symbol id="i-sliders" viewBox="0 0 24 24"><line x1="4" x2="4" y1="21" y2="14"/><line x1="4" x2="4" y1="10" y2="3"/><line x1="12" x2="12" y1="21" y2="12"/><line x1="12" x2="12" y1="8" y2="3"/><line x1="20" x2="20" y1="21" y2="16"/><line x1="20" x2="20" y1="12" y2="3"/><line x1="2" x2="6" y1="14" y2="14"/><line x1="10" x2="14" y1="8" y2="8"/><line x1="18" x2="22" y1="16" y2="16"/></symbol>
+<symbol id="i-terminal" viewBox="0 0 24 24"><polyline points="4 17 10 11 4 5"/><line x1="12" x2="20" y1="19" y2="19"/></symbol>
+<symbol id="i-hash" viewBox="0 0 24 24"><line x1="4" x2="20" y1="9" y2="9"/><line x1="4" x2="20" y1="15" y2="15"/><line x1="10" x2="8" y1="3" y2="21"/><line x1="16" x2="14" y1="3" y2="21"/></symbol>
+<symbol id="i-split" viewBox="0 0 24 24"><line x1="6" x2="6" y1="3" y2="15"/><circle cx="18" cy="6" r="3"/><circle cx="6" cy="18" r="3"/><path d="M18 9a9 9 0 0 1-9 9"/></symbol>
+<symbol id="i-repeat" viewBox="0 0 24 24"><path d="m17 2 4 4-4 4"/><path d="M3 11v-1a4 4 0 0 1 4-4h14"/><path d="m7 22-4-4 4-4"/><path d="M21 13v1a4 4 0 0 1-4 4H3"/></symbol>
+</svg>
+<div id="app"></div>
+<nav id="nav">
+<button data-v="home"></button><button data-v="play"></button><button data-v="me"></button>
+</nav>
+<div class="toast" id="toast"></div>
+<script>
+const $=s=>document.querySelector(s);
+const ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
+const esc=s=>s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+const fmt=s=>esc(s).replace(/`([^`]+)`/g,'<code>$1</code>').replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>');
+const gcs=(d,q)=>d.defaultView.getComputedStyle(d.querySelector(q));
+const px=v=>parseFloat(v)||0;
+
+/* ---------- Syntax highlighting ---------- */
+const hH=s=>s.replace(/<!\-\-[\s\S]*?\-\->|<![^>]*>?|<\/?[\w-]+(?:"[^"]*"|'[^']*'|[^>"'])*>?|[^<]+|</g,m=>{
+  if(m.slice(0,2)==='<!')return `<i class=c>${esc(m)}</i>`;
+  if(m[0]!=='<'||m==='<')return esc(m);
+  const t=m.match(/^(<\/?)([\w-]+)([\s\S]*?)(\/?>?)$/);
+  const at=esc(t[3]).replace(/("[^"]*"|'[^']*')|([\w:-]+)(?==)/g,(x,st,n)=>st?`<i class=s>${st}</i>`:`<i class=a>${n}</i>`);
+  return `<i class=p>${esc(t[1])}</i><i class=t>${t[2]}</i>${at}<i class=p>${esc(t[4])}</i>`;
+});
+const hC=s=>s.replace(/\/\*[\s\S]*?\*\/|[^{};]+\{|[{};]|[^{};]+/g,m=>{
+  if(m.slice(0,2)==='/*')return `<i class=c>${esc(m)}</i>`;
+  if(m.length>1&&m.slice(-1)==='{')return `<i class=sl>${esc(m.slice(0,-1))}</i><i class=p>{</i>`;
+  if(/^[{};]$/.test(m))return `<i class=p>${m}</i>`;
+  const d=m.match(/^(\s*)([\w-]+)(\s*:\s*)([\s\S]*)$/);
+  if(!d)return esc(m);
+  return d[1]+`<i class=pr>${d[2]}</i>`+esc(d[3])+esc(d[4]).replace(/#[0-9a-fA-F]{3,8}\b|-?\d*\.?\d+(?:px|em|rem|%|vh|vw|s|fr|deg)?/g,x=>`<i class=n>${x}</i>`);
+});
+function hl(s){let o='',i=0,m;const re=/(<style[^>]*>)([\s\S]*?)(<\/style>|$)/gi;
+  while((m=re.exec(s))){o+=hH(s.slice(i,m.index))+hH(m[1])+hC(m[2])+hH(m[3]);i=m.index+m[0].length}
+  return o+hH(s.slice(i))}
+
+/* ---------- Lessons ---------- */
+const TRACKS={html:'HTML — هيكل الصفحة',css:'CSS — شكل الصفحة',js:'JavaScript — حياة الصفحة',pro:'مشروع التخرج'};
+const LESSONS=[
+{id:'h1',k:'html',ic:'heading',t:'العناوين والفقرات',body:[
+'HTML ليست لغة برمجة، بل لغة **وصف**: تخبر المتصفح بما يوجد في الصفحة (عنوان، فقرة، صورة) دون أن تحدد شكله. الشكل مهمة CSS.',
+'كل عنصر يتكون من وسم فتح، ثم محتوى، ثم وسم إغلاق يحمل شرطة مائلة:',{c:'<p>هذه فقرة</p>'},
+'للعناوين ستة مستويات من `<h1>` (الأهم) إلى `<h6>` (الأقل أهمية). استخدم `<h1>` مرة واحدة فقط لعنوان الصفحة، ثم رتّب ما بعده تنازلياً:',{c:'<h1>ويب نايل</h1>\n<h2>الدرس الأول</h2>\n<p>أهلاً بك في عالم الويب.</p>'},
+{tip:'لا تختر العنوان حسب حجمه. الحجم يتحكم فيه CSS لاحقاً، أما رقم العنوان فيعبّر عن أهميته في بنية الصفحة، وتعتمد عليه محركات البحث وقارئات الشاشة.'}],
+task:'اكتب عنواناً `<h1>` وتحته عنواناً فرعياً `<h2>` ثم فقرة `<p>`، وضع في كل منها نصاً.',start:'<h1>مرحباً</h1>\n',checks:[['عنوان h1 فيه نص',d=>d.querySelector('h1')?.textContent.trim()],['عنوان h2 فيه نص',d=>d.querySelector('h2')?.textContent.trim()],['فقرة p فيها نص',d=>d.querySelector('p')?.textContent.trim()]]},
+{id:'h2',k:'html',ic:'bold',t:'تنسيق النص',body:[
+'داخل الفقرة تحتاج غالباً إلى إبراز كلمة أو عبارة. لذلك في HTML وسوم تعبّر عن **المعنى** لا عن الشكل فقط:',
+'`<strong>` لنص مهم جداً، ويظهر عادةً بخط عريض. و`<em>` لنص فيه تأكيد، ويظهر مائلاً.',{c:'<p>الامتحان <strong>غداً</strong>، ولا <em>تنسَ</em> كتابك.</p>'},
+'`<br>` ينزل بسطر جديد داخل الفقرة، و`<hr>` يرسم خطاً فاصلاً بين الأقسام. الوسمان بلا محتوى، لذلك لا يحتاجان وسم إغلاق:',{c:'<p>السطر الأول<br>السطر الثاني</p>\n<hr>'},
+{tip:'وسم `<b>` و`<i>` يغيّران الشكل فقط. فضّل `<strong>` و`<em>` لأنهما يوصلان المعنى لقارئ الشاشة.'}],
+task:'اكتب فقرة `<p>` فيها كلمة داخل `<strong>` وأخرى داخل `<em>`.',start:'<p>تعلّم HTML  وCSS كل يوم.</p>',checks:[['فقرة p موجودة',d=>d.querySelector('p')],['وسم strong داخل الفقرة',d=>d.querySelector('p strong')?.textContent.trim()],['وسم em داخل الفقرة',d=>d.querySelector('p em')?.textContent.trim()]]},
+{id:'h3',k:'html',ic:'link',t:'الروابط',body:[
+'الرابط هو ما يجعل الويب "شبكة". يُكتب بالوسم `<a>`، والخاصية `href` تحدد الوجهة، والنص بين الوسمين هو ما يضغط عليه المستخدم:',{c:'<a href="https://example.com">زر الموقع</a>'},
+'الخاصية هي معلومة إضافية تُكتب داخل وسم الفتح بصيغة `اسم="قيمة"`. مثلاً `target="_blank"` تفتح الرابط في تبويب جديد.',{c:'<a href="https://example.com" target="_blank">تبويب جديد</a>'},
+'يمكن أيضاً أن يفتح الرابط تطبيق البريد أو الاتصال:',{c:'<a href="mailto:me@mail.com">راسلنا</a>\n<a href="tel:+249123456789">اتصل بنا</a>'},
+{tip:'اكتب نص رابط يفهمه القارئ وحده، مثل "حمّل الدليل" وليس "اضغط هنا".'}],
+task:'أنشئ رابطاً `href` يبدأ بـ `https` ويفتح في تبويب جديد، وله نص واضح.',start:'<a>زر موقعنا</a>\n',checks:[['رابط a له href يبدأ بـ http',d=>d.querySelector('a[href^="http"]')],['يفتح في تبويب جديد target',d=>d.querySelector('a[target=_blank]')],['نص الرابط غير فارغ',d=>d.querySelector('a')?.textContent.trim()]]},
+{id:'h4',k:'html',ic:'image',t:'الصور',body:[
+'الصورة تُكتب بالوسم `<img>` وهو بلا وسم إغلاق. الخاصية `src` تحدد مصدر الصورة، و`alt` نص بديل يظهر إذا فشل التحميل ويقرؤه قارئ الشاشة:',{c:'<img src="https://picsum.photos/200" alt="منظر طبيعي" width="200">'},
+'لإضافة عنوان تحت الصورة استخدم `<figure>` مع `<figcaption>`:',{c:'<figure>\n  <img src="nile.jpg" alt="نهر النيل">\n  <figcaption>نهر النيل عند الغروب</figcaption>\n</figure>'},
+{tip:'لا تترك `alt` فارغاً في صورة تحمل معنى. اكتب وصفاً قصيراً لما تراه. وإذا كانت الصورة للزينة فقط اجعله `alt=""`.'}],
+task:'ابنِ `<figure>` فيه صورة لها `src` و`alt`، وتحتها `<figcaption>` بنص.',start:'<figure>\n  \n</figure>',checks:[['وسم figure',d=>d.querySelector('figure')],['صورة لها src وalt',d=>d.querySelector('figure img[src][alt]')?.alt.trim()],['وسم figcaption فيه نص',d=>d.querySelector('figcaption')?.textContent.trim()]]},
+{id:'h5',k:'html',ic:'list',t:'القوائم',body:[
+'هناك نوعان: القائمة النقطية `<ul>` (لا يهم ترتيبها) والمرقمة `<ol>` (الترتيب مهم، كخطوات وصفة). كل عنصر يكون داخل `<li>`:',{c:'<ul>\n  <li>HTML</li>\n  <li>CSS</li>\n</ul>\n\n<ol>\n  <li>افتح المحرر</li>\n  <li>اكتب الكود</li>\n</ol>'},
+'يمكن تداخل القوائم بوضع قائمة كاملة داخل `<li>`:',{c:'<ul>\n  <li>الواجهة\n    <ul>\n      <li>HTML</li>\n    </ul>\n  </li>\n</ul>'},
+{tip:'القوائم ليست للنص فقط: قوائم التنقل في المواقع (القائمة الرئيسية) تُبنى غالباً بـ `<ul>` ثم تُنسّق بـ CSS.'}],
+task:'أنشئ قائمة `<ul>` فيها 3 عناصر على الأقل، وقائمة `<ol>` فيها عنصران.',start:'<h2>لغات الويب</h2>\n<ul>\n  <li>HTML</li>\n</ul>\n',checks:[['قائمة ul بثلاثة li أو أكثر',d=>d.querySelectorAll('ul>li').length>=3],['قائمة ol بعنصرين أو أكثر',d=>d.querySelectorAll('ol>li').length>=2]]},
+{id:'h6',k:'html',ic:'cursor',t:'النماذج',body:[
+'النموذج `<form>` هو وسيلة جمع البيانات من المستخدم (تسجيل، بحث، تعليق). داخله حقول `<input>`، ونوع كل حقل تحدده الخاصية `type`: `text` و`email` و`password` و`number`.',
+'اربط كل حقل بعنوان `<label>` بالخاصية `for` المطابقة لـ `id` الحقل. عندها يضغط المستخدم على العنوان فيُفعَّل الحقل:',{c:'<form>\n  <label for="mail">البريد</label>\n  <input id="mail" type="email"\n    placeholder="you@mail.com" required>\n  <button>اشترك</button>\n</form>'},
+'`placeholder` نص إرشادي يختفي عند الكتابة، و`required` يمنع الإرسال إذا ترك الحقل فارغاً. وللنص الطويل استخدم `<textarea>`.',
+{tip:'نوع `email` يجعل لوحة مفاتيح الهاتف تعرض حرف @ تلقائياً، ويتحقق المتصفح من الصيغة. اختيار النوع الصحيح يحسّن التجربة بلا أي كود إضافي.'}],
+task:'ابنِ نموذجاً فيه `<label>` وحقل `email` إلزامي `required` وزر.',start:'<form>\n  \n</form>',checks:[['نموذج form',d=>d.querySelector('form')],['عنوان label',d=>d.querySelector('label')?.textContent.trim()],['حقل email إلزامي',d=>d.querySelector('input[type=email][required]')],['زر button',d=>d.querySelector('button')]]},
+{id:'c1',k:'css',ic:'palette',t:'الألوان',body:[
+'CSS هي لغة الشكل. تُكتب داخل وسم `<style>` على هيئة قواعد: **محدد** يختار العناصر، ثم أقواس فيها خصائص:',{c:'<style>\n  h1 {\n    color: teal;\n  }\n</style>'},
+'`color` للون النص و`background` للون الخلفية. القيمة تُكتب بأكثر من طريقة:',{c:'color: red;            /* اسم */\ncolor: #0E7C86;        /* hex */\ncolor: rgb(14,124,134);\ncolor: hsl(185,80%,29%);'},
+{tip:'كل خاصية تنتهي بفاصلة منقوطة `;`. نسيانها هو الخطأ الأشهر عند المبتدئين، ويجعل السطر التالي لا يعمل.'}],
+task:'لوّن `h1` بأي لون غير الأسود، وأعطِ `body` لون خلفية.',start:'<style>\n  body {\n    \n  }\n  h1 {\n    \n  }\n</style>\n<h1>ويب نايل</h1>',checks:[['لون h1 ليس الأسود',d=>gcs(d,'h1').color!=='rgb(0, 0, 0)'],['خلفية body ليست شفافة',d=>gcs(d,'body').backgroundColor!=='rgba(0, 0, 0, 0)']]},
+{id:'c2',k:'css',ic:'type',t:'الخطوط والنص',body:[
+'خصائص النص الأساسية: `font-size` للحجم، `font-weight` للسماكة، `font-family` لنوع الخط، `text-align` للمحاذاة، و`line-height` لارتفاع السطر.',{c:'p {\n  font-family: Cairo, sans-serif;\n  font-size: 18px;\n  line-height: 1.8;\n}\nh1 {\n  font-weight: 900;\n  text-align: center;\n}'},
+'اكتب `line-height` كرقم بلا وحدة، فيُحسب نسبةً لحجم الخط. القيمة بين 1.5 و1.8 مريحة للقراءة، خصوصاً في العربية.',
+{tip:'اذكر خطاً بديلاً دائماً في `font-family` (مثل `sans-serif`)، فيستخدمه الجهاز إن لم يجد الخط الأول.'}],
+task:'اجعل حجم `h1` أكبر من `30px` وموسّطاً، وارتفاع سطر `p` لا يقل عن `1.5`.',start:'<style>\n  h1 {\n    \n  }\n  p {\n    \n  }\n</style>\n<h1>عنوان كبير</h1>\n<p>فقرة تجريبية لاختبار ارتفاع السطر.</p>',checks:[['حجم h1 أكبر من 30px',d=>px(gcs(d,'h1').fontSize)>30],['محاذاة h1 center',d=>gcs(d,'h1').textAlign==='center'],['ارتفاع سطر p ≥ 1.5',d=>px(gcs(d,'p').lineHeight)/px(gcs(d,'p').fontSize)>=1.49]]},
+{id:'c3',k:'css',ic:'box',t:'الصندوق Box Model',body:[
+'كل عنصر في الصفحة صندوق مكوّن من أربع طبقات من الداخل للخارج: المحتوى، ثم `padding` (حشوة داخلية)، ثم `border` (الحد)، ثم `margin` (مسافة خارجية تفصله عن غيره).',{c:'.card {\n  padding: 16px;   /* داخل الحد */\n  margin: 12px;    /* خارج الحد */\n}'},
+'يمكن تحديد كل جهة على حدة: `padding-top` و`margin-bottom`، أو كتابة أربع قيم بالترتيب (أعلى، يمين، أسفل، يسار): `padding: 8px 16px 8px 16px;`.',
+{tip:'أضف `box-sizing: border-box` للعناصر، فيُحسب عرضها شاملاً الحشوة والحد، ويسهل التحكم بالمقاسات.'}],
+task:'أعطِ `.card` حشوة `padding` لا تقل عن `16px` ومسافة `margin` لا تقل عن `8px`.',start:'<style>\n  .card {\n    background: #dff5f2;\n    \n  }\n</style>\n<div class="card">بطاقة</div>',checks:[['padding ≥ 16px',d=>px(gcs(d,'.card').paddingTop)>=16],['margin ≥ 8px',d=>px(gcs(d,'.card').marginTop)>=8]]},
+{id:'c4',k:'css',ic:'layers',t:'الحدود والظلال',body:[
+'`border` تكتبه بثلاث قيم: السماكة والنمط واللون. و`border-radius` يدوّر الزوايا، وقيمة كبيرة تجعل الشكل دائرياً:',{c:'.box {\n  border: 2px solid #0E7C86;\n  border-radius: 16px;\n}'},
+'`box-shadow` يضيف ظلاً بخمس قيم: إزاحة أفقية، إزاحة عمودية، تمويه، ثم اللون. الظل الخفيف يمنح العنصر عمقاً:',{c:'.box {\n  box-shadow: 0 8px 20px rgba(0,0,0,.15);\n}'},
+{tip:'الظلال الناعمة (تمويه كبير وشفافية منخفضة) تبدو أرقى من الظلال القوية الحادة.'}],
+task:'اجعل `.box` بحد سماكته `2px` على الأقل، وزواياه مدورة `12px` أو أكثر، وأضف له `box-shadow`.',start:'<style>\n  .box {\n    padding: 20px;\n    \n  }\n</style>\n<div class="box">صندوق</div>',checks:[['حد سماكته ≥ 2px',d=>px(gcs(d,'.box').borderTopWidth)>=2],['زوايا مدورة ≥ 12px',d=>px(gcs(d,'.box').borderTopLeftRadius)>=12],['ظل box-shadow',d=>gcs(d,'.box').boxShadow!=='none']]},
+{id:'c5',k:'css',ic:'columns',t:'التخطيط بـ Flexbox',body:[
+'Flexbox يرتّب العناصر في صف أو عمود بسهولة. اجعل الأب `display: flex` فيصطف أبناؤه بجانب بعض تلقائياً:',{c:'.row {\n  display: flex;\n  gap: 12px;\n  justify-content: space-between;\n  align-items: center;\n}'},
+'`gap` مسافة بين الأبناء. `justify-content` يوزعهم على المحور الرئيسي (أفقي افتراضياً) مثل `center` و`space-between`. `align-items` يحاذيهم على المحور الآخر.',
+'لجعلها عموداً استخدم `flex-direction: column`، وللسماح بالنزول لسطر جديد عند ضيق المساحة استخدم `flex-wrap: wrap`.',
+{tip:'أغلب أشرطة التنقل والبطاقات في التطبيقات تُبنى بـ Flexbox. أتقنه أولاً قبل Grid.'}],
+task:'اجعل `.row` بنظام `flex` مع `gap` وتوزيع `space-between` ومحاذاة `center`.',start:'<style>\n  .row {\n    \n  }\n  .row div {background:#cfeeea;padding:12px;border-radius:10px}\n</style>\n<div class="row">\n  <div>١</div><div>٢</div><div>٣</div>\n</div>',checks:[['display: flex',d=>gcs(d,'.row').display==='flex'],['gap أكبر من صفر',d=>px(gcs(d,'.row').columnGap)>0],['justify-content: space-between',d=>gcs(d,'.row').justifyContent==='space-between'],['align-items: center',d=>gcs(d,'.row').alignItems==='center']]},
+{id:'c6',k:'css',ic:'grid',t:'الشبكة Grid',body:[
+'Grid يرتب العناصر في صفوف وأعمدة معاً، وهو الأنسب للمعارض والألواح. `display: grid` ثم تحدد الأعمدة بـ `grid-template-columns`:',{c:'.gallery {\n  display: grid;\n  grid-template-columns: 1fr 1fr 1fr;\n  gap: 10px;\n}'},
+'الوحدة `fr` تعني "جزءاً من المساحة المتاحة". ثلاثة `1fr` تعطي ثلاثة أعمدة متساوية. ويمكن اختصارها: `repeat(3, 1fr)`.',
+{tip:'Flexbox لصف أو عمود واحد، وGrid للتخطيط ثنائي الأبعاد. ولا مانع من الجمع بينهما في الصفحة نفسها.'}],
+task:'اجعل `.gallery` شبكة `grid` من عمودين على الأقل بـ `grid-template-columns` مع `gap`.',start:'<style>\n  .gallery {\n    \n  }\n  .gallery div {background:#cfeeea;padding:24px;border-radius:10px;text-align:center}\n</style>\n<div class="gallery">\n  <div>1</div><div>2</div><div>3</div><div>4</div>\n</div>',checks:[['display: grid',d=>gcs(d,'.gallery').display==='grid'],['عمودان أو أكثر',d=>gcs(d,'.gallery').gridTemplateColumns.split(' ').length>=2],['gap أكبر من صفر',d=>px(gcs(d,'.gallery').columnGap)>0]]},
+{id:'c7',k:'css',ic:'phone',t:'التصميم المتجاوب',body:[
+'الصفحة تُعرض على هاتف صغير وعلى شاشة كبيرة. **الاستعلامات الإعلامية** `@media` تطبّق قواعد فقط عندما يتحقق شرط، مثل عرض الشاشة:',{c:'.cards {\n  display: grid;\n  grid-template-columns: 1fr 1fr 1fr;\n}\n\n@media (max-width: 600px) {\n  .cards {\n    grid-template-columns: 1fr;\n  }\n}'},
+'المعنى: ثلاثة أعمدة في الشاشات الكبيرة، وعمود واحد حين يقل العرض عن `600px`.',
+'ولا تنسَ وسم `viewport` في `<head>` لأي صفحة موجهة للهاتف:',{c:'<meta name="viewport"\n  content="width=device-width, initial-scale=1">'},
+{tip:'صمّم للهاتف أولاً (Mobile First) ثم وسّع للشاشات الكبيرة بـ `min-width`. هذا الأسلوب أبسط وأسرع.'}],
+task:'أضف استعلاماً `@media` بشرط `max-width` أو `min-width` وضع بداخله قاعدة واحدة على الأقل.',start:'<style>\n  .cards {\n    display: grid;\n    grid-template-columns: 1fr 1fr 1fr;\n    gap: 8px;\n  }\n  .cards div {background:#cfeeea;padding:20px;text-align:center}\n\n  /* اكتب الاستعلام هنا */\n</style>\n<div class="cards">\n  <div>1</div><div>2</div><div>3</div>\n</div>',checks:[['يوجد @media بشرط عرض',d=>[...d.styleSheets].some(s=>[...s.cssRules].some(r=>r.type===4&&/(max|min)-width/.test(r.conditionText||r.media.mediaText)))],['بداخله قاعدة CSS',d=>[...d.styleSheets].some(s=>[...s.cssRules].some(r=>r.type===4&&r.cssRules.length>0))]]}
+];
+
+/* ---------- More lessons ---------- */
+const rule=(d,sel,p)=>{for(const s of d.styleSheets)for(const r of s.cssRules)if(r.selectorText===sel){const v=r.style.getPropertyValue(p);if(v)return v}return''};
+const anyRule=(d,f)=>[...d.styleSheets].some(s=>[...s.cssRules].some(f));
+LESSONS.push(
+{id:'h0',k:'html',ic:'code',t:'هيكل صفحة الويب',body:[
+'صفحة الويب ملف نصي ينتهي بـ `.html`، يقرؤه المتصفح ويرسم الصفحة. وكل صفحة سليمة تبدأ بهيكل ثابت تتعلمه مرة واحدة وتستعمله دائماً:',
+{c:'<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>عنوان الصفحة</title>\n</head>\n<body>\n  <h1>مرحباً</h1>\n</body>\n</html>'},
+'`<!DOCTYPE html>` تخبر المتصفح أن الصفحة بمعيار HTML5. و`<html>` هو الجذر الذي يحوي كل شيء، وفيه `lang` للغة الصفحة و`dir="rtl"` لاتجاه الكتابة من اليمين لليسار.',
+'`<head>` فيه معلومات عن الصفحة **لا تظهر** للزائر: الترميز `charset` لعرض العربية سليمة، و`viewport` ليتلاءم العرض مع الهاتف، و`<title>` وهو الاسم الذي يظهر في التبويب.',
+'أما `<body>` ففيه كل ما **يظهر** فعلاً: العناوين والفقرات والصور وغيرها.',
+{tip:'من دون `charset="UTF-8"` قد تظهر الحروف العربية رموزاً غريبة. ومن دون `viewport` تظهر الصفحة على الهاتف مصغّرة جداً.'}],
+task:'أكمل الهيكل: `lang` واتجاه `rtl` في `<html>`، و`title`، و`charset`، و`viewport` في `<head>`، وعنوان `<h1>` في `<body>`.',
+start:'<!DOCTYPE html>\n<html>\n<head>\n  \n</head>\n<body>\n  \n</body>\n</html>',
+checks:[['اللغة lang محددة',d=>d.documentElement.lang.trim()],['اتجاه rtl',d=>d.documentElement.dir==='rtl'],['عنوان title فيه نص',d=>d.title.trim()],['ترميز charset',d=>d.querySelector('meta[charset]')],['وسم viewport',d=>d.querySelector('meta[name=viewport]')],['عنوان h1 داخل body',d=>d.body.querySelector('h1')?.textContent.trim()]]},
+{id:'hT',k:'html',ic:'table',t:'الجداول',body:[
+'الجدول لعرض بيانات لها صفوف وأعمدة، مثل جدول درجات أو أسعار. الوسم `<table>` يحيط بالجدول، و`<tr>` صف، و`<th>` خلية عنوان، و`<td>` خلية بيانات:',
+{c:'<table>\n  <tr>\n    <th>المادة</th>\n    <th>الدرجة</th>\n  </tr>\n  <tr>\n    <td>الرياضيات</td>\n    <td>90</td>\n  </tr>\n</table>'},
+'للتنظيم أضف `<thead>` للعناوين و`<tbody>` للبيانات. ولدمج خليتين أفقياً استعمل `colspan`، وعمودياً `rowspan`:',
+{c:'<td colspan="2">خلية عريضة</td>'},
+{tip:'الجدول للبيانات فقط. لا تستعمله لترتيب شكل الصفحة، فذلك عمل Flexbox وGrid.'}],
+task:'ابنِ جدولاً فيه صف عناوين بخليتين `<th>` على الأقل، وصفّان للبيانات بخلايا `<td>`.',
+start:'<table>\n  <tr>\n    <th>الاسم</th>\n  </tr>\n</table>',
+checks:[['جدول table',d=>d.querySelector('table')],['خليتا عنوان th أو أكثر',d=>d.querySelectorAll('th').length>=2],['ثلاثة صفوف tr أو أكثر',d=>d.querySelectorAll('tr').length>=3],['أربع خلايا td أو أكثر',d=>d.querySelectorAll('td').length>=4]]},
+{id:'hS',k:'html',ic:'layout',t:'الوسوم الدلالية',body:[
+'الوسوم الدلالية تصف **دور** الجزء في الصفحة، فيفهم المتصفح ومحركات البحث وقارئات الشاشة بنية صفحتك، بدل أن تكون كلها `<div>`:',
+'`<header>` رأس الصفحة. `<nav>` روابط التنقل. `<main>` المحتوى الأساسي (مرة واحدة فقط). `<section>` قسم موضوعي. `<article>` محتوى مستقل كمقال. `<aside>` محتوى جانبي. `<footer>` تذييل الصفحة.',
+{c:'<header>\n  <h1>مدونتي</h1>\n  <nav>\n    <a href="#">الرئيسية</a>\n    <a href="#">من أنا</a>\n  </nav>\n</header>\n<main>\n  <section>\n    <h2>آخر المقالات</h2>\n  </section>\n</main>\n<footer>جميع الحقوق محفوظة</footer>'},
+{tip:'قبل أن تكتب div اسأل: هل يوجد وسم يصف هذا الجزء؟ استعمله. وإن لم يوجد فاستعمل div.'}],
+task:'ابنِ صفحة: `header` فيه `h1`، و`nav` فيها رابطان، و`main` فيه `section`، و`footer` فيه نص.',
+start:'<header>\n  \n</header>\n<main>\n  \n</main>\n<footer></footer>',
+checks:[['header فيه h1',d=>d.querySelector('header h1')?.textContent.trim()],['nav فيها رابطان',d=>d.querySelectorAll('nav a').length>=2],['main فيه section',d=>d.querySelector('main section')],['footer فيه نص',d=>d.querySelector('footer')?.textContent.trim()]]},
+{id:'hD',k:'html',ic:'tag',t:'div وspan وclass وid',body:[
+'`<div>` صندوق عام يأخذ سطراً كاملاً (عنصر **كتلة**)، و`<span>` حاوية نصية صغيرة تبقى داخل السطر (عنصر **مضمّن**). لا معنى لهما بذاتهما، لكنهما أساس التصميم حين نمنحهما هوية:',
+{c:'<div class="card">\n  <h2 id="title">بطاقة</h2>\n  <span class="tag big">جديد</span>\n</div>'},
+'`class` اسم مجموعة يمكن تكراره على عناصر كثيرة، ويمكن للعنصر الواحد أن يحمل أكثر من class مفصولة بمسافة. أما `id` فاسم **فريد** لعنصر واحد في الصفحة.',
+{tip:'اختر أسماء تصف الوظيفة لا الشكل، مثل `price` وليس `red-text`، فقد يتغير اللون لاحقاً.'}],
+task:'أنشئ `div` بـ `class="card"` يحتوي `h2` له `id`، و`span` له صنفان `class`.',
+start:'<div>\n  \n</div>',
+checks:[['div بـ class="card"',d=>d.querySelector('div.card')],['h2 داخل البطاقة وله id',d=>d.querySelector('div.card h2[id]')],['span له صنفان',d=>d.querySelector('div.card span[class*=" "]')]]},
+{id:'hF2',k:'html',ic:'sliders',t:'حقول النماذج المتقدمة',body:[
+'بعد الحقول النصية توجد حقول اختيار. **القائمة المنسدلة** `<select>` فيها خيارات `<option>`. و**أزرار الاختيار** `type="radio"` تجمعها الخاصية `name` نفسها فيختار المستخدم واحداً فقط. أما **مربع الاختيار** `type="checkbox"` فللاختيار المتعدد:',
+{c:'<select name="city">\n  <option>الخرطوم</option>\n  <option>أم درمان</option>\n</select>\n\n<label><input type="radio" name="lvl"> مبتدئ</label>\n<label><input type="radio" name="lvl"> متقدم</label>\n\n<label><input type="checkbox"> أوافق</label>\n\n<textarea rows="3" placeholder="رسالتك"></textarea>'},
+'`<textarea>` لنص طويل متعدد الأسطر، وعدد أسطره بالخاصية `rows`.',
+{tip:'زر `<button>` داخل النموذج يرسله افتراضياً. اكتب `type="button"` لزر لا يرسل شيئاً.'}],
+task:'ابنِ نموذجاً فيه `select` بثلاثة خيارات، وزرّي `radio` بنفس `name`، و`checkbox`، و`textarea`.',
+start:'<form>\n  \n</form>',
+checks:[['select بثلاثة خيارات',d=>d.querySelectorAll('select option').length>=3],['زرّا radio بنفس name',d=>{const r=[...d.querySelectorAll('input[type=radio]')];return r.length>=2&&r[0].name&&r.every(x=>x.name===r[0].name)}],['مربع checkbox',d=>d.querySelector('input[type=checkbox]')],['حقل textarea',d=>d.querySelector('textarea')]]},
+{id:'cS',k:'css',ic:'pointer',t:'المحددات Selectors',body:[
+'المحدد يقول لـ CSS **أي العناصر** تريد تنسيقها. أهم أنواعه:',
+{c:'p { color: gray; }         /* كل الفقرات */\n.note { color: teal; }     /* class="note" */\n#title { color: red; }     /* id="title" */\nh2, h3 { margin: 0; }      /* مجموعة */\n.note span { color: red; } /* span داخل .note */\na:hover { color: gold; }   /* عند اللمس */'},
+'**عند التعارض:** إذا انطبقت قاعدتان على العنصر تفوز الأكثر تحديداً: `id` أقوى من `class`، وهو أقوى من اسم الوسم. وعند التساوي تفوز القاعدة الأخيرة في الملف.',
+{tip:'اعتمد على class في معظم تنسيقاتك. استعمال id في CSS يصعّب تعديل القواعد لاحقاً.'}],
+task:'أعطِ `.note` خلفية، ولوّن `#main-title`، واكتب قاعدة لـ `.note span`، وقاعدة مجموعة `h2, h3`.',
+start:'<style>\n  \n</style>\n<h2 id="main-title">عنوان</h2>\n<h3>عنوان فرعي</h3>\n<p class="note">ملاحظة <span>مهمة</span></p>',
+checks:[['خلفية لـ .note',d=>gcs(d,'.note').backgroundColor!=='rgba(0, 0, 0, 0)'],['لون #main-title غير الأسود',d=>gcs(d,'#main-title').color!=='rgb(0, 0, 0)'],['قاعدة لـ .note span',d=>rule(d,'.note span','color')],['محدد مجموعة h2, h3',d=>anyRule(d,r=>/^(h2, h3|h3, h2)$/.test(r.selectorText||''))]]},
+{id:'cU',k:'css',ic:'ruler',t:'الوحدات والأحجام',body:[
+'وحدات CSS نوعان. **ثابتة:** `px` بكسل. **نسبية:** `%` نسبة من عنصر الأب، و`rem` نسبة من حجم خط الصفحة الأساسي (عادة 16px)، و`em` نسبة من حجم خط العنصر، و`vw` و`vh` نسبة من عرض الشاشة وارتفاعها.',
+{c:'.box {\n  width: 90%;\n  max-width: 480px;\n  font-size: 1.125rem;\n  min-height: 50vh;\n}'},
+'المعنى: عرض مرن بنسبة 90% لكنه لا يتجاوز 480px، فيبدو جيداً على الهاتف والشاشات الكبيرة معاً.',
+{tip:'استعمل rem لأحجام الخطوط ليحترم تصميمك إعدادات حجم الخط عند المستخدم.'}],
+task:'اجعل `.box` بعرض `width` بالنسبة `%`، و`max-width` بالبكسل `px`، وحجم خط `font-size` بوحدة `rem`.',
+start:'<style>\n  .box {\n    background: #dff5f2;\n    padding: 16px;\n    \n  }\n</style>\n<div class="box">صندوق مرن</div>',
+checks:[['العرض بالنسبة %',d=>/%$/.test(rule(d,'.box','width'))],['max-width بالبكسل',d=>/px$/.test(rule(d,'.box','max-width'))],['حجم الخط بـ rem',d=>/rem$/.test(rule(d,'.box','font-size'))]]},
+{id:'cB',k:'css',ic:'image',t:'الخلفيات والتدرجات',body:[
+'`background-color` لون مصمت، و`background-image` لصورة أو **تدرج لوني**:',
+{c:'.hero {\n  background: linear-gradient(to left, #0E7C86, #12B5A6);\n  color: white;\n  min-height: 200px;\n}'},
+'اتجاه التدرج بعد `to` (مثل `to left`) ثم ألوانه بالترتيب. وللصور: `background-image: url("nile.jpg")` مع `background-size: cover` لتملأ المساحة، و`background-position: center` لتوسيطها، و`background-repeat: no-repeat` لمنع التكرار.',
+{tip:'عند وضع نص فوق صورة أو تدرج اختر لوناً يقرأ بوضوح فوقه (تباين عالٍ)، وإلا صعبت القراءة.'}],
+task:'اجعل خلفية `.hero` تدرجاً `linear-gradient`، وارتفاعها الأدنى `min-height` لا يقل عن `150px`، ولون النص أبيض، وحشوة `16px` أو أكثر.',
+start:'<style>\n  .hero {\n    \n  }\n</style>\n<div class="hero">مرحباً بك</div>',
+checks:[['خلفية linear-gradient',d=>(rule(d,'.hero','background')+rule(d,'.hero','background-image')).includes('gradient')],['min-height ≥ 150px',d=>px(gcs(d,'.hero').minHeight)>=150],['لون النص أبيض',d=>gcs(d,'.hero').color==='rgb(255, 255, 255)'],['حشوة ≥ 16px',d=>px(gcs(d,'.hero').paddingTop)>=16]]},
+{id:'cD',k:'css',ic:'move',t:'العرض والتموضع',body:[
+'`display` يحدد سلوك العنصر: `block` يأخذ سطراً كاملاً، و`inline` يبقى داخل السطر ولا يقبل عرضاً وارتفاعاً، و`inline-block` يجمع الاثنين، و`none` يخفيه تماماً.',
+'أما `position` فتتحكم بمكان العنصر: `static` (الافتراضي)، و`relative` يبقى مكانه ويصبح مرجعاً لأبنائه، و`absolute` يخرج من التدفق ويتموضع بالنسبة لأقرب أب موضَّع، و`fixed` يثبت على الشاشة، و`sticky` يلتصق عند التمرير.',
+{c:'.card {\n  position: relative;\n}\n.badge {\n  position: absolute;\n  top: 8px;\n  left: 8px;\n  z-index: 2;\n}'},
+'`z-index` يرتب الطبقات: الرقم الأكبر يظهر فوق.',
+{tip:'قاعدة ذهبية: لتثبيت عنصر داخل بطاقة اجعل البطاقة relative والعنصر absolute.'}],
+task:'اجعل `.card` بـ `relative`، و`.badge` بـ `absolute` مع `top` و`z-index` لا يقل عن 1.',
+start:'<style>\n  .card {\n    background: #dff5f2;\n    padding: 40px 16px;\n    \n  }\n  .badge {\n    background: #F5B83D;\n    padding: 2px 10px;\n    border-radius: 99px;\n    \n  }\n</style>\n<div class="card">\n  <span class="badge">جديد</span>\n  بطاقة المنتج\n</div>',
+checks:[['.card موضع relative',d=>gcs(d,'.card').position==='relative'],['.badge موضع absolute',d=>gcs(d,'.badge').position==='absolute'],['.badge له top',d=>gcs(d,'.badge').top!=='auto'],['z-index ≥ 1',d=>parseInt(gcs(d,'.badge').zIndex)>=1]]},
+{id:'cV',k:'css',ic:'braces',t:'متغيرات CSS',body:[
+'المتغير يخزّن قيمة تستعملها في أماكن كثيرة، فتغيّرها مرة واحدة فتتغير في كل مكان. يُعرَّف باسم يبدأ بـ `--` داخل `:root` (جذر الصفحة)، ويُستدعى بـ `var()`:',
+{c:':root {\n  --main: #0E7C86;\n  --radius: 12px;\n}\n.btn {\n  background: var(--main);\n  border-radius: var(--radius);\n}'},
+'يمكنك وضع قيمة احتياطية: `var(--main, teal)` تُستعمل إذا لم يوجد المتغير.',
+{tip:'المتغيرات أساس الوضع الداكن: تغيّر قيم المتغيرات فقط وتبقى بقية القواعد كما هي.'}],
+task:'عرّف `--main` و`--radius` في `:root` ثم استعملهما في `.btn` بـ `var()`.',
+start:'<style>\n  :root {\n    \n  }\n  .btn {\n    padding: 10px 20px;\n    color: white;\n    border: 0;\n    \n  }\n</style>\n<button class="btn">زر</button>',
+checks:[['تعريف --main',d=>rule(d,':root','--main')],['تعريف --radius',d=>rule(d,':root','--radius')],['خلفية الزر تستعمل var()',d=>(rule(d,'.btn','background')+rule(d,'.btn','background-color')).includes('var(')],['زوايا الزر تستعمل var()',d=>rule(d,'.btn','border-radius').includes('var(')]]},
+{id:'cT',k:'css',ic:'sparkles',t:'الانتقالات والتأثيرات',body:[
+'التأثيرات تجعل الواجهة حية. المحدد `:hover` يطبّق قواعد عند المرور أو اللمس، و`:active` أثناء الضغط. وخاصية `transition` تجعل التغيير سلساً بدل أن يكون فجائياً:',
+{c:'.btn {\n  background: #0E7C86;\n  transition: all .3s ease;\n}\n.btn:hover {\n  background: #12B5A6;\n  transform: translateY(-2px);\n}'},
+'`transition` تأخذ الخاصية المتغيرة (أو `all`)، ثم المدة، ثم نمط التسارع مثل `ease`. و`transform` يحرّك العنصر أو يكبّره بـ `scale()` و`translate()` و`rotate()` دون أن يخلخل بقية الصفحة.',
+{tip:'اجعل المدة بين .2 و.4 ثانية. أطول من ذلك يبدو بطيئاً.'}],
+task:'أعطِ `.btn` انتقالاً `transition` مدته `.2s` على الأقل، واجعل `.btn:hover` يغيّر الخلفية أو `transform`.',
+start:'<style>\n  .btn {\n    background: #0E7C86;\n    color: #fff;\n    border: 0;\n    padding: 12px 24px;\n    border-radius: 12px;\n    \n  }\n  .btn:hover {\n    \n  }\n</style>\n<button class="btn">اضغط هنا</button>',
+checks:[['transition بمدة ≥ .2s',d=>parseFloat(gcs(d,'.btn').transitionDuration)>=0.2],['تغيير عند :hover',d=>rule(d,'.btn:hover','background')||rule(d,'.btn:hover','background-color')||rule(d,'.btn:hover','transform')]]},
+{id:'cA',k:'css',ic:'play',t:'الحركة Animations',body:[
+'الحركة المتكررة تُعرَّف بخطوتين: **@keyframes** تصف مراحل الحركة، ثم خاصية `animation` تطبّقها على عنصر:',
+{c:'@keyframes pulse {\n  from { transform: scale(1); }\n  to   { transform: scale(1.2); }\n}\n.dot {\n  animation: pulse 1s ease-in-out infinite alternate;\n}'},
+'`animation` تجمع: اسم الحركة، والمدة، والتسارع، وعدد التكرار (`infinite` لا نهائي)، والاتجاه (`alternate` تعود عكسياً). ويمكنك استعمال نسب بدل from وto: `0%` و`50%` و`100%` لحركة من مراحل عدة.',
+{tip:'بعض المستخدمين ينزعجون من الحركة الكثيرة. اجعل الحركة للتنبيه لا للزينة، ويمكنك إيقافها عندهم بـ `@media (prefers-reduced-motion: reduce)`.'}],
+task:'أنشئ `@keyframes` وطبّقه على `.dot` بمدة `animation` أكبر من صفر.',
+start:'<style>\n  .dot {\n    width: 48px;\n    height: 48px;\n    border-radius: 50%;\n    background: #12B5A6;\n    \n  }\n  \n</style>\n<div class="dot"></div>',
+checks:[['قاعدة @keyframes',d=>anyRule(d,r=>r.type===7)],['اسم animation مطبّق على .dot',d=>gcs(d,'.dot').animationName!=='none'],['مدة الحركة أكبر من صفر',d=>parseFloat(gcs(d,'.dot').animationDuration)>0]]},
+{id:'cP',k:'pro',ic:'rocket',t:'مشروع: بطاقة تعريفية',body:[
+'حان وقت المشروع! ستجمع كل ما تعلمته في بطاقة تعريفية جميلة تصلح لملفك الشخصي. الخطوات المقترحة:',
+'**1.** ابنِ HTML: `<article class="profile">` فيها عنوان `<h2>` باسمك، وفقرة تعريفية `<p>`، ورابط `<a>`.',
+'**2.** وسّط البطاقة بـ `max-width` و`margin: 0 auto`.',
+'**3.** أعطها مظهراً: حشوة وزوايا مدورة وظلاً.',
+'**4.** رتّب محتواها بـ Flexbox عمودياً.',
+'**5.** أضف تأثير `:hover` للرابط.',
+{c:'.profile {\n  max-width: 320px;\n  margin: 0 auto;\n  display: flex;\n  flex-direction: column;\n  align-items: center;\n}'},
+{tip:'جرّب ألواناً ومسافات مختلفة في التجربة الحرة، وشارك عملك مع أصدقائك. هنا يبدأ الاحتراف.'}],
+task:'أكمل البطاقة بحيث تحقق كل البنود أدناه.',
+start:'<style>\n  .profile {\n    \n  }\n  \n</style>\n<article class="profile">\n  \n</article>',
+checks:[['عنوان h2 فيه نص',d=>d.querySelector('.profile h2')?.textContent.trim()],['فقرة p فيها نص',d=>d.querySelector('.profile p')?.textContent.trim()],['رابط a له href',d=>d.querySelector('.profile a[href]')],['حشوة ≥ 16px',d=>px(gcs(d,'.profile').paddingTop)>=16],['زوايا مدورة ≥ 12px',d=>px(gcs(d,'.profile').borderTopLeftRadius)>=12],['ظل box-shadow',d=>gcs(d,'.profile').boxShadow!=='none'],['تخطيط flex',d=>gcs(d,'.profile').display==='flex'],['عرض أقصى max-width',d=>rule(d,'.profile','max-width')],['تأثير :hover على الرابط',d=>anyRule(d,r=>/a:hover/.test(r.selectorText||''))]]}
+);
+const ORDER=['h0','h1','h2','h3','h4','h5','hT','hS','hD','h6','hF2','c1','cS','c2','cU','c3','c4','cB','cD','c5','c6','cV','cT','cA','c7','cP'];
+LESSONS.sort((a,b)=>ORDER.indexOf(a.id)-ORDER.indexOf(b.id));
+
+/* ---------- JavaScript track ---------- */
+const out=c=>c.logs.filter(l=>l[0]!=='!');
+const noErr=['لا توجد أخطاء',c=>!c.err&&!c.logs.some(l=>l[0]==='!')];
+LESSONS.push(
+{id:'j0',k:'js',ic:'terminal',t:'أول برنامج',body:[
+'JavaScript هي لغة **البرمجة** التي تعمل داخل المتصفح. إن كانت HTML هيكل الصفحة وCSS شكلها، فـ JavaScript هي التي تجعلها **تتحرك وتتفاعل**: تحسب، وتقرر، وتستجيب لضغطات المستخدم.',
+'أول أمر يتعلمه كل مبرمج هو الطباعة. `console.log()` تكتب ما بين القوسين في لوحة المخرجات، وهي أداتك الأولى لاختبار أي شيء:',
+{c:'console.log("مرحباً بالعالم");\nconsole.log(2 + 3);'},
+'النص يُكتب بين علامتي اقتباس، أما الأرقام فبدونها. وكل أمر ينتهي بفاصلة منقوطة `;`. والسطر الذي يبدأ بـ `//` تعليق يتجاهله الحاسوب، لتكتب فيه ملاحظاتك:',
+{c:'// هذا تعليق\nconsole.log("جافاسكربت");'},
+{tip:'JavaScript حساسة لحالة الأحرف: `console` تعمل أما `Console` فلا. وإذا ظهر خطأ في النتيجة فاقرأ رسالته، فهي تدلك على موضع المشكلة.'}],
+task:'اطبع سطرين بـ `console.log`: الأول نص ترحيب، والثاني ناتج عملية حسابية. ثم اضغط «تشغيل».',
+start:'// اكتب كودك هنا\n',
+checks:[noErr,['طُبع سطران أو أكثر',c=>out(c).length>=2],['أحد المخرجات رقم (ناتج عملية)',c=>out(c).some(l=>/^-?\d+(\.\d+)?$/.test(l))]]},
+{id:'j1',k:'js',ic:'braces',t:'المتغيرات',body:[
+'المتغير **صندوق له اسم** تحفظ فيه قيمة لتستعملها لاحقاً. نُنشئه بالكلمة `let` للقيمة التي قد تتغير، و`const` للقيمة الثابتة:',
+{c:'const name = "سارة";\nlet age = 20;\nage = 21; // التغيير مسموح مع let\nconsole.log(name, age);'},
+'لا يمكن تغيير `const` بعد إنشائها وإلا ظهر خطأ. اجعل `const` هي الأصل، واستعمل `let` فقط حين تحتاج للتغيير.',
+'أسماء المتغيرات تبدأ بحرف ولا فراغات فيها، وتُكتب بنمط **camelCase** مثل `userName`. ولدمج المتغيرات داخل نص استعمل **القالب النصي**: علامة الاقتباس المائلة (backtick) مع الصيغة `${}`:',
+{c:'const city = "الخرطوم";\nconsole.log(`أعيش في ${city}`);'},
+{tip:'اختر اسماً يصف القيمة: `price` أفضل من `x`. الكود يُقرأ أكثر مما يُكتب.'}],
+task:'أنشئ `const` باسمك و`let` لعمرك، ثم غيّر العمر، واطبع جملة بالقالب النصي `${}` تحوي المتغيرين.',
+start:'// أنشئ المتغيرات هنا\n',
+checks:[noErr,['استعملت const',c=>/\bconst\s+\w+/.test(c.code)],['استعملت let',c=>/\blet\s+\w+/.test(c.code)],['استعملت القالب النصي ${}',c=>/\$\{/.test(c.code)],['طبعت جملة',c=>out(c).some(l=>l.length>6)]]},
+{id:'j2',k:'js',ic:'type',t:'أنواع البيانات',body:[
+'لكل قيمة **نوع**، والنوع يحدد ما يمكنك فعله بها. أهم الأنواع: `string` نص مثل "مرحباً"، و`number` رقم مثل 42 و3.14، و`boolean` منطقي وهو `true` أو `false`، و`undefined` قيمة لم تُحدد، و`null` فراغ مقصود.',
+{c:'console.log(typeof "نص");   // string\nconsole.log(typeof 42);     // number\nconsole.log(typeof true);   // boolean'},
+'الكلمة `typeof` تخبرك بنوع القيمة. ويمكن تحويل الأنواع: `Number("5")` تحوّل النص رقماً، و`String(5)` تحوّل الرقم نصاً.',
+'احذر: `"5" + 2` تعطي `"52"` لأنها دمج نصوص، بينما `Number("5") + 2` تعطي `7`.',
+{tip:'إذا ظهرت لك القيمة `NaN` فمعناها "ليس رقماً"، أي أن تحويلاً فشل مثل `Number("abc")`.'}],
+task:'اطبع `typeof` لقيمة نصية، ثم لرقمية، ثم لمنطقية، ثم اطبع ناتج `Number("5") + 2`.',
+start:'console.log(typeof "مرحباً");\n',
+checks:[noErr,['يظهر string',c=>out(c).includes('string')],['يظهر number',c=>out(c).includes('number')],['يظهر boolean',c=>out(c).includes('boolean')],['ناتج التحويل والجمع 7',c=>out(c).includes('7')]]},
+{id:'j3',k:'js',ic:'hash',t:'العمليات والمقارنات',body:[
+'العمليات الحسابية: `+` جمع، `-` طرح، `*` ضرب، `/` قسمة، `%` باقي القسمة، `**` أُسّ. وللمقارنة: `===` يساوي، `!==` لا يساوي، و`>` و`<` و`>=` و`<=`. ونتيجة المقارنة دائماً `true` أو `false`:',
+{c:'console.log(10 % 3);     // 1\nconsole.log(2 ** 3);     // 8\nconsole.log(5 > 3);      // true\nconsole.log(5 === "5");  // false'},
+'استعمل `===` دائماً للمقارنة (لا `==`) لأنها تقارن النوع والقيمة معاً. وللمنطق: `&&` (و) تتطلب تحقق الطرفين، و`||` (أو) يكفي أحدهما، و`!` (ليس) تعكس القيمة:',
+{c:'console.log(true && false);  // false\nconsole.log(true || false);  // true\nconsole.log(!true);          // false'},
+{tip:'`%` مفيدة جداً: إذا كان `n % 2 === 0` فالعدد زوجي.'}],
+task:'احسب مساحة مستطيل (8 × 5) واطبعها، ثم اطبع باقي قسمة 17 على 5، ثم اطبع نتيجة `10 > 5 && 3 < 1`.',
+start:'const width = 8;\nconst height = 5;\n\n',
+checks:[noErr,['طُبعت المساحة 40',c=>out(c).includes('40')],['طُبع باقي القسمة 2',c=>out(c).includes('2')],['طُبعت النتيجة المنطقية false',c=>out(c).includes('false')]]},
+{id:'j4',k:'js',ic:'split',t:'الشروط',body:[
+'الشرط يجعل البرنامج **يقرر**. `if` تنفذ الكود إذا تحقق الشرط، و`else` إذا لم يتحقق، و`else if` لشرط آخر. الشرط بين القوسين والكود بين `{ }`:',
+{c:'const age = 17;\nif (age >= 18) {\n  console.log("بالغ");\n} else {\n  console.log("قاصر");\n}'},
+'تُفحص الشروط من الأعلى إلى الأسفل، وتُنفَّذ أول كتلة يتحقق شرطها فقط:',
+{c:'const n = 0;\nif (n > 0) {\n  console.log("موجب");\n} else if (n < 0) {\n  console.log("سالب");\n} else {\n  console.log("صفر");\n}'},
+{tip:'لا تخلط بين `=` للإسناد و`===` للمقارنة. كتابة `if (x = 5)` خطأ شائع جداً.'}],
+task:'المتغير `score` فيه درجة طالب. اطبع "ممتاز" إن كانت 90 فأكثر، و"جيد" إن كانت 60 فأكثر، وإلا "راسب". ثم غيّر `score` وجرّب.',
+start:'const score = 75;\n\n',
+checks:[noErr,['استعملت if و else',c=>/\bif\b[\s\S]*\belse\b/.test(c.code)],['النتيجة صحيحة لقيمة score عندك',c=>{const m=c.code.match(/score\s*=\s*(\d+)/);if(!m)return false;const s=+m[1],e=s>=90?'ممتاز':s>=60?'جيد':'راسب';return out(c).length===1&&out(c)[0]===e}]]},
+{id:'j5',k:'js',ic:'repeat',t:'الحلقات',body:[
+'الحلقة تكرر الكود دون أن تنسخه. حلقة `for` لها ثلاثة أجزاء: البداية، والشرط، والزيادة:',
+{c:'for (let i = 1; i <= 3; i++) {\n  console.log("الرقم", i);\n}'},
+'المعنى: ابدأ بـ `i = 1`، واستمر ما دام `i <= 3`، وزد `i` بمقدار واحد في كل دورة (`i++`). أما `while` فتكرر ما دام الشرط صحيحاً:',
+{c:'let n = 3;\nwhile (n > 0) {\n  console.log(n);\n  n--;\n}'},
+'الأمر `break` يوقف الحلقة فوراً، و`continue` يقفز إلى الدورة التالية.',
+{tip:'احذر الحلقة اللانهائية: إن نسيت أن تغيّر المتغير في `while` فلن تنتهي أبداً. سيوقفها التطبيق بعد عدد كبير من الدورات ويعرض لك خطأ.'}],
+task:'اطبع الأرقام من 1 إلى 5 بحلقة `for` (كل رقم في سطر)، ثم اطبع مجموعها 15 بعد الحلقة.',
+start:'let sum = 0;\n\n',
+checks:[noErr,['استعملت حلقة for',c=>/\bfor\s*\(/.test(c.code)],['طُبعت الأرقام 1 إلى 5 بالترتيب',c=>out(c).slice(0,5).join(',')==='1,2,3,4,5'],['طُبع المجموع 15 بعدها',c=>out(c)[5]==='15']]},
+{id:'j6',k:'js',ic:'zap',t:'الدوال',body:[
+'الدالة **مجموعة أوامر لها اسم**، تكتبها مرة وتستدعيها متى شئت. تأخذ **مدخلات** (parameters) وتعيد **ناتجاً** بـ `return`:',
+{c:'function add(a, b) {\n  return a + b;\n}\nconsole.log(add(2, 3)); // 5'},
+'`return` تنهي الدالة وترسل القيمة لمن استدعاها. وإن لم تكتب `return` أعادت `undefined`. وتوجد صيغة أقصر تسمى **الدالة السهمية**:',
+{c:'const double = (n) => n * 2;\nconsole.log(double(4)); // 8'},
+'المتغيرات المعرّفة داخل الدالة لا يراها الكود خارجها، وهذا يسمى النطاق (Scope).',
+{tip:'اجعل كل دالة تؤدي مهمة واحدة واضحة، واختر لها اسماً فعلياً مثل `calculateTotal`.'}],
+task:'اكتب دالة `add(a, b)` تعيد مجموعهما، ودالة `greet(name)` تعيد جملة ترحيب فيها الاسم. سنختبرهما تلقائياً.',
+start:'// اكتب الدالتين هنا\n',
+tests:'__t(typeof add==="function"?add(2,3):null);__t(typeof add==="function"?add(10,-4):null);__t(typeof greet==="function"?greet("سارة"):null);',
+checks:[noErr,['add(2, 3) تعيد 5',c=>c.t[0]===5],['add(10, -4) تعيد 6',c=>c.t[1]===6],['greet("سارة") تعيد جملة فيها الاسم',c=>typeof c.t[2]==='string'&&c.t[2].includes('سارة')]]},
+{id:'j7',k:'js',ic:'list',t:'المصفوفات',body:[
+'المصفوفة تخزن **قائمة** قيم بين `[ ]`. والترقيم يبدأ من **صفر**:',
+{c:'const fruits = ["تمر", "مانجو", "عنب"];\nconsole.log(fruits[0]);      // تمر\nconsole.log(fruits.length);  // 3\nfruits.push("بطيخ");         // إضافة'},
+'`push` تضيف في النهاية، و`pop` تحذف الأخير، و`includes` تبحث عن قيمة. وأقوى الدوال ثلاث: `map` تحوّل كل عنصر، و`filter` تُبقي ما يحقق شرطاً، و`forEach` تنفذ كوداً على كل عنصر:',
+{c:'const nums = [1, 2, 3, 4];\nconsole.log(nums.map(n => n * 10));    // [10,20,30,40]\nconsole.log(nums.filter(n => n > 2));  // [3,4]\nnums.forEach(n => console.log(n));'},
+{tip:'`map` و`filter` لا تغيّران المصفوفة الأصلية، بل تعيدان مصفوفة جديدة.'}],
+task:'لديك المصفوفة `nums`. اطبع الأعداد الزوجية فقط بـ `filter`، ثم اطبع كل عدد مضاعفاً بـ `map`.',
+start:'const nums = [1, 2, 3, 4, 5];\n\n',
+checks:[noErr,['استعملت filter',c=>/\.filter\(/.test(c.code)],['استعملت map',c=>/\.map\(/.test(c.code)],['طُبعت الأعداد الزوجية [2,4]',c=>out(c).includes('[2,4]')],['طُبعت المضاعفات [2,4,6,8,10]',c=>out(c).includes('[2,4,6,8,10]')]]},
+{id:'j8',k:'js',ic:'box',t:'الكائنات',body:[
+'الكائن يجمع بيانات شيء واحد في **أزواج اسم: قيمة** بين `{ }`. يصلح لتمثيل مستخدم أو منتج أو طالب:',
+{c:'const user = {\n  name: "أحمد",\n  age: 22,\n  skills: ["HTML", "CSS"]\n};\nconsole.log(user.name);       // أحمد\nconsole.log(user.skills[0]);  // HTML\nuser.age = 23;                // تعديل\nuser.city = "أم درمان";       // إضافة'},
+'تصل للقيمة بالنقطة `user.name`. ويمكن أن تكون عناصر المصفوفة كائنات، وهذا أشيع شكل للبيانات في التطبيقات:',
+{c:'const products = [\n  { title: "قلم", price: 5 },\n  { title: "دفتر", price: 12 }\n];\nproducts.forEach(p => console.log(p.title, p.price));'},
+{tip:'بيانات JSON القادمة من الإنترنت تشبه الكائنات تماماً. أتقن الكائنات تتقن التعامل مع أي واجهة برمجية.'}],
+task:'أنشئ كائناً `student` فيه `name` نصي و`age` رقمي و`grades` مصفوفة أرقام، ثم اطبع اسمه.',
+start:'// أنشئ الكائن هنا\n',
+tests:'__t(typeof student==="object"&&student?{n:student.name,a:student.age,g:student.grades}:null);',
+checks:[noErr,['الكائن student موجود وفيه name نصي',c=>c.t[0]&&typeof c.t[0].n==='string'&&c.t[0].n.length>0],['age رقم',c=>c.t[0]&&typeof c.t[0].a==='number'],['grades مصفوفة أرقام',c=>c.t[0]&&Array.isArray(c.t[0].g)&&c.t[0].g.length>0&&c.t[0].g.every(x=>typeof x==='number')],['طُبع الاسم',c=>c.t[0]&&out(c).includes(c.t[0].n)]]},
+{id:'j9',k:'js',ic:'layout',t:'تغيير الصفحة DOM',page:'<h1 id="title">مرحباً</h1>\n<ul id="list"></ul>',body:[
+'هنا تلتقي JavaScript بالصفحة. **DOM** هو تمثيل الصفحة كعناصر يمكن لـ JavaScript قراءتها وتعديلها. نختار العنصر أولاً ثم نغيّره:',
+{c:'const title = document.querySelector("#title");\ntitle.textContent = "نص جديد";\ntitle.style.color = "teal";\ntitle.classList.add("big");'},
+'`querySelector` تأخذ محدداً مثل CSS (`#id` أو `.class` أو اسم وسم). و`textContent` للنص، و`style` للتنسيق المباشر، و`classList` لإضافة class أو إزالتها.',
+'ولإنشاء عنصر جديد: أنشئه بـ `createElement`، واملأه، ثم ضعه في الصفحة بـ `appendChild`:',
+{c:'const li = document.createElement("li");\nli.textContent = "عنصر جديد";\ndocument.querySelector("#list").appendChild(li);'},
+{tip:'إذا أخطأت في المحدد أعادت `querySelector` القيمة `null`، وسيظهر خطأ عند تعديلها. راجع اسم العنصر أولاً.'}],
+task:'في الصفحة `h1` و`ul`. غيّر نص `#title` ولوّنه، ثم أضف 3 عناصر `li` إلى `#list` بحلقة.',
+start:'// الصفحة تحتوي h1 برقم title وقائمة ul برقم list\n',
+checks:[noErr,['تغيّر نص العنوان',c=>{const t=c.doc.querySelector('#title');return t&&t.textContent.trim()&&t.textContent.trim()!=='مرحباً'}],['لُوّن العنوان',c=>c.doc.querySelector('#title')?.style.color],['أُضيفت 3 عناصر li',c=>c.doc.querySelectorAll('#list li').length>=3]]},
+{id:'j10',k:'js',ic:'pointer',t:'الأحداث',page:'<button id="btn">زدني</button>\n<p id="out">0</p>',body:[
+'الحدث هو شيء يفعله المستخدم: ضغطة، كتابة، تمرير. نربط دالة بالحدث بـ `addEventListener`، فتُنفَّذ كلما وقع:',
+{c:'const btn = document.querySelector("#btn");\nbtn.addEventListener("click", () => {\n  console.log("ضُغط الزر!");\n});'},
+'داخل الدالة يمكنك تغيير الصفحة أو تحديث متغير، وهذا النمط أساس كل تطبيق تفاعلي:',
+{c:'let count = 0;\nbtn.addEventListener("click", () => {\n  count++;\n  document.querySelector("#out").textContent = count;\n});'},
+'أحداث أخرى مهمة: `input` عند الكتابة في حقل، و`submit` عند إرسال نموذج، و`keydown` عند ضغط مفتاح.',
+{tip:'الربط يتم مرة واحدة عند تحميل الصفحة، أما الدالة فتنفَّذ في كل مرة يقع فيها الحدث.'}],
+task:'اجعل زر `#btn` يزيد الرقم المعروض في `#out` بمقدار 1 عند كل ضغطة. سنضغط الزر 3 مرات لنختبر.',
+start:'let count = 0;\n\n',
+tests:'(function(){var b=document.getElementById("btn");if(b){b.click();b.click();b.click()}})();',
+checks:[noErr,['استعملت addEventListener',c=>/addEventListener/.test(c.code)],['بعد 3 ضغطات يظهر الرقم 3',c=>c.doc.querySelector('#out')?.textContent.trim()==='3']]},
+{id:'j11',k:'js',ic:'rocket',t:'مشروع: قائمة مهام',page:'<input id="task" placeholder="مهمة جديدة">\n<button id="add">إضافة</button>\n<ul id="tasks"></ul>',body:[
+'مشروع! ستبني **قائمة مهام** تجمع كل ما تعلمته: DOM والأحداث والشروط. المتطلبات:',
+'**1.** عند ضغط "إضافة" يُنشأ عنصر `li` بنص الحقل ويُضاف إلى القائمة.',
+'**2.** بعد الإضافة يُفرَّغ الحقل.',
+'**3.** لا تُضاف مهمة فارغة (استعمل `if` و`trim()`).',
+{c:'const input = document.querySelector("#task");\nconst list = document.querySelector("#tasks");\n\ndocument.querySelector("#add").addEventListener("click", () => {\n  const text = input.value.trim();\n  if (!text) return;\n  // أنشئ li وأضفه هنا\n});'},
+'`trim()` تحذف الفراغات من طرفي النص، و`return` داخل الدالة توقفها فوراً.',
+{tip:'بعد أن تنجح، جرّب إضافة حذف المهمة عند الضغط عليها. هذه هي الخطوة الطبيعية التالية، وهكذا تُبنى التطبيقات الحقيقية.'}],
+task:'أكمل الكود ليحقق المتطلبات الثلاثة. سنختبره بإضافة مهمتين وبمحاولتين فارغتين.',
+start:'// اكتب مشروعك هنا\n',
+tests:'(function(){var i=document.getElementById("task"),b=document.getElementById("add");if(i&&b){i.value="مهمة 1";b.click();i.value="";b.click();i.value="  ";b.click();i.value="مهمة 2";b.click();__t(i.value)}})();',
+checks:[noErr,['أُضيفت مهمتان فقط (الفارغة تُهمل)',c=>c.doc.querySelectorAll('#tasks li').length===2],['نص المهمتين صحيح',c=>{const l=[...c.doc.querySelectorAll('#tasks li')];return l.length===2&&l[0].textContent.includes('مهمة 1')&&l[1].textContent.includes('مهمة 2')}],['يُفرَّغ الحقل بعد الإضافة',c=>c.t[0]==='']]}
+);
+const ORDER2=[...ORDER.slice(0,-1),'j0','j1','j2','j3','j4','j5','j6','j7','j8','j9','j10','j11','cP'];
+LESSONS.sort((a,b)=>ORDER2.indexOf(a.id)-ORDER2.indexOf(b.id));
+
+/* ---------- State ---------- */
+let S={done:{},xp:0,streak:0,last:''};
+try{Object.assign(S,JSON.parse(localStorage.getItem('webnile')||'{}'))}catch(e){}
+const save=()=>{try{localStorage.setItem('webnile',JSON.stringify(S))}catch(e){}};
+let V={n:'home'};
+let tt;function toast(m,c=''){const t=$('#toast');t.textContent=m;t.className='toast show '+c;clearTimeout(tt);tt=setTimeout(()=>t.className='toast',2600)}
+function go(n,id){const back=n==='home'&&V.n==='lesson';V={n,id};render();scrollTo(0,0);if(back){const x=document.querySelector('.node.next');if(x)x.scrollIntoView({block:'center'})}}
+const doneCount=()=>LESSONS.filter(l=>S.done[l.id]).length;
+const nextL=()=>LESSONS.find(l=>!S.done[l.id]);
+const wrap=code=>/<html[\s>]/i.test(code)?code:'<!doctype html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><base target="_blank"><style>body{font-family:system-ui,sans-serif;margin:14px;line-height:1.7}</style></head><body>'+code+'</body></html>';
+
+/* ---------- Smart autocomplete ---------- */
+const VOID=new Set(['img','br','hr','input','meta','link']);
+const BOOL=new Set(['required','disabled','checked','selected','hidden','readonly','autofocus']);
+const TG={h1:0,h2:0,h3:0,h4:0,h5:0,h6:0,p:0,div:0,span:0,strong:0,em:0,b:0,i:0,small:0,code:0,pre:0,blockquote:0,button:0,textarea:0,li:0,option:0,tr:0,th:0,td:0,figcaption:0,aside:0,footer:0,title:0,
+label:'<label for="|"></label>',a:'<a href="|"></a>',img:'<img src="|" alt="">',br:'<br>|',hr:'<hr>|',input:'<input type="|">',
+ul:'<ul>\n  <li>|</li>\n</ul>',ol:'<ol>\n  <li>|</li>\n</ol>',form:'<form>\n  |\n</form>',select:'<select>\n  <option>|</option>\n</select>',
+table:'<table>\n  <tr>\n    <th>|</th>\n  </tr>\n</table>',figure:'<figure>\n  <img src="|" alt="">\n  <figcaption></figcaption>\n</figure>',
+header:'<header>\n  |\n</header>',nav:'<nav>\n  |\n</nav>',main:'<main>\n  |\n</main>',section:'<section>\n  |\n</section>',article:'<article>\n  |\n</article>',
+style:'<style>\n  |\n</style>',meta:'<meta name="viewport" content="width=device-width, initial-scale=1">|'};
+const tmpl=n=>TG[n]||`<${n}>|</${n}>`;
+const GL=['class','id','style','title','lang','dir','hidden'];
+const AT={a:['href','target','rel'],img:['src','alt','width','height'],input:['type','name','placeholder','value','required','disabled','checked','min','max'],label:['for'],form:['action','method'],button:['type','disabled'],textarea:['rows','name','placeholder'],select:['name'],option:['value','selected'],meta:['charset','name','content'],td:['colspan','rowspan'],th:['colspan','rowspan'],ol:['start','type'],html:['lang','dir']};
+const AV={type:['text','email','password','number','tel','url','date','checkbox','radio','submit'],target:['_blank','_self'],method:['get','post'],dir:['rtl','ltr'],rel:['noopener','noreferrer'],lang:['ar','en'],charset:['UTF-8'],name:['viewport']};
+const C1='black~white~red~green~blue~teal~orange~gold~crimson~gray~tomato~navy~transparent~#0E7C86';
+const SZ='0~4px~8px~12px~16px~24px~auto';
+const CV={display:'block~inline~inline-block~flex~grid~none',position:'relative~absolute~fixed~sticky~static',color:C1,background:C1+'~linear-gradient(to left, #0E7C86, #12B5A6)','background-color':C1,'border-color':C1,'justify-content':'flex-start~center~flex-end~space-between~space-around~space-evenly','align-items':'stretch~center~flex-start~flex-end~baseline','flex-direction':'row~column~row-reverse~column-reverse','flex-wrap':'wrap~nowrap','text-align':'right~center~left~justify','font-weight':'400~600~700~900~bold~normal','font-style':'normal~italic','text-decoration':'none~underline',cursor:'pointer~default',overflow:'hidden~auto~scroll~visible','box-sizing':'border-box',border:'none~1px solid #ccc~2px solid #0E7C86','border-radius':'4px~8px~12px~16px~50%','box-shadow':'0 4px 12px rgba(0,0,0,.15)~none',transition:'all .3s ease~background .2s~transform .2s',transform:'scale(1.05)~translateY(-4px)~rotate(10deg)','grid-template-columns':'1fr 1fr~repeat(3, 1fr)~repeat(auto-fit, minmax(150px, 1fr))','font-family':'Cairo, sans-serif~system-ui~monospace','font-size':'14px~16px~18px~24px~32px','line-height':'1.5~1.7~1.8',width:'100%~50%~auto~100vw','max-width':'100%~600px~480px',height:'auto~100%~100vh','min-height':'100vh~150px~200px',margin:SZ,padding:SZ,gap:'8px~12px~16px~24px','object-fit':'cover~contain','list-style':'none~disc~decimal',opacity:'0~.5~1',visibility:'visible~hidden','background-size':'cover~contain','background-position':'center~top~bottom','background-repeat':'no-repeat~repeat',animation:'pulse 2s infinite~fade 1s ease',flex:'1~auto~none','align-self':'center~flex-start~flex-end','z-index':'1~10~100','letter-spacing':'1px~2px','text-transform':'uppercase~lowercase','white-space':'nowrap~normal',top:'0~8px~auto',right:'0~8px~auto',bottom:'0~8px~auto',left:'0~8px~auto','max-height':'100%~300px','min-width':'0~100px','row-gap':'8px~16px','column-gap':'8px~16px','place-items':'center','text-shadow':'0 1px 2px rgba(0,0,0,.3)','aspect-ratio':'1~16 / 9','animation-name':'pulse','animation-duration':'1s~2s','transition-duration':'.2s~.3s','outline':'none'};
+['top','bottom','right','left'].forEach(x=>{CV['margin-'+x]=SZ;CV['padding-'+x]=SZ;CV['border-'+x]='1px solid #ccc~none'});
+const CS={border:'solid~dashed~dotted~#0E7C86~red~gray',margin:SZ,padding:SZ,transition:'ease~ease-in-out~linear~.3s~.2s',background:'no-repeat~center~cover',animation:'ease~infinite~linear~alternate~2s~1s','box-shadow':'rgba(0,0,0,.15)~#0003'};
+const PROPS=Object.keys(CV).sort();
+const stOpen=b=>{const l=b.toLowerCase(),s=l.lastIndexOf('<style'),e=l.lastIndexOf('</style');return s>-1&&s>e&&b.indexOf('>',s)>-1?b.indexOf('>',s)+1:-1};
+function openTag(b){const st=[];b.replace(/<(\/?)([a-zA-Z][\w-]*)[^<>]*?(\/?)>/g,(m,c,n,sl)=>{n=n.toLowerCase();if(VOID.has(n)||sl)return;if(c){const i=st.lastIndexOf(n);if(i>-1)st.length=i}else st.push(n)});return st.pop()}
+function ctx(b){
+  const so=stOpen(b);
+  if(so>-1){const css=b.slice(so),op=(css.match(/{/g)||[]).length-(css.match(/}/g)||[]).length,cur=css.slice(Math.max(css.lastIndexOf(';'),css.lastIndexOf('{'),css.lastIndexOf('}'))+1);
+    let m=cur.match(/^\s*([\w-]+)\s*:\s*((?:[^;{}]*\s)?)([\w#.-]*)$/);
+    if(op>0&&m)return{k:'v',p:m[1].toLowerCase(),prev:m[2].trim(),w:m[3]};
+    m=cur.match(/^\s*([\w-]+)$/);if(op>0&&m)return{k:'p',w:m[1]};
+    return null}
+  const lt=b.lastIndexOf('<');if(lt<0||lt<b.lastIndexOf('>'))return null;
+  const t=b.slice(lt);let m=t.match(/^<(\/?)([\w-]*)$/);if(m)return{k:'t',cl:!!m[1],w:m[2].toLowerCase()};
+  m=t.match(/^<([\w-]+)([\s\S]*)$/);if(!m)return null;const r=m[2],tag=m[1].toLowerCase();
+  if((r.match(/"/g)||[]).length%2){const q=r.match(/([\w:-]+)="([^"]*)$/);return q?{k:'av',a:q[1].toLowerCase(),w:q[2]}:null}
+  const q=r.match(/\s([\w:-]*)$/);return q?{k:'a',tag,w:q[1].toLowerCase(),used:r}:null}
+function ac(b,a){
+  const c=ctx(b);if(!c)return[];
+  const pick=(arr,w)=>arr.filter(x=>x.toLowerCase().startsWith(w)&&x.toLowerCase()!==w);
+  if(c.k==='t'){
+    if(c.cl){const o=openTag(b.slice(0,b.lastIndexOf('<')));return o&&o.startsWith(c.w)&&o!==c.w?[{l:`</${o}>`,t:'t',x:`</${o}>|`,f:c.w.length+2}]:[]}
+    const l=c.w?pick(Object.keys(TG),c.w):['h1','p','div','a','img','ul','button','span'];
+    return l.slice(0,12).map(n=>({l:`<${n}>`,t:'t',x:tmpl(n),f:c.w.length+1}))}
+  if(c.k==='a'){const l=pick([...(AT[c.tag]||[]),...GL].filter(n=>!new RegExp('(^|\\s)'+n+'(=|\\s|$)').test(c.used)),c.w);return l.slice(0,12).map(n=>({l:n,t:'a',x:BOOL.has(n)?n+'|':n+'="|"',f:c.w.length}))}
+  if(c.k==='av'){const l=pick(AV[c.a]||[],c.w.toLowerCase());return l.slice(0,10).map(v=>({l:v,t:'s',x:v+'"|',f:c.w.length,g:a[0]==='"'?1:0}))}
+  if(c.k==='p'){const w=c.w.toLowerCase(),l=[...PROPS.filter(p=>p.startsWith(w)),...PROPS.filter(p=>!p.startsWith(w)&&p.includes(w))].filter(p=>p!==w);return l.slice(0,10).map(p=>({l:p,t:'p',x:p+': |;',f:c.w.length}))}
+  if(c.k==='v'){const src=c.prev?CS[c.p]:CV[c.p];if(!src)return[];const l=pick(src.split('~'),c.w.toLowerCase());return l.slice(0,10).map(v=>({l:v,t:'v',x:v+';|',f:c.w.length,g:a[0]===';'?1:0}))}
+  return[]}
+function autoClose(ed){
+  const p=ed.selectionStart,b=ed.value.slice(0,p),a=ed.value.slice(p),m=b.match(/<([a-zA-Z][\w-]*)(?:\s[^<>]*)?>$/);
+  if(!m||b.endsWith('/>'))return;const n=m[1].toLowerCase();
+  if(VOID.has(n)||a.toLowerCase().startsWith('</'+n))return;
+  if(n!=='style'&&stOpen(b.slice(0,m.index))>-1)return;
+  if(n==='style'){ed.setRangeText('\n  \n</style>',p,p,'end');ed.setSelectionRange(p+3,p+3)}
+  else ed.setRangeText(`</${n}>`,p,p,'start')}
+
+/* ---------- Editor ---------- */
+const JSK=new Set('let const var function return if else for while do break continue switch case default new this typeof in of true false null undefined class async await try catch throw'.split(' '));
+const hJS=s=>s.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\/|`(?:\\[\s\S]|[^`\\])*`|"(?:\\.|[^"\\\n])*"|'(?:\\.|[^'\\\n])*'|\b\d+(?:\.\d+)?\b|[A-Za-z_$][\w$]*|[\s\S]/g,(m,off,str)=>{
+  if(m[0]==='/'&&(m[1]==='/'||m[1]==='*'))return`<i class=c>${esc(m)}</i>`;
+  if(/^[`"']/.test(m))return`<i class=s>${esc(m)}</i>`;
+  if(/^\d/.test(m))return`<i class=n>${m}</i>`;
+  if(/^[A-Za-z_$]/.test(m)){
+    if(JSK.has(m))return`<i class=t>${m}</i>`;
+    if(/^\s*\(/.test(str.slice(off+m.length)))return`<i class=sl>${m}</i>`;
+    if(str[off-1]==='.')return`<i class=pr>${m}</i>`;
+    return m}
+  return esc(m)});
+const JSS=[['console.log','console.log(|);'],['let','let | = ;'],['const','const | = ;'],['function','function |() {\n  \n}'],['if','if (|) {\n  \n}'],['else','else {\n  |\n}'],['for','for (let i = 0; i < |; i++) {\n  \n}'],['while','while (|) {\n  \n}'],['return','return |;'],['document.querySelector','document.querySelector("|")'],['document.getElementById','document.getElementById("|")'],['document.createElement','document.createElement("|")'],['addEventListener','addEventListener("click", () => {\n  |\n});'],['typeof','typeof |'],['true','true'],['false','false'],['null','null'],['Math.random','Math.random()|'],['Math.round','Math.round(|)'],['Number','Number(|)'],['String','String(|)']];
+const JSM=['length','push(|)','pop()','map(|)','filter(|)','forEach(|)','includes(|)','join(|)','indexOf(|)','slice(|)','toUpperCase()','toLowerCase()','trim()','split(|)','replace(|)','textContent','innerHTML','value','style','classList','appendChild(|)','addEventListener("click", () => {\n  |\n})','querySelector("|")','setAttribute(|)','toFixed(|)','log(|)'];
+function acJS(b){
+  let m=b.match(/\.([A-Za-z]*)$/);
+  if(m){const w=m[1].toLowerCase();return JSM.filter(x=>x.toLowerCase().startsWith(w)&&x.toLowerCase()!==w).slice(0,10).map(x=>({l:x.replace('|','').replace(/\n\s*/g,' '),t:'p',x,f:m[1].length}))}
+  m=b.match(/(?:^|[^\w$.])([A-Za-z_$][\w$]*)$/);if(!m)return[];
+  const w=m[1].toLowerCase();
+  return JSS.filter(x=>x[0].toLowerCase().startsWith(w)&&x[0].toLowerCase()!==w).slice(0,8).map(x=>({l:x[0],t:'t',x:x[1],f:m[1].length}))}
+function pairJS(ed,e){
+  const d=e.data;if(!d||d.length!==1)return;
+  const p=ed.selectionStart,v=ed.value,nx=v[p],pv=v[p-2],cl={'(':')','[':']','{':'}'};
+  if(cl[d]){ed.setRangeText(cl[d],p,p,'start');return}
+  if(')]}'.includes(d)&&nx===d){ed.setRangeText('',p,p+1,'end');return}
+  if('"\'`'.includes(d)){
+    if(nx===d){ed.setRangeText('',p,p+1,'end');return}
+    if(!/[\w]/.test(pv||''))ed.setRangeText(d,p,p,'start')}}
+function runner(code,page,tests){
+  const g=code.replace(/<\/script/gi,'<\\/script').replace(/\b(while|for)\s*\(([^)]*)\)\s*\{/g,'$&__g();');
+  return `<!doctype html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>body{font-family:system-ui,sans-serif;margin:14px;line-height:1.7}</style></head><body>${page||''}<script>
+var __L=[],__E=null,__T=[],__c=0;
+function __g(){if(++__c>200000)throw new Error('حلقة لا نهائية')}
+function __s(v){try{if(typeof v==='string')return v;if(v===undefined||v===null||typeof v==='number'||typeof v==='boolean'||typeof v==='function')return String(v);return JSON.stringify(v)}catch(e){return String(v)}}
+console.log=console.info=console.warn=function(){__L.push([].map.call(arguments,__s).join(' '))};
+console.error=function(){__L.push('!'+[].map.call(arguments,__s).join(' '))};
+window.onerror=function(m){__E=String(m)};
+function __t(v){__T.push(v)}
+<\/script><script>${g}
+<\/script><script>${tests||''}
+<\/script><script>
+setTimeout(function(){parent.postMessage({wn:1,logs:__L,err:__E,t:__T,html:document.body.innerHTML},'*')},60);
+<\/script></body></html>`}
+function editor(host,code,onload,fname,o){
+  o=o||{};const JS=!!o.js;
+  host.innerHTML=`<div class="seg"><button class="on" data-s="c">${ic('code')} الكود</button>${JS&&!o.page?'':`<button data-s="r">${ic('eye')} ${JS?'الصفحة':'النتيجة'}</button>`}${JS?`<button data-s="o">${ic('terminal')} الكونسول</button>`:''}</div>
+  <div class="ide" id="pc"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="fn">${fname||'index.html'}</span></div><div class="code"><div class="gut" id="gut"></div><div class="wrap"><pre class="hl" id="hl"></pre><textarea class="ed" id="ed" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea></div></div></div>
+  <div class="pv off" id="pr"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="addr">preview</span></div><iframe class="frame" id="fr" sandbox="${JS?'allow-scripts':'allow-same-origin'}"></iframe></div>
+  ${JS?'<div class="pv hide" id="pcn"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="addr">console</span></div><pre class="con" id="con"></pre></div>':''}
+  <div id="kb"><div class="sug" id="sug"></div><div class="keys" id="keys"></div></div>`;
+  const ed=$('#ed'),fr=$('#fr'),h=$('#hl'),g=$('#gut'),con=$('#con');ed.value=code;
+  const keys=JS?['(',')','{','}','[',']',';','"',"'",'`','=','>','.',',','!','+','-','*','/','&','|','?',':','$']:['<','>','/','"','=','{','}',';',':','#','.','(',')'];
+  const ka=k=>esc(k).replace(/"/g,'&quot;');
+  $('#keys').innerHTML='<button data-k="  ">Tab</button>'+keys.map(k=>`<button data-k="${ka(k)}">${esc(k)}</button>`).join('');
+  const paint=()=>{h.innerHTML=(JS?hJS(ed.value):hl(ed.value))+'\n';const n=ed.value.split('\n').length;g.textContent=Array.from({length:n},(_,i)=>i+1).join('\n')};
+  const sync=()=>{h.scrollTop=ed.scrollTop;h.scrollLeft=ed.scrollLeft;g.scrollTop=ed.scrollTop};
+  $('#keys').onclick=e=>{const b=e.target.closest('button');if(!b)return;const k=b.dataset.k;ed.setRangeText(k,ed.selectionStart,ed.selectionEnd,'end');if(JS)pairJS(ed,{data:k});else if(k==='>')autoClose(ed);ed.focus();ed.dispatchEvent(new Event('input'))};
+  ed.onkeydown=e=>{
+    if(e.key==='Tab'){e.preventDefault();ed.setRangeText('  ',ed.selectionStart,ed.selectionEnd,'end');ed.dispatchEvent(new Event('input'))}
+    if(e.key==='Enter'){
+      const a=ed.selectionStart,v=ed.value,ls=v.lastIndexOf('\n',a-1)+1,before=v.slice(ls,a),ind=(before.match(/^\s*/)||[''])[0];e.preventDefault();
+      if(JS&&/[{(\[]\s*$/.test(before)){
+        if(/^[})\]]/.test(v.slice(ed.selectionEnd))){ed.setRangeText('\n'+ind+'  \n'+ind,a,ed.selectionEnd,'end');const c=a+1+ind.length+2;ed.setSelectionRange(c,c)}
+        else ed.setRangeText('\n'+ind+'  ',a,ed.selectionEnd,'end')}
+      else ed.setRangeText('\n'+ind,a,ed.selectionEnd,'end');
+      ed.dispatchEvent(new Event('input'))}
+  };
+  const show=(v,nr)=>{host.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.s===v));$('#pc').classList.toggle('hide',v!=='c');$('#kb').classList.toggle('hide',v!=='c');$('#pr').classList.toggle('off',v!=='r');const cn=$('#pcn');if(cn)cn.classList.toggle('hide',v!=='o');if(v!=='c'&&!nr)run()};
+  host.querySelector('.seg').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.s)};
+  let w;const run=()=>{fr.srcdoc=JS?runner(ed.value,o.page,o.tests):wrap(ed.value)};
+  if(JS){
+    con.innerHTML='<div class="mu">اضغط «تشغيل» لترى النتيجة هنا</div>';
+    if(window._wn)removeEventListener('message',window._wn);
+    window._wn=e=>{const d=e.data;if(e.source!==fr.contentWindow||!d||!d.wn)return;
+      const L=d.logs.map(l=>l[0]==='!'?`<div class="er">${esc(l.slice(1))}</div>`:`<div>${esc(l)}</div>`);
+      if(d.err)L.push(`<div class="er">خطأ: ${esc(d.err)}</div>`);
+      con.innerHTML=L.join('')||'<div class="mu">لا توجد مخرجات. استعمل console.log لطباعة شيء</div>';
+      o.onres&&o.onres({logs:d.logs,err:d.err,t:d.t,doc:new DOMParser().parseFromString(d.html||'','text/html')})};
+    addEventListener('message',window._wn)}
+  ed.addEventListener('input',e=>{if(JS)pairJS(ed,e);else if(e.data==='>')autoClose(ed);paint();sync();if(!JS){clearTimeout(w);w=setTimeout(run,350)}suggest()});
+  ed.addEventListener('scroll',sync);
+  const sg=$('#sug');let cur=[];
+  function suggest(){cur=(JS?acJS:ac)(ed.value.slice(0,ed.selectionStart),ed.value.slice(ed.selectionStart));sg.innerHTML=cur.length?cur.map((x,i)=>`<button data-i="${i}" data-t="${x.t}">${esc(x.l)}</button>`).join(''):'<span class="h">الاقتراحات الذكية تظهر هنا أثناء الكتابة</span>'}
+  sg.addEventListener('pointerdown',e=>{const b=e.target.closest('button');if(!b)return;e.preventDefault();const x=cur[b.dataset.i],p=ed.selectionStart,t=x.x.replace('|',''),k=x.x.indexOf('|'),from=p-x.f;ed.setRangeText(t,from,p+(x.g||0),'end');const c=from+(k<0?t.length:k);ed.setSelectionRange(c,c);ed.dispatchEvent(new Event('input'))});
+  ed.addEventListener('click',suggest);ed.addEventListener('keyup',suggest);
+  fr.onload=()=>{if(!JS&&onload)onload(fr.contentDocument)};
+  paint();if(!JS)run();suggest();return{ed,fr,run,paint,show,main:o.page?'r':'o'};
+}
+
+/* ---------- Views ---------- */
+function home(){
+  const n=nextL(),p=Math.round(doneCount()/LESSONS.length*100);
+  let h=`<div class="hero"><div class="logo">${ic('waves')}<span>ويب <b>نايل</b></span></div><p>تعلّم HTML و CSS خطوة بخطوة، واكتب الكود بنفسك</p><div class="stats"><div class="stat"><span>${ic('book')} الدروس</span><b>${doneCount()}/${LESSONS.length}</b></div><div class="stat z"><span>${ic('zap')} النقاط</span><b>${S.xp}</b></div><div class="stat f"><span>${ic('flame')} متتالية</span><b>${S.streak}</b></div></div><div class="bar"><i style="width:${p}%"></i></div></div>${n?`<div class="page" style="margin-top:18px"><button class="btn s" data-l="${n.id}">${ic('play')} تابع: ${n.t}</button></div>`:''}`;
+  ['html','css','js','pro'].forEach(k=>{
+    h+=`<div class="h2">${TRACKS[k]}</div><div class="path">`;
+    LESSONS.filter(l=>l.k===k).forEach(l=>{h+=`<div class="node ${S.done[l.id]?'done':''} ${n&&n.id===l.id?'next':''}" data-l="${l.id}"><div class="dot">${ic(S.done[l.id]?'check':l.ic)}</div><div class="t">${l.t}<small>${S.done[l.id]?'أنجزته':'درس تفاعلي'}</small></div></div>`});
+    h+='</div>';
+  });
+  return h;
+}
+function body(b,l){
+  if(typeof b==='string')return `<p>${fmt(b)}</p>`;
+  if(b.c)return `<pre class="ex">${(l&&l.k==='js'?hJS:hl)(b.c)}</pre>`;
+  return `<div class="tip">${ic('bulb')}<div>${fmt(b.tip)}</div></div>`;
+}
+function lesson(){
+  const l=LESSONS.find(x=>x.id===V.id),i=LESSONS.indexOf(l);
+  return `<div class="bar2"><button class="ib" data-back aria-label="رجوع">${ic('back')}</button><h1>${l.t}<small>الدرس ${i+1} من ${LESSONS.length}</small></h1></div><div class="page"><div class="card">${l.body.map(b=>body(b,l)).join('')}</div><div class="card task"><h3>${ic('target')} مهمتك</h3><p>${fmt(l.task)}</p><ul class="chk" id="chk">${l.checks.map(c=>`<li>${c[0]}</li>`).join('')}</ul></div><div id="edh"></div><div class="row"><button class="btn" id="rs">${ic('reset')} إعادة</button>${l.k==='js'?`<button class="btn" id="rn">${ic('play')} تشغيل</button>`:''}<button class="btn p" id="ck">${ic('check')} تحقق</button></div><div class="row hide" id="nx"><button class="btn s" id="nb">${LESSONS[i+1]?'الدرس التالي '+ic('next'):'العودة للدروس'}</button></div></div>`;
+}
+function bindLesson(){
+  const l=LESSONS.find(x=>x.id===V.id),i=LESSONS.indexOf(l),JS=l.k==='js';let want=false;
+  const E=editor($('#edh'),S['c_'+l.id]||l.start,JS?null:d=>{if(!want)return;want=false;evalC(d)},JS?'script.js':'index.html',JS?{js:1,page:l.page,tests:l.tests,onres:r=>{if(!want)return;want=false;r.code=E.ed.value;evalC(r)}}:null);
+  E.ed.addEventListener('input',()=>{S['c_'+l.id]=E.ed.value;save()});
+  $('#rs').onclick=()=>{E.ed.value=l.start;E.paint();if(!JS)E.run();S['c_'+l.id]=l.start;save();toast('رجع الكود للبداية')};
+  if(JS)$('#rn').onclick=()=>{E.show(E.main,1);E.run()};
+  $('#ck').onclick=()=>{
+    if(JS){want=true;E.show(E.main,1);E.run();return}
+    const d=E.fr.contentDocument;if(E.fr.srcdoc===wrap(E.ed.value)&&d&&d.readyState==='complete'&&d.body)evalC(d);else{want=true;E.run()}};
+  $('#nb').onclick=()=>LESSONS[i+1]?go('lesson',LESSONS[i+1].id):go('home');
+  if(S.done[l.id])$('#nx').classList.remove('hide');
+  function evalC(d){
+    if(JS&&d.err){[...$('#chk').children].forEach(li=>li.className='no');toast('في كودك خطأ، راجع النتيجة','bad');return}
+    const r=l.checks.map(c=>{try{return!!c[1](d)}catch(e){return false}});
+    [...$('#chk').children].forEach((li,j)=>li.className=r[j]?'ok':'no');
+    if(r.every(Boolean)){
+      if(!S.done[l.id]){S.done[l.id]=1;S.xp+=20;const t=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();S.streak=S.last===t?S.streak:(S.last===y?S.streak+1:1);S.last=t;save()}
+      toast('أحسنت! أنجزت الدرس +20 نقطة','good');$('#nx').classList.remove('hide');$('#nx').scrollIntoView({behavior:'smooth',block:'center'});
+    }else toast('قريب! راجع البنود الحمراء','bad');
+  }
+}
+const SNIP={'هيكل':['code','<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n</head>\n<body>\n  \n</body>\n</html>\n'],'عنوان':['heading','<h1>عنوان</h1>\n'],'فقرة':['type','<p>نص الفقرة</p>\n'],'زر':['cursor','<button>اضغط</button>\n'],'بطاقة':['box','<style>\n  .card {\n    padding: 16px;\n    border-radius: 16px;\n    background: #e8f7f5;\n  }\n</style>\n<div class="card">بطاقة</div>\n']};
+function play(){return `<div class="bar2"><h1>تجربة حرة<small>اكتب أي HTML أو CSS وشاهد النتيجة</small></h1></div><div class="page"><div class="chips">${Object.keys(SNIP).map(k=>`<button data-sn="${k}">${ic('plus')} ${k}</button>`).join('')}</div><div id="edh"></div></div>`}
+function bindPlay(){
+  let saved='';try{saved=localStorage.getItem('webnile_play')||''}catch(e){}
+  const E=editor($('#edh'),saved||'<h1>أهلاً بك</h1>\n<p>جرّب أي كود HTML أو CSS هنا.</p>');
+  E.ed.addEventListener('input',()=>{try{localStorage.setItem('webnile_play',E.ed.value)}catch(e){}});
+  document.querySelector('.chips').onclick=e=>{const b=e.target.closest('[data-sn]');if(!b)return;E.ed.value=b.dataset.sn==='هيكل'?SNIP['هيكل'][1]:E.ed.value+(E.ed.value.endsWith('\n')?'':'\n')+SNIP[b.dataset.sn][1];E.ed.dispatchEvent(new Event('input'));toast('أُضيف '+b.dataset.sn)};
+}
+let armed=false;
+function me(){
+  const bar=k=>{const a=LESSONS.filter(l=>l.k===k),d=a.filter(l=>S.done[l.id]).length;return `<div class="tr"><div><span>${TRACKS[k].split(' — ')[0]}</span><span>${d}/${a.length}</span></div><div class="b"><i style="width:${d/a.length*100}%"></i></div></div>`};
+  return `<div class="bar2"><h1>تقدمي</h1></div><div class="page"><div class="card"><p class="big">${S.xp} <small style="font-size:15px;color:var(--mute)">نقطة</small></p><p style="color:var(--mute)">${S.streak>0?ic('flame')+' سلسلتك '+S.streak+' يوم متتالٍ':'ابدأ درساً اليوم لتبدأ سلسلتك'}</p></div><div class="card">${bar('html')}${bar('css')}${bar('js')}${bar('pro')}</div>${nextL()?`<button class="btn s" style="width:100%;margin-bottom:12px" data-l="${nextL().id}">أكمل: ${nextL().t}</button>`:`<div class="card"><p>${ic('trophy')} أنهيت كل الدروس! جرّب مشروعك في التجربة الحرة.</p></div>`}<button class="btn" style="width:100%" id="rst">مسح التقدم</button></div>`;
+}
+const NAV={home:['waves','الدروس'],play:['code','تجربة حرة'],me:['trophy','تقدمي']};
+function render(){
+  $('#app').innerHTML=V.n==='home'?home():V.n==='lesson'?lesson():V.n==='play'?play():me();
+  document.querySelectorAll('#nav button').forEach(b=>{const n=NAV[b.dataset.v];b.innerHTML=ic(n[0])+n[1];b.classList.toggle('on',b.dataset.v===(V.n==='lesson'?'home':V.n))});
+  if(V.n==='lesson')bindLesson();if(V.n==='play')bindPlay();
+  const r=$('#rst');if(r)r.onclick=()=>{if(!armed){armed=true;r.textContent='اضغط مرة أخرى للتأكيد';setTimeout(()=>{armed=false;r.textContent='مسح التقدم'},3000);return}armed=false;S={done:{},xp:0,streak:0,last:''};save();toast('تم مسح التقدم');render()};
+}
+document.addEventListener('click',e=>{
+  const l=e.target.closest('[data-l]');if(l)return go('lesson',l.dataset.l);
+  if(e.target.closest('[data-back]'))return go('home');
+});
+$('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
+try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.addListener('backButton',()=>{V.n!=='home'?go('home'):A.exitApp()})}catch(e){}
+render();
+</script>
+</body>
+</html>

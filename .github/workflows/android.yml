@@ -1,0 +1,177 @@
+name: Android
+
+# push إلى main  -> يبني APK تجريبي (Debug) تنزّله وتثبّته على هاتفك
+# وسم v*         -> يبني APK و AAB موقّعين ويرفعهما إلى GitHub Release
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: android-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 40
+    env:
+      IS_RELEASE: ${{ startsWith(github.ref, 'refs/tags/v') }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Setup Java 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: tools platform-tools platforms;android-34 build-tools;34.0.0
+
+      - name: Setup Gradle (with cache)
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Bundle Cairo font (works offline)
+        continue-on-error: true
+        run: |
+          T=$(mktemp -d)
+          (cd "$T" && npm pack @fontsource/cairo@5 --silent >/dev/null && tar xzf ./*.tgz)
+          mkdir -p src/fonts
+          cp "$T"/package/files/cairo-{arabic,latin}-{400,600,700,900}-normal.woff2 src/fonts/
+          node <<'JS'
+          const fs = require('fs');
+          const R = {
+            arabic: 'U+0600-06FF,U+0750-077F,U+0870-088E,U+0890-0891,U+0898-08E1,U+08E3-08FF,U+200C-200E,U+2010-2011,U+204F,U+2E41,U+FB50-FDFF,U+FE70-FE74,U+FE76-FEFC',
+            latin: 'U+0000-00FF,U+0131,U+0152-0153,U+02BB-02BC,U+02C6,U+02DA,U+02DC,U+0304,U+0308,U+0329,U+2000-206F,U+20AC,U+2122,U+2191,U+2193,U+2212,U+2215,U+FEFF,U+FFFD'
+          };
+          let css = '', n = 0;
+          for (const sub of ['arabic', 'latin']) for (const w of [400, 600, 700, 900]) {
+            const f = 'fonts/cairo-' + sub + '-' + w + '-normal.woff2';
+            if (!fs.existsSync('src/' + f)) continue;
+            css += "@font-face{font-family:'Cairo';font-style:normal;font-weight:" + w + ";font-display:swap;src:url(" + f + ") format('woff2');unicode-range:" + R[sub] + "}\n";
+            n++;
+          }
+          if (!n) throw new Error('no font files found');
+          fs.writeFileSync('src/fonts.css', css);
+          console.log(n + ' font faces');
+          JS
+          sed -i 's#<link href="https://fonts.googleapis.com[^>]*>#<link rel="stylesheet" href="fonts.css">#' src/index.html
+
+      - name: Create Android project
+        run: |
+          if [ ! -d android ]; then
+            npx cap add android
+          fi
+
+      - name: App icon and splash screen
+        run: >
+          npx --yes @capacitor/assets@3 generate --android
+          --iconBackgroundColor '#0B1F2A'
+          --splashBackgroundColor '#0B1F2A'
+          --splashBackgroundColorDark '#0B1F2A'
+
+      - name: Sync web assets
+        run: npx cap sync android
+
+      - name: Set version
+        run: |
+          NAME=$(node -p "require('./package.json').version")
+          sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" android/app/build.gradle
+          sed -i "s/versionName \"[^\"]*\"/versionName \"$NAME\"/" android/app/build.gradle
+          grep -nE "versionCode|versionName" android/app/build.gradle
+
+      # ---------- Debug (كل push على main) ----------
+      - name: Build debug APK
+        if: env.IS_RELEASE != 'true'
+        working-directory: android
+        run: ./gradlew assembleDebug --no-daemon --stacktrace
+
+      - name: Upload debug APK
+        if: env.IS_RELEASE != 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: webnile-debug-apk
+          path: android/app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+
+      # ---------- Release (وسوم v*) ----------
+      - name: Check signing secrets
+        if: env.IS_RELEASE == 'true'
+        env:
+          KS: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KS" ]; then
+            echo "::error::Missing secret ANDROID_KEYSTORE_BASE64. Run in Termux: bash webnile-setup.sh keystore"
+            exit 1
+          fi
+
+      - name: Build release APK and AAB
+        if: env.IS_RELEASE == 'true'
+        working-directory: android
+        run: ./gradlew assembleRelease bundleRelease --no-daemon --stacktrace
+
+      - name: Sign APK
+        id: sign_apk
+        if: env.IS_RELEASE == 'true'
+        uses: r0adkll/sign-android-release@v1
+        env:
+          BUILD_TOOLS_VERSION: '34.0.0'
+        with:
+          releaseDirectory: android/app/build/outputs/apk/release
+          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Sign AAB
+        id: sign_aab
+        if: env.IS_RELEASE == 'true'
+        uses: r0adkll/sign-android-release@v1
+        env:
+          BUILD_TOOLS_VERSION: '34.0.0'
+        with:
+          releaseDirectory: android/app/build/outputs/bundle/release
+          signingKeyBase64: ${{ secrets.ANDROID_KEYSTORE_BASE64 }}
+          alias: ${{ secrets.KEY_ALIAS }}
+          keyStorePassword: ${{ secrets.KEYSTORE_PASSWORD }}
+          keyPassword: ${{ secrets.KEY_PASSWORD }}
+
+      - name: Collect release files
+        if: env.IS_RELEASE == 'true'
+        run: |
+          mkdir -p dist
+          cp "${{ steps.sign_apk.outputs.signedReleaseFile }}" "dist/webnile-${{ github.ref_name }}.apk"
+          cp "${{ steps.sign_aab.outputs.signedReleaseFile }}" "dist/webnile-${{ github.ref_name }}.aab"
+          ls -lh dist
+
+      - name: Upload release artifacts
+        if: env.IS_RELEASE == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: webnile-release
+          path: dist/*
+          if-no-files-found: error
+
+      - name: Publish GitHub Release
+        if: env.IS_RELEASE == 'true'
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/*
+          generate_release_notes: true

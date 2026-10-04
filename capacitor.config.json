@@ -1,0 +1,15 @@
+{
+  "appId": "com.webnile.app",
+  "appName": "ويب نايل",
+  "webDir": "src",
+  "server": { "androidScheme": "https" },
+  "android": { "backgroundColor": "#0B1F2A" },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1200,
+      "backgroundColor": "#0B1F2A",
+      "showSpinner": false
+    },
+    "StatusBar": { "style": "DARK", "backgroundColor": "#0B1F2A" }
+  }
+}
