@@ -107,15 +107,16 @@ jobs:
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" android/app/build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"$NAME\"/" android/app/build.gradle
           # رفع targetSdk و compileSdk إلى 36 في جميع ملفات gradle
-          find android -name "*.gradle" | xargs grep -l -E "compileSdk|targetSdk|compileSdkVersion|targetSdkVersion" | while read f; do
-            sed -i -E 's/(compileSdkVersion\s*)[0-9]+/\136/' "$f"
-            sed -i -E 's/(compileSdk\s*=\s*)[0-9]+/\136/' "$f"
-            sed -i -E 's/(targetSdkVersion\s*)[0-9]+/\136/' "$f"
-            sed -i -E 's/(targetSdk\s*=\s*)[0-9]+/\136/' "$f"
-            sed -i -E 's/(ext\.compileSdkVersion\s*=\s*)[0-9]+/\136/' "$f"
-            sed -i -E 's/(ext\.targetSdkVersion\s*=\s*)[0-9]+/\136/' "$f"
-          done
-          grep -rn --include="*.gradle" -E "compileSdk|targetSdk" android/ | grep -v "//\|#"
+          python3 -c "
+import re, os
+for root,_,files in os.walk('android'):
+  for f in files:
+    if not f.endswith('.gradle'): continue
+    p=os.path.join(root,f); t=open(p).read()
+    n=re.sub(r'((?:compileSdkVersion|targetSdkVersion|compileSdk|targetSdk)\s*=?\s*)\d+', lambda m:m.group(1)+'36', t)
+    if n!=t: open(p,'w').write(n); print('patched:',p)
+"
+          grep -rn --include="*.gradle" -E "compileSdk|targetSdk" android/ | grep -v "#"
 
       # ---------- Debug (كل push على main) ----------
       - name: Build debug APK
