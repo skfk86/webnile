@@ -106,17 +106,18 @@ jobs:
           NAME=$(node -p "require('./package.json').version")
           sed -i "s/versionCode [0-9]*/versionCode ${{ github.run_number }}/" android/app/build.gradle
           sed -i "s/versionName \"[^\"]*\"/versionName \"$NAME\"/" android/app/build.gradle
-          # رفع targetSdk و compileSdk إلى 36 في جميع ملفات gradle
-          python3 -c "
-import re, os
-for root,_,files in os.walk('android'):
-  for f in files:
-    if not f.endswith('.gradle'): continue
-    p=os.path.join(root,f); t=open(p).read()
-    n=re.sub(r'((?:compileSdkVersion|targetSdkVersion|compileSdk|targetSdk)\s*=?\s*)\d+', lambda m:m.group(1)+'36', t)
-    if n!=t: open(p,'w').write(n); print('patched:',p)
-"
-          grep -rn --include="*.gradle" -E "compileSdk|targetSdk" android/ | grep -v "#"
+          # رفع targetSdk و compileSdk إلى 36 في variables.gradle مباشرة
+          SDK_FILE="android/variables.gradle"
+          if [ -f "$SDK_FILE" ]; then
+            sed -i 's/compileSdkVersion *= *[0-9]*/compileSdkVersion = 36/' "$SDK_FILE"
+            sed -i 's/targetSdkVersion *= *[0-9]*/targetSdkVersion = 36/' "$SDK_FILE"
+            echo "=== variables.gradle after patch ===" && cat "$SDK_FILE"
+          fi
+          # patch app/build.gradle أيضاً على كل الأنماط الممكنة
+          sed -i 's/compileSdkVersion [0-9]*/compileSdkVersion 36/' android/app/build.gradle
+          sed -i 's/compileSdk = [0-9]*/compileSdk = 36/' android/app/build.gradle
+          sed -i 's/targetSdkVersion [0-9]*/targetSdkVersion 36/' android/app/build.gradle
+          sed -i 's/targetSdk = [0-9]*/targetSdk = 36/' android/app/build.gradle
 
       # ---------- Debug (كل push على main) ----------
       - name: Build debug APK
