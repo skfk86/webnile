@@ -752,10 +752,10 @@ async function amInit(){
     await _am.initialize({initializeForTesting:IS_TEST});
 
     // بانر في الشاشة الرئيسية فقط (يُظهر/يُخفى مع التنقل)
-    _am.addListener('interstitialAdLoaded',  ()=>{_interLoaded=true});
-    _am.addListener('interstitialAdDismissed',()=>{_interLoaded=false;_amLoadInter()});
-    _am.addListener('rewardVideoAdLoaded',   ()=>{_rewardLoaded=true});
-    _am.addListener('rewardVideoAdDismissed',()=>{_rewardLoaded=false});
+    _am.addListener('interstitialAdDidLoad',                    ()=>{_interLoaded=true});
+    _am.addListener('interstitialAdDidDismissFullScreenContent',()=>{_interLoaded=false;_amLoadInter()});
+    _am.addListener('rewardedVideoAdLoaded',                    ()=>{_rewardLoaded=true});
+    _am.addListener('rewardedVideoAdDismissed',                 ()=>{_rewardLoaded=false});
     _amLoadInter();
     _amLoadReward();
   }catch(e){}
@@ -805,7 +805,7 @@ async function amBannerHide(){
 async function amShowReward(onGranted){
   if(!_am||!_rewardLoaded){onGranted();return} // أعطِه المكافأة إذا لم يتوفر إعلان
   try{
-    _am.addListener('rewardVideoAdRewarded',()=>{_rewardLoaded=false;_amLoadReward();onGranted()});
+    _am.addListener('rewardedVideoAdRewardedUser',()=>{_rewardLoaded=false;_amLoadReward();onGranted()});
     await _am.showRewardVideoAd();
   }catch(e){onGranted()}
 }
