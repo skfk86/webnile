@@ -733,13 +733,21 @@ $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
 try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.addListener('backButton',()=>{V.n!=='home'?go('home'):A.exitApp()})}catch(e){}
 
 // ── AdMob — استراتيجية ذكية ────────────────────────────────────────
-const AD={
+// ⚠️ للاختبار: غيّر IS_TEST إلى true لترى إعلانات تجريبية فوراً
+// بعد التأكد من عمل الإعلانات أعده إلى false قبل رفع النسخة للمتجر
+const IS_TEST=true;
+
+const AD=IS_TEST?{
+  // معرّفات اختبار رسمية من Google
+  banner:  'ca-app-pub-3940256099942544/6300978111',
+  inter:   'ca-app-pub-3940256099942544/1033173712',
+  reward:  'ca-app-pub-3940256099942544/5224354917',
+}:{
+  // معرّفات الإنتاج الحقيقية
   banner:  'ca-app-pub-7608701150166997/2300347316',
   inter:   'ca-app-pub-7608701150166997/1719650975',
   reward:  'ca-app-pub-7608701150166997/4734938967',
-  // إنتاج: استبدل بمعرّفاتك الحقيقية
 };
-const IS_TEST=false;
 
 let _am=null,_interLoaded=false,_rewardLoaded=false;
 let _lessonsAfterAd=0; // عدّاد الدروس منذ آخر إعلان
