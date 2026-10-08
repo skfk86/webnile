@@ -745,17 +745,40 @@ let _am=null,_interLoaded=false,_rewardLoaded=false;
 let _lessonsAfterAd=0; // عدّاد الدروس منذ آخر إعلان
 const INTER_EVERY=3;   // إعلان تخللي كل 3 دروس
 
+let _bannerVisible=false; // هل البانر محمّل وظاهر فعلاً
+
 async function amInit(){
   try{
     if(!window.Capacitor||!Capacitor.Plugins.AdMob)return;
     _am=Capacitor.Plugins.AdMob;
     await _am.initialize({initializeForTesting:IS_TEST});
 
-    // بانر في الشاشة الرئيسية فقط (يُظهر/يُخفى مع التنقل)
-    _am.addListener('interstitialAdDidLoad',                    ()=>{_interLoaded=true});
-    _am.addListener('interstitialAdDidDismissFullScreenContent',()=>{_interLoaded=false;_amLoadInter()});
-    _am.addListener('rewardedVideoAdLoaded',                    ()=>{_rewardLoaded=true});
-    _am.addListener('rewardedVideoAdDismissed',                 ()=>{_rewardLoaded=false});
+    // ── البانر: طبّق الـ padding فقط بعد تحميل الإعلان ──
+    _am.addListener('bannerAdLoaded',()=>{
+      if(!_bannerVisible)return; // طُلب الإظهار؟
+      const nav=document.getElementById('nav');
+      if(nav) nav.style.bottom=BANNER_H+'px';
+      document.documentElement.style.setProperty('--bh',BANNER_H+'px');
+      document.body.style.paddingBottom=`calc(${66+BANNER_H}px + var(--sb))`;
+    });
+    _am.addListener('bannerAdFailedToLoad',()=>{
+      // فشل التحميل — لا تُظهر مساحة فارغة
+      const nav=document.getElementById('nav');
+      if(nav) nav.style.bottom='';
+      document.documentElement.style.setProperty('--bh','0px');
+      document.body.style.paddingBottom='calc(76px + var(--sb))';
+    });
+
+    // ── البيني (أسماء رسمية من BannerAdPluginEvents / InterstitialAdPluginEvents) ──
+    _am.addListener('interstitialAdLoaded',    ()=>{_interLoaded=true});
+    _am.addListener('interstitialAdDismissed', ()=>{_interLoaded=false;_amLoadInter()});
+    _am.addListener('interstitialAdFailedToLoad',()=>{_interLoaded=false;setTimeout(_amLoadInter,30000)});
+
+    // ── المكافأة (أسماء رسمية من RewardAdPluginEvents — كلها تبدأ بـ on) ──
+    _am.addListener('onRewardedVideoAdLoaded',       ()=>{_rewardLoaded=true});
+    _am.addListener('onRewardedVideoAdDismissed',    ()=>{_rewardLoaded=false;_amLoadReward()});
+    _am.addListener('onRewardedVideoAdFailedToLoad', ()=>{_rewardLoaded=false;setTimeout(_amLoadReward,30000)});
+
     _amLoadInter();
     _amLoadReward();
   }catch(e){}
@@ -780,32 +803,36 @@ async function amOnLessonDone(){
 const BANNER_H=60; // ارتفاع البانر التقريبي بالـ px
 async function amBannerShow(){
   if(!_am)return;
+  _bannerVisible=true;
+  // لا تُطبّق padding الآن — ستُطبَّق في حدث bannerAdLoaded
   try{
     await _am.showBanner({adId:AD.banner,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:0,isTesting:IS_TEST});
-    // ارفع شريط التنقل والتوست فوق البانر
-    const nav=document.getElementById('nav');
-    if(nav) nav.style.bottom=BANNER_H+'px';
-    document.documentElement.style.setProperty('--bh', BANNER_H+'px');
-    // الجسم يأخذ nav + banner + safe area
-    document.body.style.paddingBottom=`calc(${66+BANNER_H}px + var(--sb))`;
-  }catch(e){}
+  }catch(e){_bannerVisible=false;}
 }
 async function amBannerHide(){
   if(!_am)return;
+  _bannerVisible=false;
   try{
     await _am.hideBanner();
-    const nav=document.getElementById('nav');
-    if(nav) nav.style.bottom='';
-    document.documentElement.style.setProperty('--bh','0px');
-    document.body.style.paddingBottom='calc(76px + var(--sb))';
   }catch(e){}
+  // أعد الـ padding بغض النظر عن نجاح hideBanner
+  const nav=document.getElementById('nav');
+  if(nav) nav.style.bottom='';
+  document.documentElement.style.setProperty('--bh','0px');
+  document.body.style.paddingBottom='calc(76px + var(--sb))';
 }
 
 // مكافأة: يُستدعى عند ضغط زر "شاهد إعلاناً لفتح الدرس"
 async function amShowReward(onGranted){
   if(!_am||!_rewardLoaded){onGranted();return} // أعطِه المكافأة إذا لم يتوفر إعلان
   try{
-    _am.addListener('rewardedVideoAdRewardedUser',()=>{_rewardLoaded=false;_amLoadReward();onGranted()});
+    // أضف المستمع مرة واحدة قبل الإظهار
+    const h=await _am.addListener('onRewardedVideoAdReward',()=>{
+      h.remove();
+      _rewardLoaded=false;
+      _amLoadReward();
+      onGranted();
+    });
     await _am.showRewardVideoAd();
   }catch(e){onGranted()}
 }
