@@ -111,6 +111,7 @@ jobs:
           if [ -f "$SDK_FILE" ]; then
             sed -i -E 's/(compileSdkVersion\s*=\s*)[0-9]+/\136/' "$SDK_FILE"
             sed -i -E 's/(targetSdkVersion\s*=\s*)[0-9]+/\136/' "$SDK_FILE"
+            sed -i -E 's/(minSdkVersion\s*=\s*)[0-9]+/\124/' "$SDK_FILE"
             echo "=== variables.gradle ===" && cat "$SDK_FILE"
           else
             echo "variables.gradle not found, patching app/build.gradle directly"
