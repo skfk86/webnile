@@ -124,6 +124,7 @@ nav button.on{color:var(--nile)}
 <symbol id="i-code" viewBox="0 0 24 24"><path d="m16 18 6-6-6-6"/><path d="m8 6-6 6 6 6"/></symbol>
 <symbol id="i-trophy" viewBox="0 0 24 24"><path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6"/><path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18"/><path d="M4 22h16"/><path d="M10 14.66V17c0 .55-.47.98-.97 1.21C7.85 18.75 7 20.24 7 22"/><path d="M14 14.66V17c0 .55.47.98.97 1.21C16.15 18.75 17 20.24 17 22"/><path d="M18 2H6v7a6 6 0 0 0 12 0V2Z"/></symbol>
 <symbol id="i-check" viewBox="0 0 24 24"><path d="M20 6 9 17l-5-5"/></symbol>
+<symbol id="i-lock" viewBox="0 0 24 24"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></symbol>
 <symbol id="i-back" viewBox="0 0 24 24"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></symbol>
 <symbol id="i-next" viewBox="0 0 24 24"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></symbol>
 <symbol id="i-flame" viewBox="0 0 24 24"><path d="M8.5 14.5A2.5 2.5 0 0 0 11 12c0-1.38-.5-2-1-3-1.07-2.14-.22-4.05 2-6 .5 2.5 2 4.9 4 6.5 2 1.6 3 3.5 3 5.5a7 7 0 1 1-14 0c0-1.15.43-2.29 1-3a2.5 2.5 0 0 0 2.5 2.5z"/></symbol>
@@ -533,7 +534,7 @@ LESSONS.sort((a,b)=>ORDER2.indexOf(a.id)-ORDER2.indexOf(b.id));
 
 /* ---------- State ---------- */
 let S={done:{},unlocked:{},xp:0,streak:0,last:''};
-try{Object.assign(S,JSON.parse(localStorage.getItem('webnile')||'{}'))}catch(e){}
+try{const _s=JSON.parse(localStorage.getItem('webnile')||'{}');Object.assign(S,_s);if(!S.unlocked)S.unlocked={};if(!S.done)S.done={}}catch(e){}
 const save=()=>{try{localStorage.setItem('webnile',JSON.stringify(S))}catch(e){}};
 let V={n:'home'};
 let tt;function toast(m,c=''){const t=$('#toast');t.textContent=m;t.className='toast show '+c;clearTimeout(tt);tt=setTimeout(()=>t.className='toast',2600)}
@@ -771,7 +772,7 @@ function render(){
   $('#app').innerHTML=V.n==='home'?home():V.n==='lesson'?lesson():V.n==='play'?play():me();
   document.querySelectorAll('#nav button').forEach(b=>{const n=NAV[b.dataset.v];b.innerHTML=ic(n[0])+n[1];b.classList.toggle('on',b.dataset.v===(V.n==='lesson'?'home':V.n))});
   if(V.n==='lesson')bindLesson();if(V.n==='play')bindPlay();
-  const r=$('#rst');if(r)r.onclick=()=>{if(!armed){armed=true;r.textContent='اضغط مرة أخرى للتأكيد';setTimeout(()=>{armed=false;r.textContent='مسح التقدم'},3000);return}armed=false;S={done:{},xp:0,streak:0,last:''};save();toast('تم مسح التقدم');render()};
+  const r=$('#rst');if(r)r.onclick=()=>{if(!armed){armed=true;r.textContent='اضغط مرة أخرى للتأكيد';setTimeout(()=>{armed=false;r.textContent='مسح التقدم'},3000);return}armed=false;S={done:{},unlocked:{},xp:0,streak:0,last:''};save();toast('تم مسح التقدم');render()};
   const rwd=$('#rwd');if(rwd)rwd.onclick=()=>{
     if(!_rewardLoaded){toast('الإعلان لم يُحمَّل بعد، حاول لاحقاً','warning');return}
     amShowReward(()=>{S.xp+=50;save();toast('🎉 ربحت 50 نقطة!','success');render()});
@@ -820,6 +821,7 @@ let _lessonsAfterAd=0;
 const INTER_EVERY=3;
 
 let _bannerVisible=false; // هل البانر محمّل وظاهر فعلاً
+let _bannerLoaded=false;  // هل سبق أن تحمّل الإعلان بنجاح
 
 async function amInit(){
   try{
@@ -829,10 +831,16 @@ async function amInit(){
 
     // ── البانر: طبّق الـ padding فقط بعد تحميل الإعلان ──
     _am.addListener('bannerAdLoaded',()=>{
-      if(_bannerVisible) _applyBannerPadding(); // طبّق الـ padding فقط إذا طُلب الإظهار
+      _bannerLoaded=true;
+      if(_bannerVisible) _applyBannerPadding();
+    });
+    _am.addListener('bannerAdOpened',()=>{
+      // يُطلق أيضاً عند resumeBanner — يضمن تطبيق الـ padding
+      if(_bannerVisible) _applyBannerPadding();
     });
     _am.addListener('bannerAdFailedToLoad',()=>{
-      _clearBannerPadding(); // فشل التحميل — لا مساحة فارغة
+      _bannerLoaded=false;
+      _clearBannerPadding();
     });
 
     // ── البيني (أسماء رسمية من BannerAdPluginEvents / InterstitialAdPluginEvents) ──
@@ -893,7 +901,8 @@ async function amBannerShow(){
     } else {
       // البانر موجود مسبقاً — فقط استأنف الإظهار وطبّق الـ padding فوراً
       await _am.resumeBanner();
-      _applyBannerPadding();
+      // طبّق الـ padding فقط إذا كان الإعلان سبق وتحمّل فعلاً
+      if(_bannerLoaded) _applyBannerPadding();
     }
   }catch(e){_bannerVisible=false;}
 }
@@ -906,7 +915,7 @@ async function amBannerHide(){
 
 // مكافأة: يُستدعى عند ضغط زر "شاهد إعلاناً لفتح الدرس"
 async function amShowReward(onGranted){
-  if(!_am||!_rewardLoaded){onGranted();return} // أعطِه المكافأة إذا لم يتوفر إعلان
+  if(!_am||!_rewardLoaded){toast('الإعلان لم يُحمَّل بعد، انتظر لحظة وحاول مجدداً','warning');return}
   try{
     // أضف المستمع مرة واحدة قبل الإظهار
     const h=await _am.addListener('onRewardedVideoAdReward',()=>{
