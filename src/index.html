@@ -120,6 +120,18 @@ nav button.on{color:var(--nile)}
 .tr{margin:10px 0}.tr .b{height:10px;border-radius:10px;background:var(--line);overflow:hidden;margin-top:4px}.tr .b i{display:block;height:100%;background:var(--nile2);border-radius:10px}
 .tr div:first-child{display:flex;justify-content:space-between;font-weight:700;font-size:14px}
 @media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.quiz h3,.nxs h3{display:flex;align-items:center;gap:6px;margin:0 0 4px;font-size:15px;font-weight:900}.quiz h3 .i{color:var(--sun)}.nxs h3 .i{color:var(--nile2)}
+.quiz code,.xt code{direction:ltr;unicode-bidi:isolate;display:inline-block}
+.qs{margin:0 0 10px;font-size:12.5px;color:var(--mute)}
+.qz{padding:10px 0;border-top:1px solid var(--line)}.qq{margin:0 0 8px;font-weight:700;font-size:14.5px}
+.qo{display:grid;gap:7px}.qo button{font:inherit;font-size:14px;text-align:start;padding:10px 12px;border-radius:12px;border:1.5px solid var(--line);background:transparent;color:var(--ink);cursor:pointer;transition:.15s}
+.qo button:active{transform:scale(.98)}.qo button.sel{border-color:var(--nile);background:rgba(14,124,134,.1)}
+.qo button.ok{border-color:#1E9E6A;background:rgba(30,158,106,.14)}.qo button.no{border-color:var(--bad);background:rgba(214,69,69,.1);opacity:.8}
+.qw{font-size:13px;margin-top:6px}.qw:empty{display:none}.qw.good{color:#1E9E6A}.qw.bad{color:var(--bad)}
+.xt{display:flex;gap:10px;margin-top:12px;padding:10px 12px;border-radius:12px;background:rgba(14,124,134,.08);font-size:13.5px}.xt .i{color:var(--nile);margin-top:3px;flex:none}.xt b{display:block;font-size:12.5px;color:var(--nile)}
+.exr{padding:2px 16px 14px}.exr .btn{width:100%}.exl{display:flex;align-items:center;justify-content:center;gap:6px;font-size:12.5px;color:var(--mute);padding:8px;border:1.5px dashed var(--line);border-radius:14px}
+.exs{text-align:center}.exs .big{margin:0}.exs.pass{border:2px solid #1E9E6A}.exs.fail{border:2px solid var(--bad)}
+.ns{display:flex;gap:10px;padding:8px 0;border-top:1px solid var(--line)}.ns span{font-size:22px}.ns b{display:block;font-size:14px}.ns small{color:var(--mute);font-size:12.5px}
 </style>
 </head>
 <body>
@@ -186,6 +198,7 @@ nav button.on{color:var(--nile)}
     <p id="lock-xp-hint" style="display:none;margin:10px 0 0;font-size:12px;color:var(--mute)"></p>
   </div>
 </div>
+<script src="course.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
@@ -817,8 +830,11 @@ j11:['تبني تطبيقاً تفاعلياً كاملاً بنفسك.',['ال�
 };
 LESSONS.forEach(l=>{const m=META[l.id];if(m&&!l.g){l.g=m[0];l.s=m[1];l.e=m[2]}});
 
+/* المحتوى الموسّع (دروس جديدة، اختبارات، تحديات، وحدات) في course.js */
+if(window.COURSE){LESSONS.push(...COURSE.lessons);LESSONS.forEach(l=>{l.q=COURSE.quiz[l.id];l.x=COURSE.extra[l.id]})}
+
 /* وحدات الدورة بالترتيب */
-const UNITS=[
+const UNITS=window.COURSE?COURSE.units:[
 {t:'أساسيات HTML',d:'تبني أول صفحة ويب كاملة بيدك',ids:['h0','h1','h2','h3','h4','h5','pH1']},
 {t:'صفحات منظمة',d:'الجداول والوسوم الدلالية والنماذج',ids:['hT','hS','hD','h6','hF2','pH2']},
 {t:'أساسيات CSS',d:'الألوان والخطوط والصندوق والخلفيات',ids:['c1','cS','c2','cU','c3','c4','cB','pC1']},
@@ -1031,7 +1047,7 @@ function home(){
       const locked=!done&&!isNext&&!S.unlocked[l.id];
       h+=`<div class="node ${done?'done':''} ${isNext?'next':''} ${locked?'locked':''}" data-l="${l.id}"><div class="dot">${ic(done?'check':locked?'lock':l.ic)}</div><div class="t">${l.t}<small>${done?'أنجزته':locked?'مقفل':/^p[A-Z]|^cP$|^j11$/.test(l.id)?'مشروع تطبيقي':'درس تفاعلي'}</small></div></div>`;
     });
-    h+='</div>';
+    h+='</div>'+examBtn(u,ui,ud);
   });
   return h;
 }
@@ -1050,10 +1066,11 @@ function lesson(){
     :nxtFree
       ?`<button class="btn s" id="nb">الدرس التالي ${ic('next')}</button>`
       :`<button class="btn" style="background:var(--sun);color:#0B1F2A" id="nb">${ic('play')} شاهد إعلاناً ← التخطي</button>`;
-  return `<div class="bar2"><button class="ib" data-back aria-label="رجوع">${ic('back')}</button><h1>${l.t}<small>الوحدة ${l.u+1}: ${UNITS[l.u].t} · ${l.ui+1} من ${UNITS[l.u].ids.length}</small></h1></div><div class="page">${l.g?`<div class="goal">${ic('target')}<div><b>هدف الدرس</b>${fmt(l.g)}</div></div>`:''}<div class="card">${l.body.map(b=>body(b,l)).join('')}</div>${l.s?`<div class="card sum"><h3>${ic('check')} الخلاصة</h3><ul>${l.s.map(x=>`<li>${fmt(x)}</li>`).join('')}</ul>${l.e?`<div class="err"><b>⚠ خطأ شائع:</b> ${fmt(l.e)}</div>`:''}</div>`:''}<div class="card task"><h3>${ic('target')} مهمتك</h3><p>${fmt(l.task)}</p><ul class="chk" id="chk">${l.checks.map(c=>`<li>${c[0]}</li>`).join('')}</ul></div><div id="edh"></div><div class="row"><button class="btn" id="rs">${ic('reset')} إعادة</button>${l.k==='js'?`<button class="btn" id="rn">${ic('play')} تشغيل</button>`:''}<button class="btn p" id="ck">${ic('check')} تحقق</button></div><div class="row"><button class="btn" id="hint-btn" style="background:rgba(245,184,61,.15);color:var(--ink)">💡 تلميح ${ic('play')}</button></div><div class="row hide" id="nx">${nxtBtn}</div></div>`;
+  return `<div class="bar2"><button class="ib" data-back aria-label="رجوع">${ic('back')}</button><h1>${l.t}<small>الوحدة ${l.u+1}: ${UNITS[l.u].t} · ${l.ui+1} من ${UNITS[l.u].ids.length}</small></h1></div><div class="page">${l.g?`<div class="goal">${ic('target')}<div><b>هدف الدرس</b>${fmt(l.g)}</div></div>`:''}<div class="card">${l.body.map(b=>body(b,l)).join('')}</div>${l.s?`<div class="card sum"><h3>${ic('check')} الخلاصة</h3><ul>${l.s.map(x=>`<li>${fmt(x)}</li>`).join('')}</ul>${l.e?`<div class="err"><b>⚠ خطأ شائع:</b> ${fmt(l.e)}</div>`:''}</div>`:''}${quizCard(l)}<div class="card task"><h3>${ic('target')} مهمتك</h3><p>${fmt(l.task)}</p><ul class="chk" id="chk">${l.checks.map(c=>`<li>${c[0]}</li>`).join('')}</ul>${l.x?`<div class="xt">${ic('rocket')}<div><b>تحدٍّ إضافي بعد المهمة</b>${fmt(l.x)}</div></div>`:''}</div><div id="edh"></div><div class="row"><button class="btn" id="rs">${ic('reset')} إعادة</button>${l.k==='js'?`<button class="btn" id="rn">${ic('play')} تشغيل</button>`:''}<button class="btn p" id="ck">${ic('check')} تحقق</button></div><div class="row"><button class="btn" id="hint-btn" style="background:rgba(245,184,61,.15);color:var(--ink)">💡 تلميح ${ic('play')}</button></div><div class="row hide" id="nx">${nxtBtn}</div></div>`;
 }
 function bindLesson(){
   const l=LESSONS.find(x=>x.id===V.id),i=LESSONS.indexOf(l),JS=l.k==='js';let want=false;
+  bindQuiz(l);
   const E=editor($('#edh'),S['c_'+l.id]||l.start,JS?null:d=>{if(!want)return;want=false;evalC(d)},JS?'script.js':'index.html',JS?{js:1,page:l.page,tests:l.tests,onres:r=>{if(!want)return;want=false;r.code=E.ed.value;evalC(r)}}:null);
   E.ed.addEventListener('input',()=>{S['c_'+l.id]=E.ed.value;save()});
   $('#rs').onclick=()=>{E.ed.value=l.start;E.paint();if(!JS)E.run();S['c_'+l.id]=l.start;save();toast('رجع الكود للبداية')};
@@ -1099,6 +1116,74 @@ function bindLesson(){
     }else toast('قريب! راجع البنود الحمراء','bad');
   }
 }
+/* ---------- اختبر فهمك + اختبار الوحدة ---------- */
+function qOrder(key,n){const a=[...Array(n).keys()];let h=0;for(const ch of key)h=(h*31+ch.charCodeAt(0))>>>0;for(let i=n-1;i>0;i--){h=(h*1103515245+12345)>>>0;const j=(h>>>8)%(i+1);[a[i],a[j]]=[a[j],a[i]]}return a}
+function qItem(q,n,key){return `<div class="qz" data-qi="${n}"><p class="qq">${n+1}. ${fmt(q[0])}</p><div class="qo">${qOrder(key,q[1].length).map(o=>`<button data-o="${o}">${fmt(q[1][o])}</button>`).join('')}</div><div class="qw"></div></div>`}
+function quizCard(l){
+  if(!l.q)return '';
+  const did=(S.qz||{})[l.id];
+  return `<div class="card quiz" id="quiz"><h3>${ic('bulb')} اختبر فهمك</h3><p class="qs">${did?'أجبت عن هذا الاختبار بنجاح من قبل ✓':'أجب قبل أن تبدأ المهمة · +10 نقاط إن أصبت في كل الأسئلة من أول محاولة'}</p>${l.q.map((q,n)=>qItem(q,n,l.id+n)).join('')}</div>`;
+}
+function bindQuiz(l){
+  const box=$('#quiz');if(!box)return;const first={};
+  box.onclick=e=>{
+    const b=e.target.closest('[data-o]');if(!b)return;
+    const w=b.closest('.qz'),n=+w.dataset.qi,q=l.q[n];
+    if(w.classList.contains('done')||b.classList.contains('no'))return;
+    const right=+b.dataset.o===q[2];
+    if(!(n in first))first[n]=right;
+    b.classList.add(right?'ok':'no');
+    const msg=w.querySelector('.qw');
+    if(!right){msg.className='qw bad';msg.textContent='ليست هذه الإجابة. فكّر مرة أخرى';return}
+    w.classList.add('done');msg.className='qw good';msg.innerHTML='✓ '+fmt(q[3]);
+    if(box.querySelectorAll('.qz.done').length===l.q.length){
+      const perfect=l.q.every((_,k)=>first[k]);
+      if(perfect&&!(S.qz||{})[l.id]){(S.qz=S.qz||{})[l.id]=1;S.xp+=10;save();toast('فهم ممتاز! +10 نقاط','good')}
+      else toast(perfect?'أحسنت، فهمت الدرس جيداً':'جيد! راجع الشرح في الأسئلة التي أخطأت فيها','good');
+    }
+  };
+}
+let EX=null;
+function examBtn(u,ui,ud){
+  if(!u.ids.some(id=>(LESSONS.find(l=>l.id===id)||{}).q))return '';
+  const best=(S.ex||{})[ui],open=ud===u.ids.length;
+  return `<div class="exr">${open?`<button class="btn ${best>=70?'':'s'}" data-ex="${ui}">📝 اختبار الوحدة ${ui+1}${best!=null?` · أفضل نتيجة ${best}%`:''}</button>`:`<div class="exl">${ic('lock')} أنهِ دروس الوحدة لتفتح اختبارها النهائي</div>`}</div>`;
+}
+function examAvg(){const v=Object.values(S.ex||{});return v.length?Math.round(v.reduce((a,b)=>a+b,0)/v.length):null}
+function exam(){
+  const ui=V.id,u=UNITS[ui];
+  if(!EX||EX.u!==ui){
+    const pool=[];u.ids.forEach(id=>{const l=LESSONS.find(x=>x.id===id);(l&&l.q||[]).forEach(q=>pool.push(q))});
+    for(let i=pool.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[pool[i],pool[j]]=[pool[j],pool[i]]}
+    EX={u:ui,qs:pool.slice(0,10),seed:String(Math.random()),done:false};
+  }
+  return `<div class="bar2"><button class="ib" data-back aria-label="رجوع">${ic('back')}</button><h1>اختبار الوحدة ${ui+1}<small>${u.t} · ${EX.qs.length} أسئلة · النجاح من 70%</small></h1></div><div class="page"><div class="goal">${ic('target')}<div><b>اختبار نهائي</b>أسئلة مختارة من كل دروس الوحدة. اختر إجابة لكل سؤال ثم سلّم. النجاح الأول يمنحك +30 نقطة.</div></div><div class="card quiz" id="exam">${EX.qs.map((q,n)=>qItem(q,n,EX.seed+n)).join('')}</div><div id="exres"></div><div class="row"><button class="btn p" id="exsub">${ic('check')} سلّم الإجابات</button></div></div>`;
+}
+function bindExam(){
+  const box=$('#exam'),pick={};
+  box.onclick=e=>{const b=e.target.closest('[data-o]');if(!b||EX.done)return;const w=b.closest('.qz');w.querySelectorAll('[data-o]').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');pick[+w.dataset.qi]=+b.dataset.o};
+  $('#exsub').onclick=()=>{
+    if(EX.done){EX=null;render();scrollTo(0,0);return}
+    const miss=EX.qs.length-Object.keys(pick).length;
+    if(miss){toast(`بقي ${miss} ${miss===1?'سؤال':'أسئلة'} بلا إجابة`,'bad');return}
+    EX.done=true;let right=0;
+    box.querySelectorAll('.qz').forEach(w=>{const n=+w.dataset.qi,q=EX.qs[n],ok=pick[n]===q[2];if(ok)right++;
+      w.querySelectorAll('[data-o]').forEach(x=>{const o=+x.dataset.o;x.classList.remove('sel');if(o===q[2])x.classList.add('ok');else if(o===pick[n])x.classList.add('no')});
+      const m=w.querySelector('.qw');m.className='qw '+(ok?'good':'bad');m.innerHTML=(ok?'✓ ':'✗ ')+fmt(q[3])});
+    const pct=Math.round(right/EX.qs.length*100),pass=pct>=70,ui=EX.u;
+    S.ex=S.ex||{};const firstPass=pass&&!(S.ex[ui]>=70);
+    if(S.ex[ui]==null||pct>S.ex[ui])S.ex[ui]=pct;
+    if(firstPass)S.xp+=30;save();
+    $('#exres').innerHTML=`<div class="card exs ${pass?'pass':'fail'}"><p class="big">${pct}%</p><p>${right} من ${EX.qs.length} إجابات صحيحة. ${pass?(firstPass?'🎉 نجحت في الاختبار! +30 نقطة':'🎉 نجحت في الاختبار!'):'لم تصل إلى 70% بعد. راجع الشرح تحت كل سؤال ثم أعد المحاولة.'}</p></div>`;
+    $('#exsub').innerHTML=`${ic('reset')} اختبار جديد`;
+    $('#exres').scrollIntoView({behavior:'smooth',block:'center'});
+    toast(pass?'نجحت في اختبار الوحدة!':'حاول مرة أخرى، أنت قريب',pass?'good':'bad');
+  };
+}
+function nextSteps(){
+  const N=(window.COURSE&&COURSE.next)||[];if(!N.length)return '';
+  return `<div class="card nxs"><h3>${ic('rocket')} ماذا بعد الدورة؟</h3>${N.map(x=>`<div class="ns"><span>${x[0]}</span><div><b>${x[1]}</b><small>${x[2]}</small></div></div>`).join('')}</div>`;
+}
 const SNIP={'هيكل':['code','<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n</head>\n<body>\n  \n</body>\n</html>\n'],'عنوان':['heading','<h1>عنوان</h1>\n'],'فقرة':['type','<p>نص الفقرة</p>\n'],'زر':['cursor','<button>اضغط</button>\n'],'بطاقة':['box','<style>\n  .card {\n    padding: 16px;\n    border-radius: 16px;\n    background: #e8f7f5;\n  }\n</style>\n<div class="card">بطاقة</div>\n']};
 function play(){return `<div class="bar2"><h1>تجربة حرة<small>اكتب أي HTML أو CSS وشاهد النتيجة</small></h1></div><div class="page"><div class="chips">${Object.keys(SNIP).map(k=>`<button data-sn="${k}">${ic('plus')} ${k}</button>`).join('')}</div><div id="edh"></div></div>`}
 function bindPlay(){
@@ -1109,16 +1194,16 @@ function bindPlay(){
 }
 let armed=false;
 function me(){
-  const bar=(u,i)=>{const d=unitDone(u);return `<div class="tr"><div><span>${i+1}. ${u.t}</span><span>${d}/${u.ids.length}</span></div><div class="b"><i style="width:${d/u.ids.length*100}%"></i></div></div>`};
+  const bar=(u,i)=>{const d=unitDone(u);return `<div class="tr"><div><span>${i+1}. ${u.t}</span><span>${(S.ex||{})[i]!=null?'📝 '+S.ex[i]+'% · ':''}${d}/${u.ids.length}</span></div><div class="b"><i style="width:${d/u.ids.length*100}%"></i></div></div>`};
   const all=doneCount()===LESSONS.length;if(all&&!S.grad){S.grad=new Date().toLocaleDateString('ar');save()}
-  const cert=all?`<div class="cert"><div style="font-size:34px">🎓</div><div class="ct">شهادة إتمام دورة تطوير الويب</div><div class="cn">${S.name?esc(S.name):'اكتب اسمك'}</div><div class="cc">أتمّ ${LESSONS.length} درساً ومشروعاً في HTML وCSS وJavaScript</div><div class="ct" style="margin-top:6px">ويب نايل · ${S.grad||''}</div><input id="cname" placeholder="اسمك كما تريده على الشهادة" value="${S.name?esc(S.name).replace(/"/g,'&quot;'):''}"><button class="btn s" style="width:100%" id="cshare">${ic('trophy')} شارك إنجازك</button></div>`:`<div class="card"><p style="margin:0">${ic('trophy')} أكمل الدورة لتحصل على <b>شهادة إتمام</b> باسمك. متبقٍ ${LESSONS.length-doneCount()} درساً.</p></div>`;
-  return `<div class="bar2"><h1>تقدمي</h1></div><div class="page"><div class="card"><p class="big">${S.xp} <small style="font-size:15px;color:var(--mute)">نقطة</small></p><p style="color:var(--mute)">${S.streak>0?ic('flame')+' سلسلتك '+S.streak+' يوم متتالٍ':'ابدأ درساً اليوم لتبدأ سلسلتك'}</p></div><div class="card" style="background:linear-gradient(135deg,#0B1F2A,#0E3540);color:#EAF4F3"><p style="margin:0 0 4px;font-weight:900;font-size:16px">${ic('sun')} احصل على 50 نقطة مجاناً</p><p style="margin:0 0 12px;font-size:13px;color:#9DB8C0">شاهد إعلاناً قصيراً واربح نقاط XP</p><button class="btn s" style="width:100%" id="rwd">${ic('trophy')} شاهد ← 50 نقطة</button></div>${cert}<div class="card">${UNITS.map(bar).join('')}</div>${nextL()?`<button class="btn s" style="width:100%;margin-bottom:12px" data-l="${nextL().id}">أكمل: ${nextL().t}</button>`:''}<button class="btn" style="width:100%" id="rst">مسح التقدم</button></div>`;
+  const cert=all?`<div class="cert"><div style="font-size:34px">🎓</div><div class="ct">شهادة إتمام دورة تطوير الويب</div><div class="cn">${S.name?esc(S.name):'اكتب اسمك'}</div><div class="cc">أتمّ ${LESSONS.length} درساً ومشروعاً في HTML وCSS وJavaScript${examAvg()!=null?` · متوسط اختبارات الوحدات ${examAvg()}%`:''}</div><div class="ct" style="margin-top:6px">ويب نايل · ${S.grad||''}</div><input id="cname" placeholder="اسمك كما تريده على الشهادة" value="${S.name?esc(S.name).replace(/"/g,'&quot;'):''}"><button class="btn s" style="width:100%" id="cshare">${ic('trophy')} شارك إنجازك</button></div>`:`<div class="card"><p style="margin:0">${ic('trophy')} أكمل الدورة لتحصل على <b>شهادة إتمام</b> باسمك. متبقٍ ${LESSONS.length-doneCount()} درساً.</p></div>`;
+  return `<div class="bar2"><h1>تقدمي</h1></div><div class="page"><div class="card"><p class="big">${S.xp} <small style="font-size:15px;color:var(--mute)">نقطة</small></p><p style="color:var(--mute)">${S.streak>0?ic('flame')+' سلسلتك '+S.streak+' يوم متتالٍ':'ابدأ درساً اليوم لتبدأ سلسلتك'}</p></div><div class="card" style="background:linear-gradient(135deg,#0B1F2A,#0E3540);color:#EAF4F3"><p style="margin:0 0 4px;font-weight:900;font-size:16px">${ic('sun')} احصل على 50 نقطة مجاناً</p><p style="margin:0 0 12px;font-size:13px;color:#9DB8C0">شاهد إعلاناً قصيراً واربح نقاط XP</p><button class="btn s" style="width:100%" id="rwd">${ic('trophy')} شاهد ← 50 نقطة</button></div>${cert}${all?nextSteps():''}<div class="card">${UNITS.map(bar).join('')}</div>${nextL()?`<button class="btn s" style="width:100%;margin-bottom:12px" data-l="${nextL().id}">أكمل: ${nextL().t}</button>`:''}<button class="btn" style="width:100%" id="rst">مسح التقدم</button></div>`;
 }
 const NAV={home:['waves','الدروس'],play:['code','تجربة حرة'],me:['trophy','تقدمي']};
 function render(){
-  $('#app').innerHTML=V.n==='home'?home():V.n==='lesson'?lesson():V.n==='play'?play():me();
-  document.querySelectorAll('#nav button').forEach(b=>{const n=NAV[b.dataset.v];b.innerHTML=ic(n[0])+n[1];b.classList.toggle('on',b.dataset.v===(V.n==='lesson'?'home':V.n))});
-  if(V.n==='lesson')bindLesson();if(V.n==='play')bindPlay();
+  $('#app').innerHTML=V.n==='home'?home():V.n==='lesson'?lesson():V.n==='exam'?exam():V.n==='play'?play():me();
+  document.querySelectorAll('#nav button').forEach(b=>{const n=NAV[b.dataset.v];b.innerHTML=ic(n[0])+n[1];b.classList.toggle('on',b.dataset.v===(V.n==='lesson'||V.n==='exam'?'home':V.n))});
+  if(V.n==='lesson')bindLesson();if(V.n==='exam')bindExam();if(V.n==='play')bindPlay();
   const r=$('#rst');if(r)r.onclick=()=>{if(!armed){armed=true;r.textContent='اضغط مرة أخرى للتأكيد';setTimeout(()=>{armed=false;r.textContent='مسح التقدم'},3000);return}armed=false;S={done:{},unlocked:{},xp:0,streak:0,last:''};save();toast('تم مسح التقدم');render()};
   const cn=$('#cname');if(cn)cn.onchange=()=>{S.name=cn.value.trim();if(!S.grad)S.grad=new Date().toLocaleDateString('ar');save();render()};
   const cs=$('#cshare');if(cs)cs.onclick=async()=>{const t=`🎓 أتممت دورة تطوير الويب في تطبيق ويب نايل: ${LESSONS.length} درساً ومشروعاً في HTML وCSS وJavaScript!`;try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);toast('نُسخ النص، شاركه أينما تريد','good')}}catch(e){}};
@@ -1128,6 +1213,8 @@ function render(){
   };
 }
 document.addEventListener('click',e=>{
+  const ex=e.target.closest('[data-ex]');
+  if(ex){EX=null;return go('exam',+ex.dataset.ex)}
   const l=e.target.closest('[data-l]');
   if(l){
     const lid=l.dataset.l;
