@@ -90,6 +90,16 @@ code{direction:ltr;unicode-bidi:embed;font-family:var(--mono);font-size:.86em;ba
 .con{margin:0;padding:12px 14px;min-height:230px;max-height:320px;overflow:auto;background:#07141A;color:#D8EEF0;font:14px/1.7 var(--mono);direction:ltr;text-align:left;white-space:pre-wrap}
 .con div{border-bottom:1px solid rgba(255,255,255,.05)}.con .er{color:#FF7B9C}.con .mu{color:#6F8C98;font-family:'Cairo',system-ui,sans-serif;direction:rtl;text-align:right;border:0}
 .frame.sm{height:170px}
+.cmh{height:clamp(240px,46vh,440px);direction:ltr;text-align:left;background:#0A1A22}
+.cmh .cm-editor{height:100%}
+.etl{margin-inline-start:auto;display:flex;gap:4px}
+.etl button{min-width:30px;height:26px;padding:0 6px;border-radius:8px;background:#0A1A22;color:#9DB8C0;font:700 12px var(--mono)}
+.etl button.on{background:var(--nile);color:#fff}
+.keys .k2{background:var(--deep);color:#D8EEF0;font-size:18px}
+.sug button.on{background:var(--nile)}
+body.typing nav{display:none}
+body.typing .ekb{position:sticky;bottom:0;z-index:15;background:var(--bg);margin:0 -16px;padding:0 16px;box-shadow:0 -6px 14px -10px rgba(0,0,0,.35)}
+@media(pointer:coarse){.cmh .cm-tooltip-autocomplete{display:none!important}}
 .hide{display:none}
 .off{position:absolute;right:-9999px;top:0;width:320px;opacity:0;pointer-events:none}
 .row{display:flex;gap:8px;margin-top:8px}
@@ -186,6 +196,7 @@ nav button.on{color:var(--nile)}
     <p id="lock-xp-hint" style="display:none;margin:10px 0 0;font-size:12px;color:var(--mute)"></p>
   </div>
 </div>
+<script src="vendor/codemirror.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
@@ -943,8 +954,11 @@ const hJS=s=>s.replace(/\/\/[^\n]*|\/\*[\s\S]*?\*\/|`(?:\\[\s\S]|[^`\\])*`|"(?:\
   return esc(m)});
 const JSS=[['console.log','console.log(|);'],['let','let | = ;'],['const','const | = ;'],['function','function |() {\n  \n}'],['if','if (|) {\n  \n}'],['else','else {\n  |\n}'],['for','for (let i = 0; i < |; i++) {\n  \n}'],['while','while (|) {\n  \n}'],['return','return |;'],['document.querySelector','document.querySelector("|")'],['document.getElementById','document.getElementById("|")'],['document.createElement','document.createElement("|")'],['addEventListener','addEventListener("click", () => {\n  |\n});'],['typeof','typeof |'],['true','true'],['false','false'],['null','null'],['Math.random','Math.random()|'],['Math.round','Math.round(|)'],['Number','Number(|)'],['String','String(|)']];
 const JSM=['length','push(|)','pop()','map(|)','filter(|)','forEach(|)','includes(|)','join(|)','indexOf(|)','slice(|)','toUpperCase()','toLowerCase()','trim()','split(|)','replace(|)','textContent','innerHTML','value','style','classList','appendChild(|)','addEventListener("click", () => {\n  |\n})','querySelector("|")','setAttribute(|)','toFixed(|)','log(|)'];
+const JSO={console:['log(|)','error(|)','warn(|)','table(|)'],document:['querySelector("|")','querySelectorAll("|")','getElementById("|")','createElement("|")','body','title'],Math:['random()|','round(|)','floor(|)','ceil(|)','max(|)','min(|)','abs(|)','PI'],localStorage:['setItem("|", )','getItem("|")','removeItem("|")'],JSON:['stringify(|)','parse(|)']};
 function acJS(b){
-  let m=b.match(/\.([A-Za-z]*)$/);
+  let m=b.match(/\b(console|document|Math|localStorage|JSON)\.([A-Za-z]*)$/);
+  if(m){const w=m[2].toLowerCase();return JSO[m[1]].filter(x=>x.toLowerCase().startsWith(w)&&x.toLowerCase()!==w).map(x=>({l:x.replace('|',''),t:'p',x,f:m[2].length}))}
+  m=b.match(/\.([A-Za-z]*)$/);
   if(m){const w=m[1].toLowerCase();return JSM.filter(x=>x.toLowerCase().startsWith(w)&&x.toLowerCase()!==w).slice(0,10).map(x=>({l:x.replace('|','').replace(/\n\s*/g,' '),t:'p',x,f:m[1].length}))}
   m=b.match(/(?:^|[^\w$.])([A-Za-z_$][\w$]*)$/);if(!m)return[];
   const w=m[1].toLowerCase();
@@ -973,7 +987,7 @@ function __t(v){__T.push(v)}
 <\/script><script>
 setTimeout(function(){parent.postMessage({wn:1,logs:__L,err:__E,t:__T,html:document.body.innerHTML},'*')},350);
 <\/script></body></html>`}
-function editor(host,code,onload,fname,o){
+function editorLegacy(host,code,onload,fname,o){
   o=o||{};const JS=!!o.js;
   host.innerHTML=`<div class="seg"><button class="on" data-s="c">${ic('code')} الكود</button>${JS&&!o.page?'':`<button data-s="r">${ic('eye')} ${JS?'الصفحة':'النتيجة'}</button>`}${JS?`<button data-s="o">${ic('terminal')} الكونسول</button>`:''}</div>
   <div class="ide" id="pc"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="fn">${fname||'index.html'}</span></div><div class="code"><div class="gut" id="gut"></div><div class="wrap"><pre class="hl" id="hl"></pre><textarea class="ed" id="ed" wrap="off" spellcheck="false" autocapitalize="off" autocomplete="off" autocorrect="off"></textarea></div></div></div>
@@ -1017,6 +1031,61 @@ function editor(host,code,onload,fname,o){
   ed.addEventListener('click',suggest);ed.addEventListener('keyup',suggest);
   fr.onload=()=>{if(!JS&&onload)onload(fr.contentDocument)};
   paint();if(!JS)run();suggest();return{ed,fr,run,paint,show,main:o.page?'r':'o'};
+}
+
+/* ---------- Editor (CodeMirror 6: تلوين، إكمال تلقائي، إغلاق الأقواس والوسوم) ---------- */
+const CMT={type:'t',keyword:'t',property:'a',text:'s',constant:'s',function:'p',method:'p',variable:'p',class:'p'};
+function editor(host,code,onload,fname,o){
+  if(!window.CM||!CM.create)return editorLegacy(host,code,onload,fname,o);
+  o=o||{};const JS=!!o.js;
+  host.innerHTML=`<div class="seg"><button class="on" data-s="c">${ic('code')} الكود</button>${JS&&!o.page?'':`<button data-s="r">${ic('eye')} ${JS?'الصفحة':'النتيجة'}</button>`}${JS?`<button data-s="o">${ic('terminal')} الكونسول</button>`:''}</div>
+  <div class="ide" id="pc"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="fn">${fname||'index.html'}</span><span class="etl"><button data-a="fs-" aria-label="تصغير الخط">A−</button><button data-a="fs+" aria-label="تكبير الخط">A+</button><button data-a="wrap" aria-label="التفاف الأسطر">↵</button></span></div><div class="cmh" id="cmh"></div></div>
+  <div class="pv off" id="pr"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="addr">preview</span></div><iframe class="frame" id="fr" sandbox="${JS?'allow-scripts allow-forms':'allow-same-origin'}"></iframe></div>
+  ${JS?'<div class="pv hide" id="pcn"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="addr">console</span></div><pre class="con" id="con"></pre></div>':''}
+  <div id="kb" class="ekb"><div class="sug" id="sug"></div><div class="keys" id="keys"></div></div>`;
+  const fr=$('#fr'),con=$('#con'),cmh=$('#cmh'),sg=$('#sug');
+  let fs=15;try{fs=+localStorage.getItem('wn_ed_fs')||15}catch(e){}
+  const setFs=v=>{fs=Math.max(12,Math.min(22,v));cmh.style.setProperty('--wn-fs',fs+'px');try{localStorage.setItem('wn_ed_fs',fs)}catch(e){}};
+  let last=null;
+  const chips=list=>{const k=list.map(x=>x.label+(x.sel?'*':'')).join('\n');if(k===last)return;last=k;
+    sg.innerHTML=list.length?list.slice(0,30).map((x,i)=>`<button data-i="${i}" data-t="${CMT[x.type]||'s'}"${x.sel?' class="on"':''}>${esc(x.label)}</button>`).join(''):'<span class="h">الاقتراحات الذكية تظهر هنا أثناء الكتابة</span>'};
+  const cm=CM.create(cmh,{lang:JS?'js':'html',doc:code,complete:JS?(b=>acJS(b)):ac,onCompletions:chips});
+  setFs(fs);
+  // واجهة متوافقة مع textarea القديم: ed.value و حدث input
+  const ed=new EventTarget();
+  Object.defineProperty(ed,'value',{get:()=>cm.value,set:v=>{cm.value=v}});
+  ed.focus=()=>cm.focus();
+  cm.onInput(()=>ed.dispatchEvent(new Event('input')));
+  const KEYS=JS?['(',')','{','}','[',']',';','"',"'",'`','=','>','<','.',',','!','+','-','*','/','&','|','?',':','$','_']:['<','>','/','"','=','{','}',';',':','#','.','(',')','-','!'];
+  const ka=k=>esc(k).replace(/"/g,'&quot;');
+  $('#keys').innerHTML='<button class="k2" data-c="tab">⇥</button><button class="k2" data-c="undo" aria-label="تراجع">↶</button><button class="k2" data-c="redo" aria-label="إعادة">↷</button><button class="k2" data-c="left" aria-label="يسار">◀</button><button class="k2" data-c="right" aria-label="يمين">▶</button>'+KEYS.map(k=>`<button data-k="${ka(k)}">${esc(k)}</button>`).join('');
+  // الأزرار لا تسرق التركيز من المحرر، فتبقى لوحة المفاتيح مفتوحة
+  const keep=e=>{if(e.target.closest('button'))e.preventDefault()};
+  ['#keys','#sug','.etl'].forEach(s=>host.querySelector(s).addEventListener('pointerdown',keep));
+  ['#keys','#sug','.etl'].forEach(s=>host.querySelector(s).addEventListener('mousedown',keep));
+  $('#keys').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c)cm[b.dataset.c]();else cm.type(b.dataset.k)};
+  sg.onclick=e=>{const b=e.target.closest('button');if(b)cm.pick(+b.dataset.i)};
+  host.querySelector('.etl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
+    if(a==='fs-')setFs(fs-1);else if(a==='fs+')setFs(fs+1);else{b.classList.toggle('on',cm.toggleWrap());toast(cm.wrap?'التفاف الأسطر مفعّل':'التفاف الأسطر متوقف')}};
+  host.querySelector('[data-a=wrap]').classList.toggle('on',cm.wrap);
+  // أثناء الكتابة: إخفاء شريط التنقل وتثبيت شريط الرموز فوق لوحة المفاتيح
+  let bt;cm.view.dom.addEventListener('focusin',()=>{clearTimeout(bt);if(CM.isTouch)document.body.classList.add('typing')});
+  cm.view.dom.addEventListener('focusout',()=>{bt=setTimeout(()=>document.body.classList.remove('typing'),150)});
+  const show=(v,nr)=>{host.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.s===v));$('#pc').classList.toggle('hide',v!=='c');$('#kb').classList.toggle('hide',v!=='c');$('#pr').classList.toggle('off',v!=='r');const cn=$('#pcn');if(cn)cn.classList.toggle('hide',v!=='o');if(v!=='c'){document.body.classList.remove('typing');if(!nr)run()}};
+  host.querySelector('.seg').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.s)};
+  let w;const run=()=>{fr.srcdoc=JS?runner(cm.value,o.page,o.tests):wrap(cm.value)};
+  if(JS){
+    con.innerHTML='<div class="mu">اضغط «تشغيل» لترى النتيجة هنا</div>';
+    if(window._wn)removeEventListener('message',window._wn);
+    window._wn=e=>{const d=e.data;if(e.source!==fr.contentWindow||!d||!d.wn)return;
+      const L=d.logs.map(l=>l[0]==='!'?`<div class="er">${esc(l.slice(1))}</div>`:`<div>${esc(l)}</div>`);
+      if(d.err)L.push(`<div class="er">خطأ: ${esc(d.err)}</div>`);
+      con.innerHTML=L.join('')||'<div class="mu">لا توجد مخرجات. استعمل console.log لطباعة شيء</div>';
+      o.onres&&o.onres({logs:d.logs,err:d.err,t:d.t,doc:new DOMParser().parseFromString(d.html||'','text/html')})};
+    addEventListener('message',window._wn)}
+  ed.addEventListener('input',()=>{if(!JS){clearTimeout(w);w=setTimeout(run,350)}});
+  fr.onload=()=>{if(!JS&&onload)onload(fr.contentDocument)};
+  chips([]);if(!JS)run();return{ed,fr,run,paint:()=>{},show,main:o.page?'r':'o',cm};
 }
 
 /* ---------- Views ---------- */

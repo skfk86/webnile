@@ -1,0 +1,22 @@
+{
+  "name": "webnile-editor-bundle",
+  "private": true,
+  "description": "يبني ملف المحرر src/vendor/codemirror.js (CodeMirror 6) ليعمل التطبيق دون إنترنت",
+  "scripts": {
+    "build": "esbuild entry.js --bundle --minify --format=iife --global-name=CM --target=es2019 --legal-comments=none --outfile=../../src/vendor/codemirror.js"
+  },
+  "devDependencies": {
+    "@codemirror/autocomplete": "^6.20.4",
+    "@codemirror/commands": "^6.11.2",
+    "@codemirror/lang-css": "^6.3.1",
+    "@codemirror/lang-html": "^6.4.12",
+    "@codemirror/lang-javascript": "^6.2.5",
+    "@codemirror/language": "^6.13.1",
+    "@codemirror/search": "^6.7.3",
+    "@codemirror/state": "^6.7.6",
+    "@codemirror/view": "^6.44.2",
+    "@lezer/highlight": "^1.2.5",
+    "codemirror": "^6.0.2",
+    "esbuild": "^0.28.2"
+  }
+}
