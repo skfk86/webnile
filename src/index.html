@@ -6,6 +6,7 @@
 <meta name="theme-color" content="#0B1F2A">
 <title>ويب نايل</title>
 <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="mascot.css">
 <style>
 :root{--bg:#F1F6F5;--card:#fff;--ink:#0B1F2A;--mute:#5E7480;--line:#DCE7E6;--nile:#0E7C86;--nile2:#12B5A6;--sun:#F5B83D;--bad:#D64545;--deep:#0B1F2A;--sb:env(safe-area-inset-bottom,0px);--st:env(safe-area-inset-top,0px);--mono:ui-monospace,'SF Mono',Menlo,Consolas,'Roboto Mono',monospace}
 @media(prefers-color-scheme:dark){:root{--bg:#08161D;--card:#102630;--ink:#EAF4F3;--mute:#8FA8B2;--line:#1D3844;--deep:#050E13}}
@@ -185,6 +186,7 @@ nav button.on{color:var(--nile)}
     <p id="lock-xp-hint" style="display:none;margin:10px 0 0;font-size:12px;color:var(--mute)"></p>
   </div>
 </div>
+<script src="mascot.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
@@ -862,7 +864,7 @@ function showLockSheet(title,desc,onUnlock){
 }
 function go(n,id){
   const back=n==='home'&&V.n==='lesson';
-  V={n,id};render();scrollTo(0,0);
+  V={n,id};render();scrollTo(0,0);window.Mascot&&Mascot.event('view',{n,id});
   if(back){const x=document.querySelector('.node.next');if(x)x.scrollIntoView({block:'center'})}
 }
 const doneCount=()=>LESSONS.filter(l=>S.done[l.id]).length;
@@ -1074,12 +1076,13 @@ function bindLesson(){
   // أظهر زر التالي إذا الدرس محلول أو الدرس التالي مفتوح مسبقاً
   if(S.done[l.id]||(_nxt&&(S.unlocked[_nxt.id]||S.done[_nxt.id])))$('#nx').classList.remove('hide');
   function evalC(d){
-    if(JS&&d.err){[...$('#chk').children].forEach(li=>li.className='no');toast('في كودك خطأ، راجع النتيجة','bad');return}
+    if(JS&&d.err){[...$('#chk').children].forEach(li=>li.className='no');toast('في كودك خطأ، راجع النتيجة','bad');window.Mascot&&Mascot.event('error');return}
     const r=l.checks.map(c=>{try{return!!c[1](d)}catch(e){return false}});
     [...$('#chk').children].forEach((li,j)=>li.className=r[j]?'ok':'no');
     if(r.every(Boolean)){
+      const _first=!S.done[l.id],_st=S.streak;
       if(!S.done[l.id]){S.done[l.id]=1;S.xp+=20;const t=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();S.streak=S.last===t?S.streak:(S.last===y?S.streak+1:1);S.last=t;save()}
-      {const u=UNITS[l.u];toast(unitDone(u)===u.ids.length?`🎉 أنهيت الوحدة ${l.u+1}: ${u.t}!`:'أحسنت! أنجزت الدرس +20 نقطة','good')}$('#nx').classList.remove('hide');$('#nx').scrollIntoView({behavior:'smooth',block:'center'});const hb=$('#hint-btn');if(hb)hb.style.display='none';
+      {const u=UNITS[l.u];toast(unitDone(u)===u.ids.length?`🎉 أنهيت الوحدة ${l.u+1}: ${u.t}!`:'أحسنت! أنجزت الدرس +20 نقطة','good');window.Mascot&&Mascot.event('pass',{first:_first,streak:S.streak,streakUp:S.streak>_st,unit:unitDone(u)===u.ids.length,unitTitle:u.t,all:doneCount()===LESSONS.length})}$('#nx').classList.remove('hide');$('#nx').scrollIntoView({behavior:'smooth',block:'center'});const hb=$('#hint-btn');if(hb)hb.style.display='none';
       // حدّث زر التالي فوراً مع onclick جديد
       const nb=$('#nb');
       if(nb&&_nxt){
@@ -1087,7 +1090,7 @@ function bindLesson(){
         nb.innerHTML=`الدرس التالي ${ic('next')}`;
         nb.onclick=()=>go('lesson',_nxt.id);
       }
-    }else toast('قريب! راجع البنود الحمراء','bad');
+    }else{toast('قريب! راجع البنود الحمراء','bad');window.Mascot&&Mascot.event('fail')}
   }
 }
 const SNIP={'هيكل':['code','<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n</head>\n<body>\n  \n</body>\n</html>\n'],'عنوان':['heading','<h1>عنوان</h1>\n'],'فقرة':['type','<p>نص الفقرة</p>\n'],'زر':['cursor','<button>اضغط</button>\n'],'بطاقة':['box','<style>\n  .card {\n    padding: 16px;\n    border-radius: 16px;\n    background: #e8f7f5;\n  }\n</style>\n<div class="card">بطاقة</div>\n']};

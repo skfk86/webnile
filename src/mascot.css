@@ -1,0 +1,109 @@
+/* ───── نيلو: الشخصية المشجعة في ويب نايل ───── */
+.nilo{position:fixed;left:4px;bottom:calc(118px + var(--sb,0px) + var(--bh,0px));z-index:30;display:flex;align-items:flex-end;gap:2px;direction:ltr;pointer-events:none;transition:transform .55s cubic-bezier(.34,1.56,.64,1),opacity .3s;--lid:0}
+.nilo-btn{pointer-events:auto;width:96px;height:120px;padding:0;flex:none;touch-action:manipulation;-webkit-user-select:none;user-select:none;transition:transform .4s cubic-bezier(.34,1.56,.64,1)}
+.nilo-btn svg{width:100%;height:100%;display:block;overflow:visible}
+.nilo-btn:active{transform:scale(.94)}
+
+/* ── الفقاعة ── */
+.nilo-bub{pointer-events:auto;position:relative;direction:rtl;text-align:right;max-width:min(240px,calc(100vw - 118px));min-width:120px;background:var(--card,#fff);color:var(--ink,#0B1F2A);border-radius:20px 20px 20px 6px;padding:8px 14px 11px 30px;margin-bottom:58px;font-size:15px;font-weight:700;line-height:1.6;box-shadow:0 10px 28px rgba(11,31,42,.18),0 0 0 2px var(--line,#DCE7E6);opacity:0;transform:scale(.4) translate(-20px,30px);transform-origin:left bottom;transition:opacity .18s,transform .38s cubic-bezier(.34,1.56,.64,1);visibility:hidden}
+.nilo-bub:before{content:"";position:absolute;left:-8px;bottom:12px;width:16px;height:16px;background:inherit;transform:rotate(45deg);border-radius:3px;box-shadow:-2px 2px 0 var(--line,#DCE7E6)}
+.nilo-name{display:block;font-size:11px;font-weight:900;color:var(--nile,#0E7C86);letter-spacing:.2px;margin-bottom:1px}
+.nilo-t{display:block;min-height:1.6em}
+.nilo-t:after{content:"";display:inline-block;width:2px;height:1em;margin-right:2px;vertical-align:-.15em;background:var(--nile,#0E7C86);opacity:0}
+.nilo.typing .nilo-t:after{opacity:1;animation:nilo-caret .5s steps(1) infinite}
+.nilo-x{position:absolute;left:5px;top:5px;width:24px;height:24px;border-radius:50%;font-size:16px;line-height:24px;color:var(--mute,#5E7480)}
+.nilo-sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+.nilo.talk .nilo-bub{opacity:1;transform:none;visibility:visible}
+
+/* ── الاختباء: يطلّ من حافة الشاشة ── */
+.nilo.peek{transform:translate(-44px,6px) rotate(18deg) scale(.78)}
+.nilo.gone{opacity:0;transform:translateX(-130px)}
+.nilo.gone,.nilo.gone *{pointer-events:none!important}
+.nilo.enter{animation:nilo-enter .8s cubic-bezier(.34,1.56,.64,1)}
+
+/* ── أجزاء الرسم ── */
+.nilo svg *{transform-box:view-box}
+.n-rig{transform-origin:60px 140px}
+.n-body{transform-origin:60px 140px;animation:nilo-breathe 3.4s ease-in-out infinite}
+.n-shadow{transform-origin:60px 146px;transform-box:view-box}
+.n-arm-l{transform-origin:22px 100px;animation:nilo-sway-l 3.4s ease-in-out infinite;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.n-arm-r{transform-origin:98px 100px;animation:nilo-sway-r 3.4s ease-in-out infinite;transition:transform .35s cubic-bezier(.34,1.56,.64,1)}
+.n-look{transition:transform .22s ease-out}
+.n-face{transition:transform .3s ease-out}
+.n-lid{transform-box:fill-box;transform-origin:50% 0;transform:scaleY(var(--lid));transition:transform .12s ease-in}
+.nilo.blink .n-lid{transform:scaleY(1);transition-duration:.07s}
+.n-brow{transform-box:fill-box;transform-origin:center;transition:transform .3s cubic-bezier(.34,1.56,.64,1)}
+
+/* الأفواه */
+.nilo [data-m]{display:none}
+.nilo[data-mouth=smile] [data-m=smile],.nilo[data-mouth=a] [data-m=a],.nilo[data-mouth=e] [data-m=e],.nilo[data-mouth=o] [data-m=o],.nilo[data-mouth=s] [data-m=s],.nilo[data-mouth=sad] [data-m=sad],.nilo[data-mouth=think] [data-m=think],.nilo[data-mouth=cheer] [data-m=cheer]{display:inline}
+
+/* العيون */
+.n-hap{display:none}
+.nilo[data-eyes=h] .n-eye,.nilo[data-eyes=w] .n-eye-r{display:none}
+.nilo[data-eyes=h] .n-hap,.nilo[data-eyes=w] .n-hap-r{display:inline}
+
+/* المؤثرات */
+.n-fx>g{display:none}
+.nilo[data-mood=cheer] .fx-star,.nilo[data-mood=sad] .fx-tear,.nilo[data-mood=think] .fx-dots,.nilo[data-mood=sad] .fx-sweat{display:inline}
+.fx-star path{transform-box:fill-box;transform-origin:center;animation:nilo-tw .9s ease-in-out infinite alternate}
+.fx-star path:nth-child(2){animation-delay:.3s}.fx-star path:nth-child(3){animation-delay:.6s}.fx-star path:nth-child(4){animation-delay:.45s}
+.fx-tear path{animation:nilo-tear 1.7s ease-in infinite}
+.fx-dots circle{transform-box:fill-box;transform-origin:center;animation:nilo-dot 1.2s ease-in-out infinite}
+.fx-dots circle:nth-child(2){animation-delay:.2s}.fx-dots circle:nth-child(3){animation-delay:.4s}
+
+/* ── المزاج: حواجب وجفون وأذرع ── */
+.nilo[data-mood=happy]{--lid:0}
+.nilo[data-mood=happy] .n-brow{transform:translateY(-1px)}
+.nilo[data-mood=cheer] .n-brow{transform:translateY(-6px)}
+.nilo[data-mood=cheer] .n-arm-r{transform:rotate(-118deg);animation:nilo-pump-r .5s ease-in-out infinite alternate}
+.nilo[data-mood=cheer] .n-arm-l{transform:rotate(118deg);animation:nilo-pump-l .5s ease-in-out infinite alternate}
+.nilo[data-mood=sad]{--lid:.38}
+.nilo[data-mood=sad] .n-brow-l{transform:translateY(-2px) rotate(-16deg)}
+.nilo[data-mood=sad] .n-brow-r{transform:translateY(-2px) rotate(16deg)}
+.nilo[data-mood=sad] .n-arm-l{transform:rotate(-14deg);animation:none}
+.nilo[data-mood=sad] .n-arm-r{transform:rotate(14deg);animation:none}
+.nilo[data-mood=sad] .n-face{transform:translateY(3px)}
+.nilo[data-mood=sad] .n-rig{transform:translateY(2px) scale(1.02,.97)}
+.nilo[data-mood=think]{--lid:.22}
+.nilo[data-mood=think] .n-brow-l{transform:translateY(-6px) rotate(-8deg)}
+.nilo[data-mood=think] .n-brow-r{transform:translateY(1px) rotate(4deg)}
+.nilo[data-mood=think] .n-arm-l{transform:rotate(-92deg);animation:nilo-tap .9s ease-in-out infinite alternate}
+.nilo[data-mood=think] .n-rig{transform:rotate(-5deg)}
+.nilo[data-mood=wink] .n-brow-r{transform:translateY(2px)}
+.nilo[data-mood=wink] .n-brow-l{transform:translateY(-4px)}
+.nilo[data-mood=wink] .n-arm-r{transform:rotate(-70deg);animation:none}
+.nilo[data-mood=sleep]{--lid:1}
+
+/* ── الحركات ── */
+.nilo.talking .n-rig{animation:nilo-talk .3s ease-in-out infinite alternate}
+.nilo.a-jump .n-rig{animation:nilo-jump .75s cubic-bezier(.3,.7,.4,1) 2}
+.nilo.a-jump .n-shadow{animation:nilo-shadow .75s cubic-bezier(.3,.7,.4,1) 2}
+.nilo.a-shake .n-rig{animation:nilo-shake .6s ease-in-out}
+.nilo.a-wave .n-arm-r{transform:rotate(-120deg);animation:nilo-wave .3s ease-in-out 6 alternate}
+.nilo.a-nod .n-face{animation:nilo-nod .4s ease-in-out 2}
+
+/* قصاصات الاحتفال */
+.nilo-conf{position:fixed;inset:0;pointer-events:none;z-index:98;overflow:hidden}
+.nilo-conf i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;animation:nilo-fall linear forwards}
+
+@keyframes nilo-enter{0%{transform:translateX(-140px) rotate(-20deg)}70%{transform:translateX(6px) rotate(4deg)}100%{transform:none}}
+@keyframes nilo-breathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.015,1.03)}}
+@keyframes nilo-sway-l{0%,100%{transform:rotate(0)}50%{transform:rotate(6deg)}}
+@keyframes nilo-sway-r{0%,100%{transform:rotate(0)}50%{transform:rotate(-6deg)}}
+@keyframes nilo-talk{from{transform:translateY(0) scale(1,1)}to{transform:translateY(-1.6px) scale(.99,1.012)}}
+@keyframes nilo-jump{0%{transform:translateY(0) scale(1.12,.86)}30%{transform:translateY(-30px) scale(.92,1.1)}55%{transform:translateY(-34px) scale(.98,1.02)}82%{transform:translateY(0) scale(1.14,.85)}100%{transform:translateY(0) scale(1,1)}}
+@keyframes nilo-shadow{0%,82%,100%{transform:scale(1)}30%,55%{transform:scale(.55);opacity:.5}}
+@keyframes nilo-shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-8deg)}40%{transform:rotate(7deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
+@keyframes nilo-wave{from{transform:rotate(-100deg)}to{transform:rotate(-140deg)}}
+@keyframes nilo-pump-r{from{transform:rotate(-108deg)}to{transform:rotate(-132deg)}}
+@keyframes nilo-pump-l{from{transform:rotate(108deg)}to{transform:rotate(132deg)}}
+@keyframes nilo-tap{from{transform:rotate(-88deg)}to{transform:rotate(-96deg)}}
+@keyframes nilo-nod{50%{transform:translateY(3px)}}
+@keyframes nilo-tw{from{opacity:.3;transform:scale(.6) rotate(0)}to{opacity:1;transform:scale(1.15) rotate(25deg)}}
+@keyframes nilo-tear{0%{transform:translateY(0);opacity:0}15%{opacity:1}100%{transform:translateY(22px);opacity:0}}
+@keyframes nilo-dot{0%,100%{transform:scale(.6);opacity:.4}50%{transform:scale(1.1);opacity:1}}
+@keyframes nilo-caret{50%{opacity:0}}
+@keyframes nilo-fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+@media(prefers-reduced-motion:reduce){.nilo,.nilo *{animation:none!important;transition:none!important}.nilo-conf{display:none}}
