@@ -90,15 +90,40 @@ code{direction:ltr;unicode-bidi:embed;font-family:var(--mono);font-size:.86em;ba
 .con{margin:0;padding:12px 14px;min-height:230px;max-height:320px;overflow:auto;background:#07141A;color:#D8EEF0;font:14px/1.7 var(--mono);direction:ltr;text-align:left;white-space:pre-wrap}
 .con div{border-bottom:1px solid rgba(255,255,255,.05)}.con .er{color:#FF7B9C}.con .mu{color:#6F8C98;font-family:'Cairo',system-ui,sans-serif;direction:rtl;text-align:right;border:0}
 .frame.sm{height:170px}
-.cmh{height:clamp(240px,46vh,440px);direction:ltr;text-align:left;background:#0A1A22}
+#pc{background:#1E222A}
+.etabs{padding:0;gap:0;background:#16191F;border-bottom:1px solid #2A2F38;min-height:40px}
+.ftabs{display:flex;overflow-x:auto;scrollbar-width:none;flex:1;min-width:0}
+.ft{flex:none;display:flex;align-items:center;gap:7px;padding:10px 14px;font:13px var(--mono);color:#7F848E;border-top:2px solid transparent;border-right:1px solid #2A2F38;white-space:nowrap}
+.ft.on{background:#1E222A;color:#E6E6E6;border-top-color:var(--nile2)}
+.ft i{width:9px;height:9px;border-radius:2px;background:#E06C75}.ft.css i{background:#61AFEF}.ft.js i{background:#E5C07B}
+.cmh{height:clamp(240px,46vh,440px);direction:ltr;text-align:left;background:#1E222A}
 .cmh .cm-editor{height:100%}
-.etl{margin-inline-start:auto;display:flex;gap:4px}
-.etl button{min-width:30px;height:26px;padding:0 6px;border-radius:8px;background:#0A1A22;color:#9DB8C0;font:700 12px var(--mono)}
+.estat{display:flex;justify-content:space-between;gap:8px;padding:4px 12px;background:#0E7C86;color:#E9FBF8;font:11px/1.6 var(--mono);direction:rtl;white-space:nowrap;overflow:hidden}
+.estat span:last-child{direction:ltr}
+.etl{display:flex;gap:4px;padding:4px 6px;background:#1E222A;border-bottom:1px solid #2A2F38;overflow-x:auto;scrollbar-width:none}
+.etl button{flex:1 0 auto;height:32px;padding:0 8px;border-radius:8px;color:#9AA3B2;font-size:12px;font-weight:700;white-space:nowrap}
+.etl button:active{background:#2C313A}
 .etl button.on{background:var(--nile);color:#fff}
 .keys .k2{background:var(--deep);color:#D8EEF0;font-size:18px}
 .sug button.on{background:var(--nile)}
 body.typing nav{display:none}
 body.typing .ekb{position:sticky;bottom:0;z-index:15;background:var(--bg);margin:0 -16px;padding:0 16px;box-shadow:0 -6px 14px -10px rgba(0,0,0,.35)}
+.efsbar{display:none}
+body.efs-on{overflow:hidden}
+body.efs-on nav{display:none}
+.efs{position:fixed;inset:0;z-index:60;display:flex;flex-direction:column;background:#16191F;padding:var(--st) 0 var(--sb)}
+.efs .efsbar{display:flex;align-items:center;gap:10px;padding:8px 10px;color:#E6E6E6}
+.efs .efsbar b{flex:1;font-size:15px}
+.efs .efsbar button{display:flex;align-items:center;gap:6px;height:36px;min-width:36px;justify-content:center;border-radius:10px;background:#252A33;color:#E6E6E6;padding:0 10px;font-weight:700}
+.efs .efsbar .ck{background:var(--nile);color:#fff}
+.efs .seg{margin:0 10px 8px;background:#252A33}.efs .seg button{color:#9AA3B2}.efs .seg button.on{background:#1E222A;color:#fff}
+.efs .ide,.efs .pv{flex:1;min-height:0;border-radius:0;display:flex;flex-direction:column;box-shadow:none}
+.efs .ide.hide,.efs .pv.hide{display:none}.efs .pv.off{display:none}
+.efs .cmh{flex:1;height:auto;min-height:0}
+.efs .frame{flex:1;height:auto}.efs .con{flex:1;max-height:none}
+body .efs .ekb{position:static;margin:0;padding:0 8px;background:#16191F;box-shadow:none}
+.efs .ekb .sug .h{color:#7F848E}
+.efs .keys button{background:#252A33;color:#E6E6E6;box-shadow:none}.efs .keys .k2{background:#0E7C86}
 @media(pointer:coarse){.cmh .cm-tooltip-autocomplete{display:none!important}}
 .hide{display:none}
 .off{position:absolute;right:-9999px;top:0;width:320px;opacity:0;pointer-events:none}
@@ -879,6 +904,7 @@ function go(n,id){
   const back=n==='home'&&V.n==='lesson';
   // إعلان بيني عند الرجوع إذا قضى المستخدم >30 ثانية في الدرس
   if(back&&(Date.now()-_lessonEnteredAt)>30000)_showInter();
+  if(window._efsExit)window._efsExit();
   V={n,id};render();scrollTo(0,0);
   if(back){const x=document.querySelector('.node.next');if(x)x.scrollIntoView({block:'center'})}
   if(n==='lesson'){amBannerHide();_lessonEnteredAt=Date.now();}else amBannerShow();
@@ -1033,49 +1059,66 @@ function editorLegacy(host,code,onload,fname,o){
   paint();if(!JS)run();suggest();return{ed,fr,run,paint,show,main:o.page?'r':'o'};
 }
 
-/* ---------- Editor (CodeMirror 6: تلوين، إكمال تلقائي، إغلاق الأقواس والوسوم) ---------- */
+/* ---------- Editor (CodeMirror 6 بشكل IDE: تبويبات ملفات، ملء الشاشة، تلوين، إكمال تلقائي) ---------- */
 const CMT={type:'t',keyword:'t',property:'a',text:'s',constant:'s',function:'p',method:'p',variable:'p',class:'p'};
+const EKEYS={html:['<','>','/','"','=','{','}',';',':','#','.','(',')','-','!'],css:['{','}',':',';','#','.','-','%','(',')','"',',','!','>','*'],js:['(',')','{','}','[',']',';','"',"'",'`','=','>','<','.',',','!','+','-','*','/','&','|','?',':','$','_']};
+const ELANG={html:'HTML',css:'CSS',js:'JavaScript'};
+const ecss=(b,a)=>ac('<style>\n'+b,a);
 function editor(host,code,onload,fname,o){
   if(!window.CM||!CM.create)return editorLegacy(host,code,onload,fname,o);
-  o=o||{};const JS=!!o.js;
-  host.innerHTML=`<div class="seg"><button class="on" data-s="c">${ic('code')} الكود</button>${JS&&!o.page?'':`<button data-s="r">${ic('eye')} ${JS?'الصفحة':'النتيجة'}</button>`}${JS?`<button data-s="o">${ic('terminal')} الكونسول</button>`:''}</div>
-  <div class="ide" id="pc"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="fn">${fname||'index.html'}</span><span class="etl"><button data-a="fs-" aria-label="تصغير الخط">A−</button><button data-a="fs+" aria-label="تكبير الخط">A+</button><button data-a="wrap" aria-label="التفاف الأسطر">↵</button></span></div><div class="cmh" id="cmh"></div></div>
-  <div class="pv off" id="pr"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="addr">preview</span></div><iframe class="frame" id="fr" sandbox="${JS?'allow-scripts allow-forms':'allow-same-origin'}"></iframe></div>
-  ${JS?'<div class="pv hide" id="pcn"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="addr">console</span></div><pre class="con" id="con"></pre></div>':''}
+  o=o||{};const JS=!!o.js,MULTI=!!o.files,LIVE=!JS||MULTI,CON=JS||MULTI;
+  const files=MULTI?o.files:[{key:'main',name:fname||(JS?'script.js':'index.html'),lang:JS?'js':'html',doc:code}];
+  files.forEach(f=>f.complete=f.lang==='js'?(b=>acJS(b)):f.lang==='css'?ecss:ac);
+  const sb=MULTI?'allow-scripts allow-forms allow-modals':JS?'allow-scripts allow-forms':'allow-same-origin';
+  const chk=!!document.querySelector('#ck');
+  host.innerHTML=`<div class="efsbar"><button data-x="exit" aria-label="خروج من ملء الشاشة">${ic('back')}</button><b>${MULTI?'مشروعي':'محرر الكود'}</b>${chk?`<button data-x="check" class="ck">${ic('check')} تحقق</button>`:''}</div>
+  <div class="seg"><button class="on" data-s="c">${ic('code')} الكود</button>${JS&&!o.page&&!MULTI?'':`<button data-s="r">${ic('eye')} ${JS?'الصفحة':'النتيجة'}</button>`}${CON?`<button data-s="o">${ic('terminal')} الكونسول</button>`:''}</div>
+  <div class="ide" id="pc"><div class="tabs etabs"><div class="ftabs" id="ftabs">${files.map((f,i)=>`<button data-f="${f.key}" class="ft ${f.lang}${i?'':' on'}"><i></i>${esc(f.name)}</button>`).join('')}</div></div><div class="etl"><button data-a="full">⛶ ملء الشاشة</button><button data-a="wrap">↵ التفاف</button><button data-a="fmt">ترتيب</button><button data-a="find">بحث</button><button data-a="fs-" dir="ltr" aria-label="تصغير الخط">A−</button><button data-a="fs+" dir="ltr" aria-label="تكبير الخط">A+</button></div><div class="cmh" id="cmh"></div><div class="estat" id="estat"></div></div>
+  <div class="pv off" id="pr"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="addr">preview</span></div><iframe class="frame" id="fr" sandbox="${sb}"></iframe></div>
+  ${CON?'<div class="pv hide" id="pcn"><div class="tabs"><span class="dots"><i></i><i></i><i></i></span><span class="addr">console</span></div><pre class="con" id="con"></pre></div>':''}
   <div id="kb" class="ekb"><div class="sug" id="sug"></div><div class="keys" id="keys"></div></div>`;
-  const fr=$('#fr'),con=$('#con'),cmh=$('#cmh'),sg=$('#sug');
+  const q=s=>host.querySelector(s);
+  const fr=q('#fr'),con=q('#con'),cmh=q('#cmh'),sg=q('#sug'),stat=q('#estat');
   let fs=15;try{fs=+localStorage.getItem('wn_ed_fs')||15}catch(e){}
-  const setFs=v=>{fs=Math.max(12,Math.min(22,v));cmh.style.setProperty('--wn-fs',fs+'px');try{localStorage.setItem('wn_ed_fs',fs)}catch(e){}};
+  const setFs=v=>{fs=Math.max(11,Math.min(24,v));cmh.style.setProperty('--wn-fs',fs+'px');try{localStorage.setItem('wn_ed_fs',fs)}catch(e){}};
   let last=null;
   const chips=list=>{const k=list.map(x=>x.label+(x.sel?'*':'')).join('\n');if(k===last)return;last=k;
     sg.innerHTML=list.length?list.slice(0,30).map((x,i)=>`<button data-i="${i}" data-t="${CMT[x.type]||'s'}"${x.sel?' class="on"':''}>${esc(x.label)}</button>`).join(''):'<span class="h">الاقتراحات الذكية تظهر هنا أثناء الكتابة</span>'};
-  const cm=CM.create(cmh,{lang:JS?'js':'html',doc:code,complete:JS?(b=>acJS(b)):ac,onCompletions:chips});
-  setFs(fs);
+  let cm;
+  const status=c=>{if(!cm)return;stat.innerHTML=`<span>سطر ${c.line}، عمود ${c.col}${c.sel?` (${c.sel} محدد)`:''}</span><span>${ELANG[cm.lang]} · مسافتان · UTF-8</span>`};
+  cm=CM.create(cmh,{files,onCompletions:chips,onCursor:status});
+  setFs(fs);status(cm.cursor());
   // واجهة متوافقة مع textarea القديم: ed.value و حدث input
   const ed=new EventTarget();
   Object.defineProperty(ed,'value',{get:()=>cm.value,set:v=>{cm.value=v}});
   ed.focus=()=>cm.focus();
   cm.onInput(()=>ed.dispatchEvent(new Event('input')));
-  const KEYS=JS?['(',')','{','}','[',']',';','"',"'",'`','=','>','<','.',',','!','+','-','*','/','&','|','?',':','$','_']:['<','>','/','"','=','{','}',';',':','#','.','(',')','-','!'];
   const ka=k=>esc(k).replace(/"/g,'&quot;');
-  $('#keys').innerHTML='<button class="k2" data-c="tab">⇥</button><button class="k2" data-c="undo" aria-label="تراجع">↶</button><button class="k2" data-c="redo" aria-label="إعادة">↷</button><button class="k2" data-c="left" aria-label="يسار">◀</button><button class="k2" data-c="right" aria-label="يمين">▶</button>'+KEYS.map(k=>`<button data-k="${ka(k)}">${esc(k)}</button>`).join('');
+  const keys=()=>{q('#keys').innerHTML='<button class="k2" data-c="tab">⇥</button><button class="k2" data-c="undo" aria-label="تراجع">↶</button><button class="k2" data-c="redo" aria-label="إعادة">↷</button><button class="k2" data-c="left" aria-label="يسار">◀</button><button class="k2" data-c="right" aria-label="يمين">▶</button>'+EKEYS[cm.lang].map(k=>`<button data-k="${ka(k)}">${esc(k)}</button>`).join('')};
+  keys();
   // الأزرار لا تسرق التركيز من المحرر، فتبقى لوحة المفاتيح مفتوحة
   const keep=e=>{if(e.target.closest('button'))e.preventDefault()};
-  ['#keys','#sug','.etl'].forEach(s=>host.querySelector(s).addEventListener('pointerdown',keep));
-  ['#keys','#sug','.etl'].forEach(s=>host.querySelector(s).addEventListener('mousedown',keep));
-  $('#keys').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c)cm[b.dataset.c]();else cm.type(b.dataset.k)};
+  ['#keys','#sug','.etl','#ftabs'].forEach(s=>{q(s).addEventListener('pointerdown',keep);q(s).addEventListener('mousedown',keep)});
+  q('#keys').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c)cm[b.dataset.c]();else cm.type(b.dataset.k)};
   sg.onclick=e=>{const b=e.target.closest('button');if(b)cm.pick(+b.dataset.i)};
-  host.querySelector('.etl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
-    if(a==='fs-')setFs(fs-1);else if(a==='fs+')setFs(fs+1);else{b.classList.toggle('on',cm.toggleWrap());toast(cm.wrap?'التفاف الأسطر مفعّل':'التفاف الأسطر متوقف')}};
-  host.querySelector('[data-a=wrap]').classList.toggle('on',cm.wrap);
-  // أثناء الكتابة: إخفاء شريط التنقل وتثبيت شريط الرموز فوق لوحة المفاتيح
+  q('#ftabs').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;cm.open(b.dataset.f);host.querySelectorAll('#ftabs .ft').forEach(x=>x.classList.toggle('on',x===b));keys();show('c',1)};
+  // ملء الشاشة
+  const full=on=>{host.classList.toggle('efs',on);document.body.classList.toggle('efs-on',on);q('[data-a=full]').classList.toggle('on',on);window._efsExit=on?()=>{full(false);return true}:null;setTimeout(()=>cm.measure(),50)};
+  q('.efsbar').onclick=e=>{const b=e.target.closest('button');if(!b)return;full(false);if(b.dataset.x==='check')setTimeout(()=>{const c=document.querySelector('#ck');if(c){c.scrollIntoView({block:'center'});c.click()}},60)};
+  q('.etl').onclick=e=>{const b=e.target.closest('button');if(!b)return;const a=b.dataset.a;
+    if(a==='fs-')setFs(fs-1);else if(a==='fs+')setFs(fs+1);else if(a==='find')cm.search();else if(a==='fmt'){cm.format();toast('رُتّبت المسافات')}
+    else if(a==='full')full(!host.classList.contains('efs'));
+    else{b.classList.toggle('on',cm.toggleWrap());toast(cm.wrap?'التفاف الأسطر مفعّل':'التفاف الأسطر متوقف')}};
+  q('[data-a=wrap]').classList.toggle('on',cm.wrap);
+  // أثناء الكتابة على الجوال: إخفاء شريط التنقل وتثبيت شريط الرموز فوق لوحة المفاتيح
   let bt;cm.view.dom.addEventListener('focusin',()=>{clearTimeout(bt);if(CM.isTouch)document.body.classList.add('typing')});
   cm.view.dom.addEventListener('focusout',()=>{bt=setTimeout(()=>document.body.classList.remove('typing'),150)});
-  const show=(v,nr)=>{host.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.s===v));$('#pc').classList.toggle('hide',v!=='c');$('#kb').classList.toggle('hide',v!=='c');$('#pr').classList.toggle('off',v!=='r');const cn=$('#pcn');if(cn)cn.classList.toggle('hide',v!=='o');if(v!=='c'){document.body.classList.remove('typing');if(!nr)run()}};
+  const show=(v,nr)=>{host.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.s===v));q('#pc').classList.toggle('hide',v!=='c');q('#kb').classList.toggle('hide',v!=='c');q('#pr').classList.toggle('off',v!=='r');const cn=q('#pcn');if(cn)cn.classList.toggle('hide',v!=='o');if(v!=='c'){document.body.classList.remove('typing');if(!nr)run()}};
   host.querySelector('.seg').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.s)};
-  let w;const run=()=>{fr.srcdoc=JS?runner(cm.value,o.page,o.tests):wrap(cm.value)};
-  if(JS){
-    con.innerHTML='<div class="mu">اضغط «تشغيل» لترى النتيجة هنا</div>';
+  const page=()=>{const h=cm.get('html'),c=cm.get('css');return(c.trim()?`<style>\n${c}\n</style>\n`:'')+h};
+  let w;const run=()=>{fr.srcdoc=MULTI?runner(cm.get('js'),page(),''):JS?runner(cm.value,o.page,o.tests):wrap(cm.value)};
+  if(CON){
+    con.innerHTML='<div class="mu">'+(MULTI?'مخرجات console.log من script.js تظهر هنا':'اضغط «تشغيل» لترى النتيجة هنا')+'</div>';
     if(window._wn)removeEventListener('message',window._wn);
     window._wn=e=>{const d=e.data;if(e.source!==fr.contentWindow||!d||!d.wn)return;
       const L=d.logs.map(l=>l[0]==='!'?`<div class="er">${esc(l.slice(1))}</div>`:`<div>${esc(l)}</div>`);
@@ -1083,9 +1126,9 @@ function editor(host,code,onload,fname,o){
       con.innerHTML=L.join('')||'<div class="mu">لا توجد مخرجات. استعمل console.log لطباعة شيء</div>';
       o.onres&&o.onres({logs:d.logs,err:d.err,t:d.t,doc:new DOMParser().parseFromString(d.html||'','text/html')})};
     addEventListener('message',window._wn)}
-  ed.addEventListener('input',()=>{if(!JS){clearTimeout(w);w=setTimeout(run,350)}});
-  fr.onload=()=>{if(!JS&&onload)onload(fr.contentDocument)};
-  chips([]);if(!JS)run();return{ed,fr,run,paint:()=>{},show,main:o.page?'r':'o',cm};
+  ed.addEventListener('input',()=>{if(LIVE){clearTimeout(w);w=setTimeout(run,MULTI?600:350)}});
+  fr.onload=()=>{if(!JS&&!MULTI&&onload)onload(fr.contentDocument)};
+  chips([]);if(LIVE)run();return{ed,fr,run,paint:()=>{},show,main:o.page||MULTI?'r':'o',cm,full};
 }
 
 /* ---------- Views ---------- */
@@ -1169,12 +1212,18 @@ function bindLesson(){
   }
 }
 const SNIP={'هيكل':['code','<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n</head>\n<body>\n  \n</body>\n</html>\n'],'عنوان':['heading','<h1>عنوان</h1>\n'],'فقرة':['type','<p>نص الفقرة</p>\n'],'زر':['cursor','<button>اضغط</button>\n'],'بطاقة':['box','<style>\n  .card {\n    padding: 16px;\n    border-radius: 16px;\n    background: #e8f7f5;\n  }\n</style>\n<div class="card">بطاقة</div>\n']};
-function play(){return `<div class="bar2"><h1>تجربة حرة<small>اكتب أي HTML أو CSS وشاهد النتيجة</small></h1></div><div class="page"><div class="chips">${Object.keys(SNIP).map(k=>`<button data-sn="${k}">${ic('plus')} ${k}</button>`).join('')}</div><div id="edh"></div></div>`}
+function play(){return `<div class="bar2"><h1>تجربة حرة<small>مشروع كامل: HTML وCSS وJavaScript في ملفات منفصلة</small></h1></div><div class="page"><div class="chips">${Object.keys(SNIP).map(k=>`<button data-sn="${k}">${ic('plus')} ${k}</button>`).join('')}</div><div id="edh"></div></div>`}
 function bindPlay(){
-  let saved='';try{saved=localStorage.getItem('webnile_play')||''}catch(e){}
-  const E=editor($('#edh'),saved||'<h1>أهلاً بك</h1>\n<p>جرّب أي كود HTML أو CSS هنا.</p>');
-  E.ed.addEventListener('input',()=>{try{localStorage.setItem('webnile_play',E.ed.value)}catch(e){}});
-  document.querySelector('.chips').onclick=e=>{const b=e.target.closest('[data-sn]');if(!b)return;E.ed.value=b.dataset.sn==='هيكل'?SNIP['هيكل'][1]:E.ed.value+(E.ed.value.endsWith('\n')?'':'\n')+SNIP[b.dataset.sn][1];E.ed.dispatchEvent(new Event('input'));toast('أُضيف '+b.dataset.sn)};
+  const ld=(k,d)=>{try{return localStorage.getItem(k)||d}catch(e){return d}};
+  const sv=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
+  const html=ld('webnile_play','<h1>أهلاً بك</h1>\n<p>جرّب أي كود HTML هنا، والتنسيق في style.css، والبرمجة في script.js.</p>\n<button id="btn">اضغط</button>');
+  const F=[['html','index.html','webnile_play',html],['css','style.css','webnile_play_css','body {\n  font-family: Cairo, sans-serif;\n}\n'],['js','script.js','webnile_play_js','// اكتب JavaScript هنا\n']];
+  const E=editor($('#edh'),html,null,'index.html',{files:F.map(f=>({key:f[0],name:f[1],lang:f[0],doc:f[0]==='html'?html:ld(f[2],f[3])}))});
+  const multi=!!E.cm;
+  E.ed.addEventListener('input',()=>{if(!multi)return sv('webnile_play',E.ed.value);F.forEach(f=>sv(f[2],E.cm.get(f[0])))});
+  document.querySelector('.chips').onclick=e=>{const b=e.target.closest('[data-sn]');if(!b)return;
+    if(multi){const t=document.querySelector('#ftabs [data-f=html]');if(t)t.click()}
+    E.ed.value=b.dataset.sn==='هيكل'?SNIP['هيكل'][1]:E.ed.value+(E.ed.value.endsWith('\n')?'':'\n')+SNIP[b.dataset.sn][1];E.ed.dispatchEvent(new Event('input'));toast('أُضيف '+b.dataset.sn)};
 }
 let armed=false;
 function me(){
@@ -1213,7 +1262,7 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-back]'))return go('home');
 });
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
-try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.addListener('backButton',()=>{V.n!=='home'?go('home'):A.exitApp()})}catch(e){}
+try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.addListener('backButton',()=>{if(window._efsExit&&window._efsExit())return;V.n!=='home'?go('home'):A.exitApp()})}catch(e){}
 
 // ── AdMob — استراتيجية ذكية ────────────────────────────────────────
 // ⚠️ للاختبار: غيّر IS_TEST إلى true لترى إعلانات تجريبية فوراً
