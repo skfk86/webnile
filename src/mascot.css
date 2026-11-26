@@ -1,0 +1,60 @@
+/* ───── نيلو: الشخصية المشجعة في ويب نايل ───── */
+.nilo{position:fixed;left:8px;bottom:calc(132px + var(--sb,0px) + var(--bh,0px));z-index:30;display:flex;align-items:flex-end;gap:6px;direction:ltr;pointer-events:none;transition:transform .45s cubic-bezier(.34,1.56,.64,1),opacity .3s}
+.nilo-btn{pointer-events:auto;width:68px;height:76px;padding:0;flex:none;filter:drop-shadow(0 4px 6px rgba(11,31,42,.22));touch-action:manipulation;-webkit-user-select:none;user-select:none}
+.nilo-btn svg{width:100%;height:100%;display:block;overflow:visible}
+.nilo-body{transform-origin:50px 108px;animation:nilo-bob 3.2s ease-in-out infinite}
+.nilo-eye{transform-box:fill-box;transform-origin:center;animation:nilo-blink 4.6s infinite}
+.nilo-pup{transition:transform .3s}
+.nilo-arm-r{transform-origin:84px 72px}.nilo-arm-l{transform-origin:16px 72px}
+
+/* الفقاعة */
+.nilo-bub{pointer-events:auto;position:relative;order:2;direction:rtl;text-align:right;max-width:min(230px,calc(100vw - 100px));background:var(--card,#fff);color:var(--ink,#0B1F2A);border-radius:18px 18px 18px 6px;padding:9px 12px 9px 28px;margin-bottom:40px;font-size:14px;font-weight:700;line-height:1.55;box-shadow:0 6px 20px rgba(11,31,42,.16),0 0 0 1px var(--line,#DCE7E6);opacity:0;transform:scale(.6) translateY(10px);transform-origin:left bottom;transition:opacity .2s,transform .3s cubic-bezier(.34,1.56,.64,1);visibility:hidden}
+.nilo-bub:before{content:"";position:absolute;left:-6px;bottom:8px;width:14px;height:14px;background:inherit;transform:rotate(45deg);border-radius:3px;box-shadow:-1px 1px 0 var(--line,#DCE7E6)}
+.nilo-bub b{color:var(--nile,#0E7C86)}
+.nilo-x{position:absolute;left:4px;top:4px;width:22px;height:22px;border-radius:50%;font-size:15px;line-height:22px;color:var(--mute,#5E7480)}
+.nilo.talk .nilo-bub{opacity:1;transform:none;visibility:visible}
+
+/* وضع الاختباء: يطلّ من حافة الشاشة */
+.nilo.peek{transform:translateX(-30px) rotate(16deg)}
+.nilo.peek .nilo-btn{opacity:.92}
+.nilo.gone{opacity:0;transform:translateX(-110px);pointer-events:none}
+.nilo.gone *{pointer-events:none}
+
+/* الأفواه حسب المزاج */
+.nilo .m{display:none}
+.nilo.mood-happy .m-happy,.nilo.mood-cheer .m-cheer,.nilo.mood-oops .m-oops,.nilo.mood-think .m-think,.nilo.mood-wink .m-happy,.nilo.mood-sleep .m-sleep{display:inline}
+.nilo .brow,.nilo .zz,.nilo .stars,.nilo .wink{display:none}
+.nilo.mood-think .brow,.nilo.mood-oops .brow{display:inline}
+.nilo.mood-sleep .zz{display:inline}
+.nilo.mood-cheer .stars{display:inline}
+.nilo.mood-wink .wink{display:inline}.nilo.mood-wink .eye-r{display:none}
+.nilo.mood-sleep .nilo-eye{transform:scaleY(.12);animation:none}
+.nilo.mood-cheer .nilo-cheek{opacity:.9}
+.nilo.mood-think .nilo-pup{transform:translate(2px,-2px)}
+.nilo.mood-oops .nilo-pup{transform:translateY(1.5px)}
+
+/* الحركات */
+.nilo.a-jump .nilo-body{animation:nilo-jump .9s cubic-bezier(.3,.7,.4,1) 2}
+.nilo.a-shake .nilo-body{animation:nilo-shake .55s ease-in-out}
+.nilo.a-wave .nilo-arm-r{animation:nilo-wave .5s ease-in-out 4 alternate}
+.nilo.a-cheer .nilo-arm-r,.nilo.a-jump .nilo-arm-r{animation:nilo-up .45s ease-out forwards}
+.nilo.a-cheer .nilo-arm-l,.nilo.a-jump .nilo-arm-l{animation:nilo-up-l .45s ease-out forwards}
+.nilo.a-pop{animation:nilo-pop .5s cubic-bezier(.34,1.56,.64,1)}
+.nilo .stars{animation:nilo-tw 1s ease-in-out infinite alternate;transform-origin:50px 40px}
+
+/* قصاصات الاحتفال */
+.nilo-conf{position:fixed;inset:0;pointer-events:none;z-index:98;overflow:hidden}
+.nilo-conf i{position:absolute;top:-14px;width:9px;height:14px;border-radius:2px;animation:nilo-fall linear forwards}
+
+@keyframes nilo-bob{0%,100%{transform:translateY(0) scale(1,1)}50%{transform:translateY(-3px) scale(.985,1.015)}}
+@keyframes nilo-blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+@keyframes nilo-jump{0%{transform:translateY(0) scale(1.08,.9)}35%{transform:translateY(-20px) scale(.94,1.08)}65%{transform:translateY(0) scale(1.1,.88)}100%{transform:translateY(0) scale(1)}}
+@keyframes nilo-shake{0%,100%{transform:rotate(0)}20%{transform:rotate(-9deg)}40%{transform:rotate(7deg)}60%{transform:rotate(-5deg)}80%{transform:rotate(3deg)}}
+@keyframes nilo-wave{from{transform:rotate(0)}to{transform:rotate(-38deg)}}
+@keyframes nilo-up{to{transform:rotate(-70deg)}}
+@keyframes nilo-up-l{to{transform:rotate(70deg)}}
+@keyframes nilo-pop{0%{transform:scale(.5) translateY(40px);opacity:0}100%{transform:none;opacity:1}}
+@keyframes nilo-tw{from{opacity:.4;transform:scale(.85)}to{opacity:1;transform:scale(1.08)}}
+@keyframes nilo-fall{to{transform:translateY(110vh) rotate(720deg)}}
+
+@media(prefers-reduced-motion:reduce){.nilo,.nilo *{animation:none!important;transition:none!important}.nilo-conf{display:none}}
