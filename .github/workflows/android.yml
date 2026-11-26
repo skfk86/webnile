@@ -90,17 +90,6 @@ jobs:
       - name: Sync web assets
         run: npx cap sync android
 
-      - name: Configure AdMob in AndroidManifest
-        run: |
-          MANIFEST=android/app/src/main/AndroidManifest.xml
-          APP_ID="${{ secrets.ADMOB_APP_ID }}"
-          # استخدم معرّف الاختبار إذا لم يُضف Secret بعد
-          if [ -z "$APP_ID" ]; then
-            APP_ID="ca-app-pub-7608701150166997~6726677483"
-          fi
-          sed -i "s|</application>|    <meta-data android:name=\"com.google.android.gms.ads.APPLICATION_ID\" android:value=\"$APP_ID\"/>\n        </application>|" "$MANIFEST"
-          echo "✓ AdMob App ID set"
-
       - name: Set version
         run: |
           NAME=$(node -p "require('./package.json').version")

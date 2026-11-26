@@ -177,11 +177,10 @@ nav button.on{color:var(--nile)}
   <div class="sheet">
     <div style="font-size:38px;margin-bottom:8px">🔒</div>
     <h3 id="lock-title">درس مقفل</h3>
-    <p id="lock-desc">شاهد إعلاناً قصيراً لفتح هذا الدرس</p>
+    <p id="lock-desc">أنجز الدروس السابقة أو افتحه بنقاطك</p>
     <button id="lock-xp" style="display:none;width:100%;margin-bottom:10px;padding:12px;border-radius:16px;font-weight:700;font-size:15px;background:var(--nile);color:#fff">⭐ استخدم 100 نقطة</button>
     <div class="sheet-btns">
       <button id="lock-cancel" style="background:var(--line);color:var(--ink)">إلغاء</button>
-      <button id="lock-watch" style="background:var(--sun);color:#0B1F2A">▶ شاهد وافتح</button>
     </div>
     <p id="lock-xp-hint" style="display:none;margin:10px 0 0;font-size:12px;color:var(--mute)"></p>
   </div>
@@ -840,7 +839,7 @@ const save=()=>{try{localStorage.setItem('webnile2',JSON.stringify(S))}catch(e){
 let V={n:'home'};
 let tt;function toast(m,c=''){const t=$('#toast');t.textContent=m;t.className='toast show '+c;clearTimeout(tt);tt=setTimeout(()=>t.className='toast',2600)}
 const XP_UNLOCK=100;
-// onUnlock = دالة تُفتح مجاناً (XP أو بعد مشاهدة الإعلان)
+// onUnlock = تُستدعى بعد فتح الدرس بالنقاط
 function showLockSheet(title,desc,onUnlock){
   const ov=$('#lock-overlay');
   $('#lock-title').textContent=title;
@@ -853,24 +852,18 @@ function showLockSheet(title,desc,onUnlock){
   }else{
     xpBtn.style.display='none';
     xpHint.style.display='block';
-    xpHint.textContent=`تحتاج ${XP_UNLOCK} نقطة لفتح درس مجاناً — لديك ${S.xp} حالياً`;
+    xpHint.textContent=`تحتاج ${XP_UNLOCK} نقطة لفتح هذا الدرس — لديك ${S.xp} حالياً. أنجز دروساً أكثر (+20 لكل درس) لتجمع النقاط`;
   }
   ov.classList.add('show');
   const close=()=>ov.classList.remove('show');
   $('#lock-cancel').onclick=close;
   // XP: خصم مباشر ثم فتح
   xpBtn.onclick=()=>{close();S.xp-=XP_UNLOCK;save();toast(`✅ فُتح الدرس! تبقّى لديك ${S.xp} نقطة`,'good');onUnlock();};
-  // إعلان: شاهد أولاً ثم فتح
-  $('#lock-watch').onclick=()=>{close();amShowReward(onUnlock);};
 }
-let _lessonEnteredAt=0;
 function go(n,id){
   const back=n==='home'&&V.n==='lesson';
-  // إعلان بيني عند الرجوع إذا قضى المستخدم >30 ثانية في الدرس
-  if(back&&(Date.now()-_lessonEnteredAt)>30000)_showInter();
   V={n,id};render();scrollTo(0,0);
   if(back){const x=document.querySelector('.node.next');if(x)x.scrollIntoView({block:'center'})}
-  if(n==='lesson'){amBannerHide();_lessonEnteredAt=Date.now();}else amBannerShow();
 }
 const doneCount=()=>LESSONS.filter(l=>S.done[l.id]).length;
 const nextL=()=>LESSONS.find(l=>!S.done[l.id]);
@@ -1049,8 +1042,8 @@ function lesson(){
     ?`<button class="btn s" id="nb">العودة للدروس</button>`
     :nxtFree
       ?`<button class="btn s" id="nb">الدرس التالي ${ic('next')}</button>`
-      :`<button class="btn" style="background:var(--sun);color:#0B1F2A" id="nb">${ic('play')} شاهد إعلاناً ← التخطي</button>`;
-  return `<div class="bar2"><button class="ib" data-back aria-label="رجوع">${ic('back')}</button><h1>${l.t}<small>الوحدة ${l.u+1}: ${UNITS[l.u].t} · ${l.ui+1} من ${UNITS[l.u].ids.length}</small></h1></div><div class="page">${l.g?`<div class="goal">${ic('target')}<div><b>هدف الدرس</b>${fmt(l.g)}</div></div>`:''}<div class="card">${l.body.map(b=>body(b,l)).join('')}</div>${l.s?`<div class="card sum"><h3>${ic('check')} الخلاصة</h3><ul>${l.s.map(x=>`<li>${fmt(x)}</li>`).join('')}</ul>${l.e?`<div class="err"><b>⚠ خطأ شائع:</b> ${fmt(l.e)}</div>`:''}</div>`:''}<div class="card task"><h3>${ic('target')} مهمتك</h3><p>${fmt(l.task)}</p><ul class="chk" id="chk">${l.checks.map(c=>`<li>${c[0]}</li>`).join('')}</ul></div><div id="edh"></div><div class="row"><button class="btn" id="rs">${ic('reset')} إعادة</button>${l.k==='js'?`<button class="btn" id="rn">${ic('play')} تشغيل</button>`:''}<button class="btn p" id="ck">${ic('check')} تحقق</button></div><div class="row"><button class="btn" id="hint-btn" style="background:rgba(245,184,61,.15);color:var(--ink)">💡 تلميح ${ic('play')}</button></div><div class="row hide" id="nx">${nxtBtn}</div></div>`;
+      :`<button class="btn" style="background:var(--sun);color:#0B1F2A" id="nb">⭐ تخطَّ بـ ${XP_UNLOCK} نقطة</button>`;
+  return `<div class="bar2"><button class="ib" data-back aria-label="رجوع">${ic('back')}</button><h1>${l.t}<small>الوحدة ${l.u+1}: ${UNITS[l.u].t} · ${l.ui+1} من ${UNITS[l.u].ids.length}</small></h1></div><div class="page">${l.g?`<div class="goal">${ic('target')}<div><b>هدف الدرس</b>${fmt(l.g)}</div></div>`:''}<div class="card">${l.body.map(b=>body(b,l)).join('')}</div>${l.s?`<div class="card sum"><h3>${ic('check')} الخلاصة</h3><ul>${l.s.map(x=>`<li>${fmt(x)}</li>`).join('')}</ul>${l.e?`<div class="err"><b>⚠ خطأ شائع:</b> ${fmt(l.e)}</div>`:''}</div>`:''}<div class="card task"><h3>${ic('target')} مهمتك</h3><p>${fmt(l.task)}</p><ul class="chk" id="chk">${l.checks.map(c=>`<li>${c[0]}</li>`).join('')}</ul></div><div id="edh"></div><div class="row"><button class="btn" id="rs">${ic('reset')} إعادة</button>${l.k==='js'?`<button class="btn" id="rn">${ic('play')} تشغيل</button>`:''}<button class="btn p" id="ck">${ic('check')} تحقق</button></div><div class="row"><button class="btn" id="hint-btn" style="background:rgba(245,184,61,.15);color:var(--ink)">💡 تلميح</button></div><div class="row hide" id="nx">${nxtBtn}</div></div>`;
 }
 function bindLesson(){
   const l=LESSONS.find(x=>x.id===V.id),i=LESSONS.indexOf(l),JS=l.k==='js';let want=false;
@@ -1061,24 +1054,22 @@ function bindLesson(){
   $('#ck').onclick=()=>{
     if(JS){want=true;E.show(E.main,1);E.run();return}
     const d=E.fr.contentDocument;if(E.fr.srcdoc===wrap(E.ed.value)&&d&&d.readyState==='complete'&&d.body)evalC(d);else{want=true;E.run()}};
-  // زر التلميح — يشاهد إعلان مكافأة ويحصل على تلميح
+  // زر التلميح — مجاني
   const hintMsg=l.hint||(l.e?'انتبه: '+l.e.replace(/`/g,''):'')||`راجع الكود الموجود في المحاضرة وقارنه بما يطلبه التحقق — ركّز على ${l.checks[0]?l.checks[0][0]:'الشرط الأول'}.`;
   $('#hint-btn').onclick=()=>{
-    amShowReward(()=>{
-      let hb=$('#hint-box');
-      if(!hb){hb=document.createElement('div');hb.id='hint-box';hb.className='tip';$('#hint-btn').parentNode.after(hb)}
-      hb.innerHTML=`${ic('bulb')}<div>${hintMsg}</div>`;
-      hb.scrollIntoView({behavior:'smooth',block:'center'});
-    });
+    let hb=$('#hint-box');
+    if(!hb){hb=document.createElement('div');hb.id='hint-box';hb.className='tip';$('#hint-btn').parentNode.after(hb)}
+    hb.innerHTML=`${ic('bulb')}<div>${hintMsg}</div>`;
+    hb.scrollIntoView({behavior:'smooth',block:'center'});
   };
   const _nxt=LESSONS[i+1];
   $('#nb').onclick=()=>{
     if(!_nxt)return go('home');
     // مجاني: إذا أنجز الدرس الحالي أو الدرس التالي مفتوح مسبقاً
     if(S.done[l.id]||S.unlocked[_nxt.id]||S.done[_nxt.id])return go('lesson',_nxt.id);
-    // تخطي بدون إنجاز — XP أو إعلان
+    // تخطي بدون إنجاز — بالنقاط
     const _doUnlock=()=>{S.unlocked[_nxt.id]=1;save();go('lesson',_nxt.id)};
-    showLockSheet('تخطي الدرس؟',`"${_nxt.t}" — أنجز الدرس للانتقال مجاناً، أو افتحه بنقاط/إعلان`,_doUnlock);
+    showLockSheet('تخطي الدرس؟',`"${_nxt.t}" — أنجز الدرس للانتقال مجاناً، أو افتحه بنقاطك`,_doUnlock);
   };
   // أظهر زر التالي إذا الدرس محلول أو الدرس التالي مفتوح مسبقاً
   if(S.done[l.id]||(_nxt&&(S.unlocked[_nxt.id]||S.done[_nxt.id])))$('#nx').classList.remove('hide');
@@ -1087,7 +1078,7 @@ function bindLesson(){
     const r=l.checks.map(c=>{try{return!!c[1](d)}catch(e){return false}});
     [...$('#chk').children].forEach((li,j)=>li.className=r[j]?'ok':'no');
     if(r.every(Boolean)){
-      if(!S.done[l.id]){S.done[l.id]=1;S.xp+=20;const t=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();S.streak=S.last===t?S.streak:(S.last===y?S.streak+1:1);S.last=t;save();amOnLessonDone()}
+      if(!S.done[l.id]){S.done[l.id]=1;S.xp+=20;const t=new Date().toDateString(),y=new Date(Date.now()-864e5).toDateString();S.streak=S.last===t?S.streak:(S.last===y?S.streak+1:1);S.last=t;save()}
       {const u=UNITS[l.u];toast(unitDone(u)===u.ids.length?`🎉 أنهيت الوحدة ${l.u+1}: ${u.t}!`:'أحسنت! أنجزت الدرس +20 نقطة','good')}$('#nx').classList.remove('hide');$('#nx').scrollIntoView({behavior:'smooth',block:'center'});const hb=$('#hint-btn');if(hb)hb.style.display='none';
       // حدّث زر التالي فوراً مع onclick جديد
       const nb=$('#nb');
@@ -1112,7 +1103,7 @@ function me(){
   const bar=(u,i)=>{const d=unitDone(u);return `<div class="tr"><div><span>${i+1}. ${u.t}</span><span>${d}/${u.ids.length}</span></div><div class="b"><i style="width:${d/u.ids.length*100}%"></i></div></div>`};
   const all=doneCount()===LESSONS.length;if(all&&!S.grad){S.grad=new Date().toLocaleDateString('ar');save()}
   const cert=all?`<div class="cert"><div style="font-size:34px">🎓</div><div class="ct">شهادة إتمام دورة تطوير الويب</div><div class="cn">${S.name?esc(S.name):'اكتب اسمك'}</div><div class="cc">أتمّ ${LESSONS.length} درساً ومشروعاً في HTML وCSS وJavaScript</div><div class="ct" style="margin-top:6px">ويب نايل · ${S.grad||''}</div><input id="cname" placeholder="اسمك كما تريده على الشهادة" value="${S.name?esc(S.name).replace(/"/g,'&quot;'):''}"><button class="btn s" style="width:100%" id="cshare">${ic('trophy')} شارك إنجازك</button></div>`:`<div class="card"><p style="margin:0">${ic('trophy')} أكمل الدورة لتحصل على <b>شهادة إتمام</b> باسمك. متبقٍ ${LESSONS.length-doneCount()} درساً.</p></div>`;
-  return `<div class="bar2"><h1>تقدمي</h1></div><div class="page"><div class="card"><p class="big">${S.xp} <small style="font-size:15px;color:var(--mute)">نقطة</small></p><p style="color:var(--mute)">${S.streak>0?ic('flame')+' سلسلتك '+S.streak+' يوم متتالٍ':'ابدأ درساً اليوم لتبدأ سلسلتك'}</p></div><div class="card" style="background:linear-gradient(135deg,#0B1F2A,#0E3540);color:#EAF4F3"><p style="margin:0 0 4px;font-weight:900;font-size:16px">${ic('sun')} احصل على 50 نقطة مجاناً</p><p style="margin:0 0 12px;font-size:13px;color:#9DB8C0">شاهد إعلاناً قصيراً واربح نقاط XP</p><button class="btn s" style="width:100%" id="rwd">${ic('trophy')} شاهد ← 50 نقطة</button></div>${cert}<div class="card">${UNITS.map(bar).join('')}</div>${nextL()?`<button class="btn s" style="width:100%;margin-bottom:12px" data-l="${nextL().id}">أكمل: ${nextL().t}</button>`:''}<button class="btn" style="width:100%" id="rst">مسح التقدم</button></div>`;
+  return `<div class="bar2"><h1>تقدمي</h1></div><div class="page"><div class="card"><p class="big">${S.xp} <small style="font-size:15px;color:var(--mute)">نقطة</small></p><p style="color:var(--mute)">${S.streak>0?ic('flame')+' سلسلتك '+S.streak+' يوم متتالٍ':'ابدأ درساً اليوم لتبدأ سلسلتك'}</p></div>${cert}<div class="card">${UNITS.map(bar).join('')}</div>${nextL()?`<button class="btn s" style="width:100%;margin-bottom:12px" data-l="${nextL().id}">أكمل: ${nextL().t}</button>`:''}<button class="btn" style="width:100%" id="rst">مسح التقدم</button></div>`;
 }
 const NAV={home:['waves','الدروس'],play:['code','تجربة حرة'],me:['trophy','تقدمي']};
 function render(){
@@ -1122,10 +1113,6 @@ function render(){
   const r=$('#rst');if(r)r.onclick=()=>{if(!armed){armed=true;r.textContent='اضغط مرة أخرى للتأكيد';setTimeout(()=>{armed=false;r.textContent='مسح التقدم'},3000);return}armed=false;S={done:{},unlocked:{},xp:0,streak:0,last:''};save();toast('تم مسح التقدم');render()};
   const cn=$('#cname');if(cn)cn.onchange=()=>{S.name=cn.value.trim();if(!S.grad)S.grad=new Date().toLocaleDateString('ar');save();render()};
   const cs=$('#cshare');if(cs)cs.onclick=async()=>{const t=`🎓 أتممت دورة تطوير الويب في تطبيق ويب نايل: ${LESSONS.length} درساً ومشروعاً في HTML وCSS وJavaScript!`;try{if(navigator.share)await navigator.share({text:t});else{await navigator.clipboard.writeText(t);toast('نُسخ النص، شاركه أينما تريد','good')}}catch(e){}};
-  const rwd=$('#rwd');if(rwd)rwd.onclick=()=>{
-    if(!_rewardLoaded){toast('الإعلان لم يُحمَّل بعد، حاول لاحقاً','warning');return}
-    amShowReward(()=>{S.xp+=50;save();toast('🎉 ربحت 50 نقطة!','success');render()});
-  };
 }
 document.addEventListener('click',e=>{
   const l=e.target.closest('[data-l]');
@@ -1136,7 +1123,7 @@ document.addEventListener('click',e=>{
     const locked=!S.done[lid]&&!isNext&&!S.unlocked[lid];
     if(locked){
       const ls=LESSONS.find(x=>x.id===lid);
-      showLockSheet('درس مقفل 🔒',`"${ls?ls.t:'هذا الدرس'}" — افتحه بنقاط أو بإعلان قصير`,()=>{S.unlocked[lid]=1;save();go('lesson',lid)});
+      showLockSheet('درس مقفل 🔒',`"${ls?ls.t:'هذا الدرس'}" — أنجز الدروس السابقة أو افتحه بنقاطك`,()=>{S.unlocked[lid]=1;save();go('lesson',lid)});
       return;
     }
     return go('lesson',lid);
@@ -1145,146 +1132,6 @@ document.addEventListener('click',e=>{
 });
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
 try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.addListener('backButton',()=>{V.n!=='home'?go('home'):A.exitApp()})}catch(e){}
-
-// ── AdMob — استراتيجية ذكية ────────────────────────────────────────
-// ⚠️ للاختبار: غيّر IS_TEST إلى true لترى إعلانات تجريبية فوراً
-// بعد التأكد من عمل الإعلانات أعده إلى false قبل رفع النسخة للمتجر
-const IS_TEST=false;
-
-const AD=IS_TEST?{
-  // معرّفات اختبار رسمية من Google
-  banner:  'ca-app-pub-3940256099942544/6300978111',
-  inter:   'ca-app-pub-3940256099942544/1033173712',
-  reward:  'ca-app-pub-3940256099942544/5224354917',
-}:{
-  // معرّفات الإنتاج الحقيقية
-  banner:  'ca-app-pub-7608701150166997/2300347316',
-  inter:   'ca-app-pub-7608701150166997/1719650975',
-  reward:  'ca-app-pub-7608701150166997/4734938967',
-};
-
-let _am=null,_interLoaded=false,_rewardLoaded=false;
-let _lessonsAfterAd=0;
-const INTER_EVERY=2;
-
-let _bannerVisible=false; // هل البانر محمّل وظاهر فعلاً
-let _bannerLoaded=false;  // هل سبق أن تحمّل الإعلان بنجاح
-
-async function amInit(){
-  try{
-    if(!window.Capacitor||!Capacitor.Plugins.AdMob)return;
-    _am=Capacitor.Plugins.AdMob;
-    await _am.initialize({initializeForTesting:IS_TEST});
-
-    // ── البانر: طبّق الـ padding فقط بعد تحميل الإعلان ──
-    _am.addListener('bannerAdLoaded',()=>{
-      _bannerLoaded=true;
-      if(_bannerVisible) _applyBannerPadding();
-    });
-    _am.addListener('bannerAdOpened',()=>{
-      // يُطلق أيضاً عند resumeBanner — يضمن تطبيق الـ padding
-      if(_bannerVisible) _applyBannerPadding();
-    });
-    _am.addListener('bannerAdFailedToLoad',()=>{
-      _bannerLoaded=false;
-      _clearBannerPadding();
-    });
-
-    // ── البيني (أسماء رسمية من BannerAdPluginEvents / InterstitialAdPluginEvents) ──
-    _am.addListener('interstitialAdLoaded',    ()=>{_interLoaded=true});
-    _am.addListener('interstitialAdDismissed', ()=>{_interLoaded=false;_amLoadInter()});
-    _am.addListener('interstitialAdFailedToLoad',()=>{_interLoaded=false;setTimeout(_amLoadInter,30000)});
-
-    // ── المكافأة (أسماء رسمية من RewardAdPluginEvents — كلها تبدأ بـ on) ──
-    _am.addListener('onRewardedVideoAdLoaded',       ()=>{_rewardLoaded=true});
-    _am.addListener('onRewardedVideoAdDismissed',    ()=>{_rewardLoaded=false;_amLoadReward()});
-    _am.addListener('onRewardedVideoAdFailedToLoad', ()=>{_rewardLoaded=false;setTimeout(_amLoadReward,30000)});
-
-    // ملاحظة: لا إعلان بيني عند فتح التطبيق — مخالف لسياسة AdMob
-    _amLoadInter();
-    _amLoadReward();
-  }catch(e){}
-}
-
-async function _amLoadInter(){
-  try{if(_am)await _am.prepareInterstitial({adId:AD.inter,isTesting:IS_TEST})}catch(e){}
-}
-async function _amLoadReward(){
-  try{if(_am)await _am.prepareRewardVideoAd({adId:AD.reward,isTesting:IS_TEST})}catch(e){}
-}
-
-// يُستدعى عند إتمام درس — إعلان بيني كل 3 دروس
-// فاصل أدنى 60 ثانية بين أي إعلانين بينيين
-let _lastInterAt=0;const INTER_GAP=60000;
-async function _showInter(){
-  if(!_am||!_interLoaded||Date.now()-_lastInterAt<INTER_GAP)return false;
-  _lastInterAt=Date.now();_lessonsAfterAd=0;
-  try{await _am.showInterstitial()}catch(e){}
-  return true;
-}
-async function amOnLessonDone(){
-  _lessonsAfterAd++;
-  if(_lessonsAfterAd<INTER_EVERY)return;
-  _showInter();
-}
-
-// بانر: أظهر في الرئيسية، أخفِ في الدروس
-const BANNER_H=60;
-let _bannerCreated=false; // هل استدعينا showBanner من قبل؟
-
-function _applyBannerPadding(){
-  const nav=document.getElementById('nav');
-  if(nav) nav.style.bottom=BANNER_H+'px';
-  document.documentElement.style.setProperty('--bh',BANNER_H+'px');
-  document.body.style.paddingBottom=`calc(${66+BANNER_H}px + var(--sb))`;
-}
-function _clearBannerPadding(){
-  const nav=document.getElementById('nav');
-  if(nav) nav.style.bottom='';
-  document.documentElement.style.setProperty('--bh','0px');
-  document.body.style.paddingBottom='calc(76px + var(--sb))';
-}
-
-async function amBannerShow(){
-  if(!_am)return;
-  _bannerVisible=true;
-  try{
-    if(!_bannerCreated){
-      // أول مرة فقط: أنشئ البانر وانتظر حدث التحميل لتطبيق الـ padding
-      _bannerCreated=true;
-      await _am.showBanner({adId:AD.banner,adSize:'ADAPTIVE_BANNER',position:'BOTTOM_CENTER',margin:0,isTesting:IS_TEST});
-    } else {
-      // البانر موجود مسبقاً — فقط استأنف الإظهار وطبّق الـ padding فوراً
-      await _am.resumeBanner();
-      // طبّق الـ padding فقط إذا كان الإعلان سبق وتحمّل فعلاً
-      if(_bannerLoaded) _applyBannerPadding();
-    }
-  }catch(e){_bannerVisible=false;}
-}
-async function amBannerHide(){
-  if(!_am||!_bannerCreated)return;
-  _bannerVisible=false;
-  try{ await _am.hideBanner(); }catch(e){}
-  _clearBannerPadding();
-}
-
-// مكافأة: يُستدعى عند ضغط زر "شاهد إعلاناً لفتح الدرس"
-async function amShowReward(onGranted){
-  if(!_am||!_rewardLoaded){toast('الإعلان لم يُحمَّل بعد، انتظر لحظة وحاول مجدداً','warning');return}
-  try{
-    // أضف المستمع مرة واحدة قبل الإظهار
-    const h=await _am.addListener('onRewardedVideoAdReward',()=>{
-      h.remove();
-      _rewardLoaded=false;
-      _amLoadReward();
-      onGranted();
-    });
-    await _am.showRewardVideoAd();
-  }catch(e){toast('تعذّر عرض الإعلان، حاول لاحقاً','warning')}
-}
-
-amInit();
-// ───────────────────────────────────────────────────────────────────
 
 render();
 </script>
