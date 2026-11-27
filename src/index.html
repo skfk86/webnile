@@ -1104,12 +1104,12 @@ function ideShell(files,drawer,CON){
   <div id="kb" class="ekb"><div class="sug" id="sug"></div><div class="estat" id="estat" dir="ltr"></div><div class="xkeys" dir="ltr"><button data-c="tab" aria-label="Tab">${XI('<path d="M3 12h13M11 6l6 6-6 6M21 5v14"/>')}</button><button data-c="up" aria-label="أعلى">${XI('<path d="m6 15 6-6 6 6"/>')}</button><button data-c="down" aria-label="أسفل">${XI('<path d="m6 9 6 6 6-6"/>')}</button><button data-c="left" aria-label="يسار">${XI('<path d="m15 6-6 6 6 6"/>')}</button><button data-c="right" aria-label="يمين">${XI('<path d="m9 6 6 6-6 6"/>')}</button><button data-c="undo" aria-label="تراجع">${XI('<path d="M9 14 4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/>')}</button><button data-c="suggest" aria-label="اقتراحات">${XI('<path d="M12 3l1.6 4.4L18 9l-4.4 1.6L12 15l-1.6-4.4L6 9l4.4-1.6z"/><path d="M19 15l.8 2.2L22 18l-2.2.8L19 21l-.8-2.2L16 18l2.2-.8z"/>')}</button><button data-x="sym" class="on" aria-label="الرموز">${XI('<path d="m6 17 5-5-5-5M13 17l5-5-5-5"/>')}</button></div><div class="keys" id="keys"></div></div>
   <div class="xdrawer" id="xdrawer" dir="ltr"><div class="xdpanel">
     <div class="xact">
-      <button data-p="files" class="on" aria-label="المستكشف">${XI('<path d="M15 2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M15 2v5h5"/><path d="M4 7v13a2 2 0 0 0 2 2h9"/>')}</button>
-      <button data-p="proj" aria-label="المشاريع">${XI('<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>')}</button>
-      <button data-p="snip" aria-label="إدراج">${XI('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v7M14 17.5h7"/>')}</button>
-      <button data-p="set" aria-label="الإعدادات">${XI('<path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>')}</button>
+      <button data-p="files" class="on" aria-label="المستكشف">${XI('<path d="M15 2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M15 2v5h5"/><path d="M4 7v13a2 2 0 0 0 2 2h9"/>')}<small>الملفات</small></button>
+      <button data-p="proj" aria-label="المشاريع">${XI('<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>')}<small>المشاريع</small></button>
+      <button data-p="snip" aria-label="إدراج">${XI('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v7M14 17.5h7"/>')}<small>إدراج</small></button>
+      <button data-p="set" aria-label="الإعدادات">${XI('<path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>')}<small>الإعدادات</small></button>
       <span class="xsp"></span>
-      <button data-x="exit" aria-label="العودة للدروس">${XI('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>')}</button>
+      <button data-x="exit" aria-label="العودة للدروس">${XI('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>')}<small>خروج</small></button>
     </div>
     <div class="xpanes pj-bar">
       <section data-pane="files">
@@ -1124,8 +1124,8 @@ function ideShell(files,drawer,CON){
         ${drawer}
       </section>
       <section data-pane="snip" hidden>
-        <div class="xph"><span>SNIPPETS</span></div>
-        <div class="chips xsnip">${Object.keys(SNIP).map(k=>`<button class="xrow" data-sn="${k}">${XI('<path d="M5 12h14M12 5v14"/>')}<span>${k}</span></button>`).join('')}</div>
+        <div class="xph"><span>SNIPPETS</span><small>تُدرج عند المؤشر</small></div>
+        <div class="chips xsnip">${Object.keys(XSNIP).map(lang=>`<div class="xsg" dir="ltr">${FICON[lang]}<b>${lang==='js'?'JavaScript':lang.toUpperCase()}</b><small>${{html:'index.html',css:'style.css',js:'script.js'}[lang]}</small></div>${XSNIP[lang].map((x,i)=>`<button class="xrow" data-sx="${lang}:${i}"><span>${x[0]}</span><small>${x[1]}</small></button>`).join('')}`).join('')}</div>
       </section>
       <section data-pane="set" hidden>
         <div class="xph"><span>SETTINGS</span></div>
@@ -1394,6 +1394,39 @@ function nextSteps(){
   return `<div class="card nxs"><h3>${ic('rocket')} ماذا بعد الدورة؟</h3>${N.map(x=>`<div class="ns"><span>${x[0]}</span><div><b>${x[1]}</b><small>${x[2]}</small></div></div>`).join('')}</div>`;
 }
 const SNIP={'هيكل':['code','<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n</head>\n<body>\n  \n</body>\n</html>\n'],'عنوان':['heading','<h1>عنوان</h1>\n'],'فقرة':['type','<p>نص الفقرة</p>\n'],'زر':['cursor','<button>اضغط</button>\n'],'بطاقة':['box','<style>\n  .card {\n    padding: 16px;\n    border-radius: 16px;\n    background: #e8f7f5;\n  }\n</style>\n<div class="card">بطاقة</div>\n']};
+// الإدراج السريع في التجربة الحرة: [الاسم، وصف قصير، الكود]
+const XSNIP={
+html:[
+['هيكل صفحة كامل','DOCTYPE + head + body','__PAGE__'],
+['عنوان وفقرة','h1 + p','<h1>عنوان الصفحة</h1>\n<p>اكتب هنا وصفاً قصيراً.</p>\n'],
+['زر','button#btn','<button id="btn">اضغط هنا</button>\n'],
+['رابط','a href','<a href="https://example.com" target="_blank">زر الموقع</a>\n'],
+['صورة','img + alt','<img src="https://picsum.photos/400/240" alt="وصف الصورة">\n'],
+['قائمة','ul > li','<ul>\n  <li>العنصر الأول</li>\n  <li>العنصر الثاني</li>\n  <li>العنصر الثالث</li>\n</ul>\n'],
+['بطاقة','div.card','<div class="card">\n  <h3>عنوان البطاقة</h3>\n  <p>وصف قصير للبطاقة.</p>\n</div>\n'],
+['نموذج تسجيل','form + input','<form id="form">\n  <label for="name">الاسم</label>\n  <input id="name" placeholder="اسمك" required>\n  <label for="email">البريد</label>\n  <input id="email" type="email" placeholder="you@mail.com" required>\n  <button type="submit">إرسال</button>\n</form>\n<p id="msg"></p>\n'],
+['جدول','table','<table>\n  <tr><th>الاسم</th><th>الدرجة</th></tr>\n  <tr><td>سارة</td><td>95</td></tr>\n  <tr><td>علي</td><td>88</td></tr>\n</table>\n']],
+css:[
+['أساسيات الصفحة','box-sizing + body','* {\n  box-sizing: border-box;\n}\nbody {\n  margin: 0;\n  padding: 16px;\n  font-family: Cairo, system-ui, sans-serif;\n  line-height: 1.7;\n}\n'],
+['متغيرات الألوان',':root --vars',':root {\n  --main: #0E7C86;\n  --bg: #F1F6F5;\n  --text: #0B1F2A;\n}\n'],
+['توسيط بـ Flexbox','display: flex','.center {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 100vh;\n}\n'],
+['شبكة Grid متجاوبة','grid auto-fit','.grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));\n  gap: 12px;\n}\n'],
+['زر جميل','button:hover','button {\n  padding: 10px 20px;\n  border: 0;\n  border-radius: 99px;\n  background: #0E7C86;\n  color: white;\n  cursor: pointer;\n  transition: transform .2s;\n}\nbutton:hover {\n  transform: scale(1.05);\n}\n'],
+['بطاقة بظل','.card','.card {\n  padding: 16px;\n  border-radius: 16px;\n  background: white;\n  box-shadow: 0 4px 16px rgba(0, 0, 0, .08);\n}\n'],
+['شاشات الجوال','@media','@media (max-width: 600px) {\n  body {\n    padding: 8px;\n  }\n}\n'],
+['حركة ظهور','@keyframes','@keyframes fadeIn {\n  from { opacity: 0; transform: translateY(10px); }\n  to { opacity: 1; transform: none; }\n}\n.fade {\n  animation: fadeIn .5s ease;\n}\n']],
+js:[
+['حدث نقر','addEventListener','const btn = document.querySelector("#btn");\nbtn.addEventListener("click", () => {\n  console.log("تم الضغط!");\n});\n'],
+['تغيير نص عنصر','textContent','const title = document.querySelector("h1");\ntitle.textContent = "عنوان جديد";\n'],
+['إنشاء عنصر','createElement','const item = document.createElement("p");\nitem.textContent = "فقرة جديدة";\ndocument.body.appendChild(item);\n'],
+['دالة','function','function greet(name) {\n  return "أهلاً " + name;\n}\nconsole.log(greet("سارة"));\n'],
+['حلقة على مصفوفة','forEach','const fruits = ["تفاح", "موز", "برتقال"];\nfruits.forEach((fruit, i) => {\n  console.log(i + 1, fruit);\n});\n'],
+['شرط','if / else','const score = 75;\nif (score >= 50) {\n  console.log("ناجح");\n} else {\n  console.log("راسب");\n}\n'],
+['حفظ في الجهاز','localStorage','localStorage.setItem("name", "سارة");\nconst saved = localStorage.getItem("name");\nconsole.log(saved);\n'],
+['مؤقت','setTimeout / setInterval','setTimeout(() => {\n  console.log("بعد ثانية");\n}, 1000);\n'],
+['التحقق من نموذج','submit','document.querySelector("#form").addEventListener("submit", (e) => {\n  e.preventDefault();\n  const name = document.querySelector("#name").value.trim();\n  document.querySelector("#msg").textContent = name ? "شكراً " + name : "اكتب اسمك";\n});\n'],
+['جلب بيانات','fetch + async','async function load() {\n  try {\n    const res = await fetch("https://jsonplaceholder.typicode.com/users");\n    const data = await res.json();\n    console.log(data.length + " مستخدمين");\n  } catch (e) {\n    console.log("تعذّر الاتصال");\n  }\n}\nload();\n']]
+};
 function play(){return `<div id="edh"></div>`}
 const playDrawer=()=>{const pro=window.Premium&&Premium.active(),tag=pro?'':'<em>PRO</em>',I=d=>`<svg viewBox="0 0 24 24">${d}</svg>`;
   return `<button class="xrow" data-pj="list">${I('<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>')}<span>مشاريعي المحفوظة</span>${tag}</button><button class="xrow" data-pj="save">${I('<path d="M12 5v14M5 12h14"/>')}<span>حفظ المشروع باسم</span>${tag}</button><button class="xrow" data-pj="export">${I('<path d="M12 3v12M7 8l5-5 5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>')}<span>تصدير كملف HTML واحد</span>${tag}</button>`};
@@ -1405,9 +1438,17 @@ function bindPlay(){
   const E=editor($('#edh'),html,null,'index.html',{ide:1,drawer:playDrawer(),files:F.map(f=>({key:f[0],name:f[1],lang:f[0],doc:f[0]==='html'?html:ld(f[2],f[3])}))});
   const multi=!!E.cm;
   E.ed.addEventListener('input',()=>{if(!multi)return sv('webnile_play',E.ed.value);F.forEach(f=>sv(f[2],E.cm.get(f[0])))});
-  const chp=document.querySelector('.chips');if(chp)chp.onclick=e=>{const b=e.target.closest('[data-sn]');if(!b)return;
-    if(multi){const t=document.querySelector('#ftabs [data-f=html]');if(t)t.click()}
-    E.ed.value=b.dataset.sn==='هيكل'?SNIP['هيكل'][1]:E.ed.value+(E.ed.value.endsWith('\n')?'':'\n')+SNIP[b.dataset.sn][1];E.ed.dispatchEvent(new Event('input'));toast('أُضيف '+b.dataset.sn)};
+  const chp=document.querySelector('.chips');if(chp&&multi)chp.onclick=e=>{const b=e.target.closest('[data-sx]');if(!b)return;
+    const [lang,n]=b.dataset.sx.split(':'),x=XSNIP[lang][+n];
+    const t=document.querySelector(`#ftabs [data-f=${lang}]`);if(t)t.click();
+    const cm=E.cm;
+    if(x[2]==='__PAGE__'){
+      const cur=cm.get('html');if(/<html[\s>]/i.test(cur)){toast('الملف فيه هيكل صفحة بالفعل','bad');return}
+      const body=cur.trim()?cur.trim().split('\n').map(l=>'  '+l).join('\n')+'\n':'  \n';
+      E.ed.value='<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n'+body+'  <script src="script.js"><\/script>\n</body>\n</html>\n';
+      E.ed.dispatchEvent(new Event('input'));
+    }else{const c=cm.cursor();cm.type((c.col>1?'\n':'')+x[2])}
+    toast('أُدرج: '+x[0],'good')};
 }
 let armed=false;
 function me(){

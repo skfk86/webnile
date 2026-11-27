@@ -92,3 +92,16 @@ button.xrow:active{background:#2A2D35}
 .xide .xdrawer .xpanes button.xrow:active{background:#2A2D35}
 .xpanes{overflow-x:hidden}
 .xide .xdrawer .xpanes.pj-bar{display:block;margin:0}
+/* أسماء أيقونات الشريط العمودي */
+.xact{width:60px}
+.xact button{width:60px;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.xact button svg{width:22px;height:22px}
+.xact button small{font:600 10px/1 'Cairo',system-ui,sans-serif;color:inherit}
+.xact button.on:before{top:12px;bottom:12px}
+/* الإدراج السريع */
+.xph small{font:400 11px 'Cairo',system-ui,sans-serif;letter-spacing:0;color:#6E737D}
+.xsg{display:flex;align-items:center;gap:8px;padding:12px 16px 4px;color:#E6E6E6;font-size:13px}
+.xsg .fi{width:16px!important;height:16px!important}
+.xsg small{margin-left:auto;color:#6E737D;font:11px var(--mono)}
+.xsnip .xrow span{flex:1}
+.xsnip .xrow small{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
