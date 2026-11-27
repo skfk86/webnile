@@ -20,6 +20,8 @@ import {lintSource} from './lint.js';
 import {html} from '@codemirror/lang-html';
 import {javascript, localCompletionSource} from '@codemirror/lang-javascript';
 import {css} from '@codemirror/lang-css';
+import {json, jsonParseLinter} from '@codemirror/lang-json';
+import {markdown} from '@codemirror/lang-markdown';
 import {tags as t} from '@lezer/highlight';
 
 const External = Annotation.define();
@@ -277,6 +279,9 @@ function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 function langExt(lang) {
   if (lang === 'js') return javascript();
   if (lang === 'css') return css();
+  if (lang === 'json') return json();
+  if (lang === 'md') return markdown();
+  if (lang !== 'html') return [];
   return [closeRawTags, html({autoCloseTags: true, matchClosingTags: true})];
 }
 
@@ -385,7 +390,7 @@ export function create(parent, o) {
         activateOnTypingDelay: 40, maxRenderedOptions: 40, closeOnBlur: !touch}),
       keymap.of([...acKeys, ...closeBracketsKeymap, ...defaultKeymap, ...searchKeymap, ...historyKeymap,
         {key: 'Tab', run: indentMore, shift: indentLess}, {key: 'Mod-g', run: gotoLine}, {key: 'Mod-d', run: selectNextOccurrence}]),
-      o.lint === false ? [] : [linter(lintSource(f.lang), {delay: 700}), lintGutter()],
+      o.lint === false || !/^(html|css|js|json)$/.test(f.lang) ? [] : [linter(f.lang === 'json' ? jsonParseLinter() : lintSource(f.lang), {delay: 700}), lintGutter()],
       PHRASES,
       langExt(f.lang),
       theme, wrapC.of(wrapOn ? EditorView.lineWrapping : []),
@@ -419,13 +424,39 @@ export function create(parent, o) {
       if (key === cur || key == null) return view.state.doc.toString();
       return states[key] ? states[key].doc.toString() : (byKey[key] ? byKey[key].doc || '' : '');
     },
+    // ملفات المشروع ديناميكية: تُضاف وتُغلق وتُعاد تسميتها دون إعادة إنشاء المحرر
+    get files() { return files.map(f => f.key); },
+    addFile(f) { if (byKey[f.key]) return; files.push(f); byKey[f.key] = f; },
+    removeFile(key) {
+      if (!byKey[key] || files.length < 2) return false;
+      const i = files.findIndex(x => x.key === key);
+      files.splice(i, 1); delete byKey[key]; delete states[key];
+      if (cur === key) { cur = null; api.open(files[Math.max(0, i - 1)].key); }
+      return true;
+    },
+    renameFile(key, nk, name, lang) {
+      const f = byKey[key]; if (!f) return;
+      const text = api.get(key), sameLang = f.lang === (lang || f.lang);
+      delete byKey[key]; f.key = nk; f.name = name || f.name; f.lang = lang || f.lang; f.doc = text; byKey[nk] = f;
+      if (cur === key) { cur = nk; if (!sameLang) { view.setState(mkState(f)); } }
+      else if (states[key]) { states[nk] = sameLang ? states[key] : null; delete states[key]; if (!states[nk]) delete states[nk]; }
+      ver++;
+      if (o.onCursor && cur === nk) o.onCursor(cursorInfo(view.state));
+    },
+    setText(key, text) {
+      if (key === cur) { api.value = text; ver++; return; }
+      const f = byKey[key]; if (!f) return;
+      if (states[key]) states[key] = states[key].update({changes: {from: 0, to: states[key].doc.length, insert: text}, annotations: External}).state;
+      else f.doc = text;
+      ver++;
+    },
     open(key) {
       if (!byKey[key] || key === cur) return;
-      states[cur] = view.state;
+      if (cur && byKey[cur]) states[cur] = view.state;
+      cur = key; // قبل setState: المستمعون يقرؤون byKey[cur]
       view.setState(states[key] || mkState(byKey[key]));
       diag = countDiag(view.state); if (o.onDiagnostics) o.onDiagnostics(diag);
       view.dispatch({effects: wrapC.reconfigure(wrapOn ? EditorView.lineWrapping : [])});
-      cur = key;
       if (o.onCompletions) o.onCompletions([]);
       if (o.onCursor) o.onCursor(cursorInfo(view.state));
     },

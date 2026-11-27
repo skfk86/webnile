@@ -152,3 +152,75 @@ body.kb-open .xide{padding-bottom:0}
 .xide .xdrawer .xpanes .xsn-act .ok{background:#0E7C86;color:#fff}
 .xide .xdrawer .xpanes .xsn-act .del{background:none;color:#E06C75;flex:none;padding:9px 12px}
 .xide .ide{isolation:isolate}
+/* المرحلة C: مساحة العمل (مستكشف، بحث، مشاريع، تبويبات) */
+.ws-loading{position:fixed;inset:0;display:grid;place-items:center;background:#1B1D23;color:#9AA0A6;font:600 14px 'Cairo',system-ui,sans-serif;z-index:50}
+.xide .ft{display:flex;align-items:center;gap:6px;white-space:nowrap}
+.xide .ft .ftx{display:inline-grid;place-items:center;width:20px;height:20px;margin-inline-start:2px;border-radius:5px;color:#6E737D;font-size:16px;line-height:1}
+.xide .ft .ftx:active{background:#3A3E48;color:#fff}
+.xide .ft.dirty .ftx{font-size:0}
+.xide .ft.dirty .ftx:after{content:"";width:8px;height:8px;border-radius:50%;background:#E5C07B}
+.xide .ft.json i{background:#CBCB41}.xide .ft.md i{background:#519ABA}.xide .ft.txt i,.xide .ft.svg i{background:#8B8F98}
+.xph span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-transform:none}
+.wfil,.wsq{padding:2px 12px 8px}
+.wfil input,.wsq input,.wsin{width:100%;background:#14161B;color:#E6E6E6;border:1px solid #3A3F4A;border-radius:8px;padding:8px 10px;font:14px 'Cairo',system-ui,sans-serif}
+.wsq{display:flex;flex-direction:column;gap:6px}
+.wsopt{display:flex;gap:6px}
+.xide .xdrawer .xpanes .wsopt button{flex:none;width:40px;height:30px;border-radius:6px;background:#2A2D35;color:#AEB4BE;font:600 13px var(--mono);padding:0}
+.xide .xdrawer .xpanes .wsopt button.on{background:#0E7C86;color:#fff}
+.wtree{padding-bottom:6px}
+.wrow{display:flex;align-items:stretch;min-height:34px}
+.wrow.on{background:#2A2D3A}
+.wrow.cut{opacity:.5}
+.xide .xdrawer .xpanes .wmain{flex:1;min-width:0;display:flex;align-items:center;gap:6px;padding:0 4px 0 calc(8px + var(--d,0) * 14px);text-align:start;color:#C9CDD4;font:13.5px var(--mono)}
+.xide .xdrawer .xpanes .wmain:active,.xide .xdrawer .xpanes .wmore:active{background:#2A2D35}
+.wch{flex:none;width:14px;height:14px;display:grid;place-items:center;color:#8B8F98}
+.wch svg{width:12px;height:12px;fill:none;stroke:currentColor;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round;transition:transform .15s}
+.wch.o svg{transform:rotate(90deg)}
+.wfi{flex:none;width:17px;height:17px;display:grid;place-items:center}
+.wfi svg{width:17px;height:17px;fill:none;stroke:#C09553;stroke-width:1.8;stroke-linejoin:round}
+.wmain .fi{width:17px!important;height:17px!important;flex:none}
+.wn{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wn em{font-style:normal;color:#6E737D;font-size:11px;margin-inline-start:8px}
+.wmain small{flex:none;color:#E5C07B;font-size:10px}
+.xide .xdrawer .xpanes .wmore{flex:none;width:34px;display:grid;place-items:center;color:#6E737D}
+.wmore svg{width:16px;height:16px;fill:currentColor}
+.wempty,.wsum,.wtip{margin:0;padding:8px 16px;color:#6E737D;font-size:12px;line-height:1.6}
+.wclip{display:flex;align-items:center;gap:8px;margin:0 12px 8px;padding:6px 8px;border-radius:8px;background:#23262E;color:#C9CDD4;font-size:12px}
+.wclip svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:1.8;flex:none}
+.wclip span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xide .xdrawer .xpanes .wclip button{flex:none;padding:4px 8px;border-radius:6px;background:#0E7C86;color:#fff;font:600 12px 'Cairo',system-ui,sans-serif}
+.xide .xdrawer .xpanes .wclip button[data-ws=clipx]{background:none;color:#8B8F98;padding:2px}
+.wsg{padding:4px 0}
+.wsgh{display:flex;align-items:center;gap:6px;padding:4px 12px;color:#E6E6E6;font:600 12.5px var(--mono)}
+.wsgh .fi{width:15px!important;height:15px!important}
+.wsgh small{flex:1;color:#6E737D;font-weight:400;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.wsgh i{font-style:normal;background:#2A2D35;border-radius:99px;padding:0 7px;font-size:11px;color:#AEB4BE}
+.wsh{display:flex;align-items:stretch}
+.xide .xdrawer .xpanes .wsh button:first-child{flex:1;min-width:0;display:flex;gap:8px;align-items:baseline;padding:4px 8px 4px 30px;text-align:start;color:#AEB4BE}
+.wsh small{flex:none;color:#6E737D;font:11px var(--mono);min-width:22px}
+.wsh code{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font:12px var(--mono)}
+.wsh mark{background:rgba(229,192,123,.3);color:#fff;border-radius:2px}
+.xide .xdrawer .xpanes .wsr{flex:none;width:32px;display:grid;place-items:center;color:#8B8F98}
+.wsr svg{width:15px;height:15px;fill:none;stroke:currentColor;stroke-width:2}
+.xide .xdrawer .xpanes .wsq .wsact button{flex:1;padding:8px 0;border-radius:8px;background:#2A2D35;color:#E6E6E6;font:600 13px 'Cairo',system-ui,sans-serif}
+.xide .xdrawer .xpanes .wsq .wsact .ok{background:#0E7C86;color:#fff}
+.xide .xdrawer .xpanes .wsq .wsact button[disabled]{opacity:.45}
+/* نوافذ مساحة العمل */
+.wsheet{position:fixed;inset:0;z-index:90;display:flex;align-items:flex-end;justify-content:center;background:rgba(0,0,0,.5);opacity:0;transition:opacity .18s}
+.wsheet.show{opacity:1}
+.wsbox{width:100%;max-width:520px;max-height:80vh;overflow:auto;display:flex;flex-direction:column;gap:10px;padding:18px 16px calc(16px + var(--sb));border-radius:18px 18px 0 0;background:#23262E;color:#E6E6E6;font-family:'Cairo',system-ui,sans-serif;transform:translateY(30px);transition:transform .18s}
+.wsheet.show .wsbox{transform:none}
+.wsbox>b{font-size:15px;overflow-wrap:anywhere}
+.wsbox>small{color:#9AA0A6;font-size:12.5px;line-height:1.6}
+.wsact{display:flex;gap:8px}
+.wsact button{flex:1;padding:10px 0;border-radius:10px;background:#2F333C;color:#E6E6E6;font:600 14px 'Cairo',system-ui,sans-serif}
+.wsact .ok{background:#0E7C86;color:#fff}
+.wsact .del,.wsmenu .del{color:#FF8A8A}
+.wsact button.del{background:#4A2A2E}
+.wsmenu{display:flex;flex-direction:column}
+.wsmenu button{padding:12px 6px;text-align:start;color:#E6E6E6;font:500 14.5px 'Cairo',system-ui,sans-serif;border-radius:8px;background:none}
+.wsmenu button:active{background:#2F333C}
+.wsmenu hr{border:0;border-top:1px solid #33373F;margin:4px 0}
+.wimg{display:grid;place-items:center;max-height:50vh;overflow:auto;background:repeating-conic-gradient(#2a2d35 0 25%,#23262e 0 50%) 0 0/16px 16px;border-radius:10px;padding:8px}
+.wimg img{max-width:100%;max-height:46vh}
+.xide .wsh code{background:none;color:#AEB4BE;padding:0;border:0;box-shadow:none}
