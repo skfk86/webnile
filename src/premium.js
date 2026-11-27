@@ -244,9 +244,78 @@ async function shareFile(name,data,isB64,mime,text){
     return true;
   }catch(e){return false}
 }
+/* ---------- الوصول لمساحة تخزين الهاتف (مجاني للجميع) ----------
+   الحفظ: Documents/WebNile/<اسم المشروع>/index.html + style.css + script.js
+   الفتح: منتقي ملفات النظام (أي مكان في الهاتف)، أو قائمة المشاريع المحفوظة في Documents/WebNile */
+var DEV_DIR='WebNile',DOCS='DOCUMENTS';
+function safeName(n){return String(n||'').trim().replace(/[\\/:*?"<>|\u0000-\u001f]+/g,'_').replace(/^\.+/,'').slice(0,60)}
+function kindOf(name){var m=/\.([a-z0-9]+)$/i.exec(name||'');var x=m?m[1].toLowerCase():'';return x==='css'?'css':(x==='js'||x==='mjs')?'js':'html'}
+async function fsReady(){
+  var FS=plug('Filesystem');if(!FS)return null;
+  try{var p=await FS.checkPermissions();if(p&&p.publicStorage!=='granted'){p=await FS.requestPermissions();if(p&&p.publicStorage==='denied'){tst('اسمح للتطبيق بالوصول للتخزين من إعدادات الهاتف','bad');return null}}}catch(e){}
+  return FS;
+}
+async function devSave(name){
+  var nm=safeName(name);if(!nm){tst('اكتب اسماً للمجلد','bad');return false}
+  var c=current(),files=[['index.html',c.html],['style.css',c.css],['script.js',c.js]];
+  var FS=await fsReady();
+  if(FS){
+    try{
+      for(var i=0;i<files.length;i++)await FS.writeFile({path:DEV_DIR+'/'+nm+'/'+files[i][0],data:files[i][1]||'',directory:DOCS,encoding:'utf8',recursive:true});
+      lsSet('webnile_dev_last',nm);
+      tst('💾 حُفظ في الهاتف: Documents/'+DEV_DIR+'/'+nm,'good');return true;
+    }catch(e){tst('تعذّر الحفظ: '+(e&&e.message||'تحقق من مساحة التخزين'),'bad');return false}
+  }
+  // المتصفح: تنزيل ملف HTML واحد فيه الملفات الثلاثة
+  var p=current();p.name=nm;var ok=await shareFile(nm+'.html',bundle(p),false,'text/html','');
+  if(ok)tst('نُزّل '+nm+'.html','good');return ok;
+}
+async function devList(){
+  var FS=plug('Filesystem');if(!FS)return [];
+  try{
+    var r=await FS.readdir({path:DEV_DIR,directory:DOCS});
+    return (r.files||[]).filter(function(f){return typeof f==='string'||f.type==='directory'}).map(function(f){return typeof f==='string'?{name:f,at:0}:{name:f.name,at:+f.mtime||0}}).sort(function(a,b){return b.at-a.at});
+  }catch(e){return []}
+}
+async function devOpenFolder(nm){
+  var FS=await fsReady();if(!FS)return;
+  var out={html:'',css:'',js:''},n=0;
+  for(var f of [['html','index.html'],['css','style.css'],['js','script.js']]){
+    try{var r=await FS.readFile({path:DEV_DIR+'/'+nm+'/'+f[1],directory:DOCS,encoding:'utf8'});out[f[0]]=r.data;n++}catch(e){}
+  }
+  if(!n){tst('لم أجد ملفات في هذا المجلد','bad');return}
+  lsSet('webnile_dev_last',nm);
+  loadInto(out);tst('📂 فُتح "'+nm+'" من الهاتف','good');
+}
+function readText(file){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result||''))};r.onerror=no;r.readAsText(file)})}
+async function devPick(files){
+  if(!files||!files.length)return;
+  var c=current(),got=[];
+  for(var i=0;i<files.length;i++){
+    var f=files[i];if(f.size>2e6){tst('الملف '+f.name+' أكبر من 2MB','bad');continue}
+    try{var t=await readText(f);c[kindOf(f.name)]=t;got.push(f.name)}catch(e){}
+  }
+  if(!got.length)return;
+  loadInto(c);tst('📂 فُتح: '+got.join('، '),'good');
+}
+function devOpenSheet(){
+  pjSheet('<h3>📂 فتح من الهاتف</h3><p>اختر ملفات .html أو .css أو .js من أي مكان في هاتفك، وكل ملف يذهب لتبويبه في المحرر.</p><label class="btn p dev-pick" style="width:100%;margin-bottom:12px">📄 اختيار ملفات<input id="dev-file" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.txt,text/html,text/css,text/javascript,text/plain" hidden></label><div id="dev-dirs"></div><div class="sheet-btns"><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
+  var inp=document.getElementById('dev-file');
+  inp.onchange=function(){var fl=[].slice.call(inp.files||[]);sheet.classList.remove('show');devPick(fl)};
+  devList().then(function(a){
+    var box=document.getElementById('dev-dirs');if(!box||!a.length)return;
+    box.innerHTML='<p style="margin:0 0 6px;font-weight:700;color:var(--ink)">مشاريعك في Documents/'+DEV_DIR+'</p><div class="pj-list">'+a.map(function(d){return '<div class="pj-item"><button data-pj="devdir" data-n="'+esc(d.name)+'"><b>📁 '+esc(d.name)+'</b>'+(d.at?'<small>'+new Date(d.at).toLocaleDateString('ar')+'</small>':'')+'</button></div>'}).join('')+'</div>';
+  });
+}
+function devSaveSheet(){
+  var last=lsGet('webnile_dev_last','');
+  pjSheet('<h3>💾 حفظ في الهاتف</h3><p>يُحفظ مشروعك كملفات حقيقية <b dir="ltr">index.html · style.css · script.js</b> في مجلد <b dir="ltr">Documents/'+DEV_DIR+'</b>، فتفتحها بأي محرر آخر أو ترفعها على GitHub.</p><input id="dev-name" class="pj-in" maxlength="60" placeholder="اسم المجلد، مثلاً: موقع-المقهى" value="'+esc(last)+'"><div class="sheet-btns"><button data-pj="devsave" style="background:var(--nile);color:#fff">حفظ</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إلغاء</button></div>');
+  setTimeout(function(){var i=document.getElementById('dev-name');if(i)i.focus()},300);
+}
+
 function playBar(){
   var n=projects().length,on=active();
-  return '<div class="pj-bar"><button data-pj="list">📁 مشاريعي'+(on&&n?' ('+n+')':'')+(on?'':' <span class="pro-pill">برو</span>')+'</button><button data-pj="save">💾 حفظ باسم</button><button data-pj="export">⤴ تصدير HTML</button></div>';
+  return '<div class="pj-bar"><button data-pj="devopen">📂 فتح من الهاتف</button><button data-pj="devsave-sheet">💾 حفظ في الهاتف</button><button data-pj="list">📁 مشاريعي'+(on&&n?' ('+n+')':'')+(on?'':' <span class="pro-pill">برو</span>')+'</button><button data-pj="save">💾 حفظ باسم</button><button data-pj="export">⤴ تصدير HTML</button></div>';
 }
 var sheet=null;
 function pjSheet(html){
@@ -268,6 +337,8 @@ function pjAct(e){
   var b=e.target.closest('[data-pj]');if(!b)return;
   var k=b.dataset.pj,i=+b.dataset.i,a=projects();
   if(k==='x'){sheet.classList.remove('show');return}
+  if(k==='devdir'){sheet.classList.remove('show');devOpenFolder(b.dataset.n);return}
+  if(k==='devsave'){var v=document.getElementById('dev-name').value;devSave(v).then(function(ok){if(ok)sheet.classList.remove('show')});return}
   if(k==='open'){loadInto(a[i]);sheet.classList.remove('show');tst('فُتح "'+a[i].name+'"','good');return}
   if(k==='del'){if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='تأكيد؟';return}var n=a[i].name;a.splice(i,1);saveProjects(a);pjList();tst('حُذف "'+n+'"');return}
   if(k==='new'){var c=current();if(c.html||c.css)lsSet('webnile_play_backup',JSON.stringify(c));loadInto({html:'<h1>مشروع جديد</h1>\n',css:'body {\n  font-family: Cairo, sans-serif;\n}\n',js:'// اكتب JavaScript هنا\n'});sheet.classList.remove('show');return}
@@ -278,8 +349,10 @@ function bindPlay(){
   var bar=document.querySelector('.pj-bar');if(!bar)return;
   bar.onclick=async function(e){
     var b=e.target.closest('[data-pj]');if(!b)return;
-    if(!active())return paywall('files');
     var k=b.dataset.pj;
+    if(k==='devopen')return devOpenSheet();
+    if(k==='devsave-sheet')return devSaveSheet();
+    if(!active())return paywall('files');
     if(k==='list')pjList();
     else if(k==='save')pjSave();
     else if(k==='export'){var p=current();p.name='مشروعي';var ok=await shareFile('webnile-project.html',bundle(p),false,'text/html','مشروعي من ويب نايل');if(!ok)tst('تعذّر التصدير','bad')}
@@ -335,7 +408,7 @@ function bindMe(ctx){
 window.Premium={
   active:active,paywall:paywall,onChange:function(f){listeners.push(f)},
   nextStreak:nextStreak,freezesLeft:freezesLeft,
-  playBar:playBar,bindPlay:bindPlay,
+  playBar:playBar,bindPlay:bindPlay,devSave:devSave,devPick:devPick,
   meCard:meCard,certBtn:certBtn,bindMe:bindMe,
   restore:restore,manage:manage,
   _bundle:bundle,_code:code,_plans:plans

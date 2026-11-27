@@ -80,6 +80,14 @@ jobs:
             npx cap add android
           fi
 
+      - name: Storage permissions (Android 10 and older only)
+        run: |
+          M=android/app/src/main/AndroidManifest.xml
+          # من Android 11 فأحدث لا يحتاج حفظ ملفات التطبيق في Documents أي إذن
+          grep -q WRITE_EXTERNAL_STORAGE "$M" || sed -i 's#</manifest>#    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" android:maxSdkVersion="32" />\n    <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" android:maxSdkVersion="29" />\n</manifest>#' "$M"
+          grep -q requestLegacyExternalStorage "$M" || sed -i 's#<application#<application android:requestLegacyExternalStorage="true"#' "$M"
+          grep -n "EXTERNAL_STORAGE\|requestLegacy" "$M"
+
       - name: App icon and splash screen
         run: >
           npx --yes @capacitor/assets@3 generate --android

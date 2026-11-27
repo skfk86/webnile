@@ -43,6 +43,8 @@ body.pw-on{overflow:hidden}
 .pj-list{display:grid;gap:6px;margin:0 0 14px;max-height:45vh;overflow:auto}
 .pj-item{display:flex;gap:6px}.pj-item button:first-child{flex:1;text-align:start;padding:10px 12px;border-radius:12px;background:var(--bg)}
 .pj-item b{display:block;font-size:14px}.pj-item small{color:var(--mute);font-size:12px}
-.pj-item button:last-child{flex:none;min-width:46px;border-radius:12px;background:rgba(214,69,69,.1);color:var(--bad);font-size:13px;font-weight:700}
+.pj-item button+button{flex:none;min-width:46px;border-radius:12px;background:rgba(214,69,69,.1);color:var(--bad);font-size:13px;font-weight:700}
 .pj-in{width:100%;padding:12px;border-radius:12px;border:1px solid var(--line);background:var(--bg);color:var(--ink);font:inherit;margin:0 0 14px}
 .lock-pro{width:100%;margin-bottom:10px;padding:12px;border-radius:16px;font-weight:900;font-size:15px;background:linear-gradient(90deg,#F5B83D,#FFD27A);color:#0B1F2A}
+.dev-pick{cursor:pointer;box-sizing:border-box}
+#dev-dirs:empty{display:none}#dev-dirs{margin-bottom:12px}

@@ -10,3 +10,6 @@
 ### ويب نايل برو (اشتراك Google Play)
 الدورة الأساسية مجانية بالكامل. الاشتراك الاختياري في `src/premium.js` ومشاريعه في `src/pro-course.js`.
 خطوات إعداد المنتجات والاختبار في Play Console: [docs/PLAY_BILLING_SETUP.md](docs/PLAY_BILLING_SETUP.md)
+
+### الوصول لملفات الهاتف في المحرر
+في "تجربة حرة": **📂 فتح من الهاتف** يختار ملفات .html/.css/.js من أي مكان، و**💾 حفظ في الهاتف** يكتب المشروع في `Documents/WebNile/<الاسم>/` (index.html وstyle.css وscript.js). الميزة مجانية للجميع، وتستعمل `@capacitor/filesystem`.
