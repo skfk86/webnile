@@ -43,22 +43,52 @@ body .xide .ekb{position:static;flex:none;margin:0;padding:0;background:#1F2128;
 .xide .keys{padding:0 8px 8px}
 .xide .keys button{background:#2A2D35;color:#E6E6E6;box-shadow:none;height:38px}
 .xide .efsbar{display:none!important}
-/* القائمة الجانبية */
-.xdrawer{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+/* الشريط الجانبي على طريقة VS Code و Acode */
+.xdrawer{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s}
 .xdrawer.open{opacity:1;pointer-events:all}
-.xdpanel{position:absolute;top:0;bottom:0;right:0;width:min(86vw,340px);background:#1F2128;color:#D7DAE0;padding:calc(var(--st) + 16px) 14px calc(var(--sb) + 14px);overflow:auto;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column;gap:8px}
+.xdpanel{position:absolute;top:0;bottom:0;left:0;width:min(84vw,330px);display:flex;background:#1F2128;color:#C9CDD4;transform:translateX(-100%);transition:transform .22s ease-out;box-shadow:8px 0 24px rgba(0,0,0,.35);font-family:system-ui,'Cairo',sans-serif}
 .xdrawer.open .xdpanel{transform:none}
-.xdh{display:flex;align-items:center;gap:8px;font-size:17px;color:#fff}.xdh .i{color:#12B5A6}.xdh small{margin-inline-start:auto;color:#7F848E;font-size:12px}
-.xdsec{font-size:12px;font-weight:700;color:#7F848E;margin-top:10px}
-.xdfiles{display:grid;gap:2px}
-.xdfiles button{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border-radius:10px;font:15px var(--mono);color:#D7DAE0}
-.xdfiles button.on{background:#2A2D35;color:#fff}
-.xide .pj-bar{flex-direction:column;overflow:visible;margin:0;gap:6px}
-.xide .pj-bar button{flex:none;background:#2A2D35;color:#E6E6E6;box-shadow:none;text-align:start;padding:11px 12px}
-.xide .chips{margin:0}
-.xide .chips button{background:#2A2D35;color:#E6E6E6;box-shadow:none}
-.xide .etl{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:none;border:0;padding:0;overflow:visible}
-.xide .etl button{background:#2A2D35;color:#E6E6E6;height:40px}
-.xide .etl button.on{background:#0E7C86;color:#fff}
-.xdexit{margin-top:auto;padding:12px;border-radius:12px;background:#2A2D35;color:#E6E6E6;display:flex;gap:8px;align-items:center;justify-content:center;font-weight:700}
-.xprev .seg button[hidden]{display:none}
+.xact{flex:none;width:52px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:calc(var(--st) + 8px) 0 calc(var(--sb) + 8px);background:#18191E;border-right:1px solid #2A2D35}
+.xact button{position:relative;width:52px;height:50px;display:grid;place-items:center;color:#6E737D}
+.xact button.on{color:#E6E6E6}
+.xact button.on:before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;background:#12B5A6;border-radius:2px}
+.xact svg,.xrow svg,.xph-i svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.xact svg{width:24px;height:24px}
+.xact .xsp{flex:1}
+.xpanes{flex:1;min-width:0;overflow:auto;padding:calc(var(--st) + 6px) 0 calc(var(--sb) + 10px)}
+.xpanes section[hidden]{display:none}
+.xph{display:flex;align-items:center;gap:2px;height:36px;padding:0 6px 0 16px;font-size:11px;font-weight:700;letter-spacing:.9px;color:#8B8F98}
+.xph span{flex:1}
+.xph-i{width:32px;height:32px;display:grid;place-items:center;border-radius:6px;color:#8B8F98}
+.xph-i svg{width:17px;height:17px}
+.xph-i:active{background:#2A2D35}
+.xrow{display:flex;align-items:center;gap:10px;width:100%;min-height:36px;padding:0 14px 0 16px;color:#C9CDD4;font-size:14px;text-align:start;border-left:2px solid transparent}
+.xrow svg{width:17px;height:17px;flex:none;color:#8B8F98}
+.xrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xrow small{color:#6E737D;font:11px var(--mono)}
+.xrow em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.5px;color:#0B1F2A;background:#F5B83D;border-radius:4px;padding:1px 5px}
+button.xrow:active{background:#2A2D35}
+.xdir{color:#E6E6E6;font-size:13px;gap:4px;padding-left:8px}.xdir svg{width:16px;height:16px}.xdir b{font-weight:700;font:600 13px var(--mono)}
+.xleaf{padding-left:30px;font:14px var(--mono);gap:8px}
+.xleaf .fi{width:17px!important;height:17px!important}
+.xleaf.on{background:#2A2D3A;color:#fff;border-left-color:#12B5A6}
+.xpanes .chips{display:block;margin:0}
+.xide .xpanes .chips button.xrow{display:flex;background:none;box-shadow:none;border-radius:0;padding:0 14px 0 16px;font-weight:400;color:#C9CDD4}
+.xide .etl.xset{display:block;background:none;border:0;padding:0;overflow:visible}
+.xide .etl.xset button.xrow{height:auto;background:none;border-radius:0;color:#C9CDD4;font-weight:400;font-size:14px}
+.xsw i{flex:none;width:34px;height:20px;border-radius:20px;background:#3A3E48;position:relative;transition:background .2s}
+.xsw i:after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#C9CDD4;transition:transform .2s}
+.xsw.on i{background:#0E7C86}.xsw.on i:after{transform:translateX(14px);background:#fff}
+.xide .xstep{gap:6px}
+.xstep span{display:flex;align-items:center;gap:10px}
+.xide .etl.xset .xstep button{flex:none;width:34px;height:30px;border-radius:6px;background:#2A2D35;color:#E6E6E6;font:600 17px/1 system-ui;padding:0}
+/* تصفير أنماط الأزرار العامة داخل الشريط الجانبي */
+.xide .xdrawer .xpanes button{flex:none;height:auto;background:none;box-shadow:none;border-radius:0;font-weight:400;white-space:normal;padding-top:0;padding-bottom:0}
+.xide .xdrawer .xpanes button.xrow{padding:0 14px 0 16px;min-height:36px}
+.xide .xdrawer .xpanes button.xleaf{padding-left:30px}
+.xide .xdrawer .xpanes .xph-i{width:32px;height:32px;padding:0;border-radius:6px}
+.xide .xdrawer .xpanes .xleaf.on{background:#2A2D3A}
+.xide .xdrawer .xpanes .xstep button{width:34px;height:30px;border-radius:6px;background:#2A2D35;padding:0}
+.xide .xdrawer .xpanes button.xrow:active{background:#2A2D35}
+.xpanes{overflow-x:hidden}
+.xide .xdrawer .xpanes.pj-bar{display:block;margin:0}
