@@ -28,6 +28,7 @@ function setOwned(on,plan){
 }
 function esc(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 function tst(m,c){if(typeof toast==='function')toast(m,c||'')}
+function I(n){return '<svg class="i"><use href="#i-'+n+'"/></svg>'}
 
 /* ---------- Google Play Billing ---------- */
 var store=null,ready=false,busy=false,initErr=null;
@@ -114,7 +115,7 @@ function restore(){
   busy=true;PW.paint();
   Promise.resolve(store.restorePurchases()).then(function(){
     busy=false;refresh();PW.paint();
-    if(active()){PW.close();tst('👑 تمت استعادة اشتراكك','good')}else tst('لا يوجد اشتراك سابق على حساب Google هذا','bad');
+    if(active()){PW.close();tst('تمت استعادة اشتراكك في برو','good')}else tst('لا يوجد اشتراك سابق على حساب Google هذا','bad');
   }).catch(function(){busy=false;PW.paint();tst('تعذّرت الاستعادة، تحقق من الاتصال','bad')});
 }
 function manage(){
@@ -125,17 +126,19 @@ function manage(){
 
 /* ---------- المزايا ---------- */
 var PERKS=[
-  ['🚀','6 مشاريع احترافية حصرية','صفحة هبوط، حاسبة، معرض بفلاتر، فاحص كلمات مرور، متتبّع مصاريف، مؤقت بومودورو. مع الحل النموذجي لكل مشروع.'],
-  ['🔓','تنقّل حر في كل الدروس','افتح أي درس أو تخطَّه دون أن تدفع نقاطك.'],
-  ['❄️',FREEZES+' حمايات للسلسلة كل شهر','فاتك يوم؟ تحمي الحماية سلسلتك تلقائياً.'],
-  ['📁','مشاريع غير محدودة في المحرر','احفظ كل مشروع باسمه وارجع إليه، وصدّره ملف HTML جاهزاً للنشر.'],
-  ['🎓','شهادة احترافية كصورة','شهادة بتصميم فاخر ورمز تعريف فريد، تشاركها على LinkedIn وواتساب.'],
-  ['💚','تدعم استمرار التطبيق','بلا إعلانات أبداً، واشتراكك يموّل دروساً ومشاريع جديدة.']
+  ['rocket','6 مشاريع احترافية حصرية','صفحة هبوط، حاسبة، معرض بفلاتر، فاحص كلمات مرور، متتبّع مصاريف، مؤقت بومودورو. مع الحل النموذجي لكل مشروع.'],
+  ['code','أدوات المحرر الاحترافية','فتح الملفات من الهاتف وحفظها فيه، و27 نموذج كود جاهزاً، ومشاريع غير محدودة محفوظة بأسماء، وتصدير HTML.'],
+  ['lock-open','تنقّل حر في كل الدروس','افتح أي درس أو تخطَّه دون أن تدفع نقاطك.'],
+  ['snowflake',FREEZES+' حمايات للسلسلة كل شهر','فاتك يوم؟ تحمي الحماية سلسلتك تلقائياً.'],
+  ['grad','شهادة احترافية كصورة','شهادة بتصميم فاخر ورمز تعريف فريد، تشاركها على LinkedIn وواتساب.'],
+  ['heart','تدعم استمرار التطبيق','بلا إعلانات أبداً، واشتراكك يموّل دروساً ومشاريع جديدة.']
 ];
 var REASON={
   projects:'المشاريع الاحترافية حصرية لمشتركي برو',
   unlock:'مع برو تفتح أي درس دون نقاط',
   files:'احفظ مشاريع غير محدودة وصدّرها',
+  storage:'افتح ملفاتك من الهاتف واحفظ مشاريعك فيه',
+  snippets:'27 نموذج كود جاهزاً بضغطة واحدة',
   cert:'شهادتك الاحترافية بانتظارك',
   me:'ارفع مستواك مع ويب نايل برو'
 };
@@ -161,12 +164,12 @@ PW.paint=function(){
     var why=!C()?'الاشتراك متاح عند تثبيت التطبيق من Google Play.':!ready?'جارٍ تحميل الأسعار من Google Play…':'تعذّر تحميل الأسعار. تحقق من اتصالك ثم أعد فتح الصفحة.';
     plansH='<div class="pw-na">'+why+'</div>';
   }
-  var cta=on?'👑 أنت مشترك بالفعل':busy?'جارٍ التنفيذ…':p?(p.trial?'ابدأ '+period(p.trial)+' مجاناً':p.per==='l'?'اشترِ برو مدى الحياة':'اشترك الآن'):'غير متاح الآن';
+  var cta=on?'أنت مشترك بالفعل':busy?'جارٍ التنفيذ…':p?(p.trial?'ابدأ '+period(p.trial)+' مجاناً':p.per==='l'?'اشترِ برو مدى الحياة':'اشترك الآن'):'غير متاح الآن';
   PW.el.querySelector('.pw-box').innerHTML=
-    '<button class="pw-x" data-pw="close" aria-label="إغلاق">✕</button>'+
-    '<div class="pw-head"><div class="pw-crown">👑</div><h2>ويب نايل <b>برو</b></h2><p>'+esc(REASON[PW.why]||REASON.me)+'</p></div>'+
-    '<div class="pw-perks">'+PERKS.map(function(k){return '<div class="pw-perk"><span>'+k[0]+'</span><div><b>'+k[1]+'</b><small>'+k[2]+'</small></div></div>'}).join('')+'</div>'+
-    '<div class="pw-free">✅ يبقى مجاناً للجميع: كل دروس الدورة الأساسية، والاختبارات، والتلميحات، والمحرر، وشهادة الإتمام.</div>'+
+    '<button class="pw-x" data-pw="close" aria-label="إغلاق">'+I('x')+'</button>'+
+    '<div class="pw-head"><div class="pw-crown">'+I('crown')+'</div><h2>ويب نايل <b>برو</b></h2><p>'+esc(REASON[PW.why]||REASON.me)+'</p></div>'+
+    '<div class="pw-perks">'+PERKS.map(function(k){return '<div class="pw-perk"><span>'+I(k[0])+'</span><div><b>'+k[1]+'</b><small>'+k[2]+'</small></div></div>'}).join('')+'</div>'+
+    '<div class="pw-free">'+I('circle-check')+'<span>يبقى مجاناً للجميع: كل دروس الدورة الأساسية، والاختبارات، والتلميحات، والمحرر وتشغيل الكود، وشهادة الإتمام.</span></div>'+
     '<div class="pw-plans">'+plansH+'</div>'+
     '<button class="pw-cta" data-pw="buy"'+(on||busy||!p?' disabled':'')+'>'+cta+'</button>'+
     '<div class="pw-links"><button data-pw="restore">استعادة المشتريات</button>'+(on&&st.plan!=='life'?'<button data-pw="manage">إدارة الاشتراك</button>':'')+'</div>'+
@@ -191,7 +194,7 @@ function paywall(why){
   if(store&&ready)try{store.update()}catch(e){}
   requestAnimationFrame(function(){PW.el.classList.add('show');document.body.classList.add('pw-on')});
 }
-function welcome(){tst('👑 أهلاً بك في ويب نايل برو! كل المزايا مفتوحة الآن','good')}
+function welcome(){tst('أهلاً بك في ويب نايل برو! كل المزايا مفتوحة الآن','good')}
 
 /* ---------- حماية السلسلة ---------- */
 function month(){var d=new Date();return d.getFullYear()+'-'+(d.getMonth()+1)}
@@ -205,7 +208,7 @@ function nextStreak(S,today,yesterday){
     if(gap>0&&gap<=left){
       if(!st.fz||st.fz.m!==month())st.fz={m:month(),u:0};
       st.fz.u+=gap;persist();
-      setTimeout(function(){tst('❄️ حمت '+(gap===1?'حماية واحدة':gap+' حمايات')+' سلسلتك! تبقّى '+freezesLeft()+' هذا الشهر','good')},2700);
+      setTimeout(function(){tst('حمت '+(gap===1?'حماية واحدة':gap+' حمايات')+' سلسلتك! تبقّى '+freezesLeft()+' هذا الشهر','good')},2700);
       return S.streak+1;
     }
   }
@@ -263,7 +266,7 @@ async function devSave(name){
     try{
       for(var i=0;i<files.length;i++)await FS.writeFile({path:DEV_DIR+'/'+nm+'/'+files[i][0],data:files[i][1]||'',directory:DOCS,encoding:'utf8',recursive:true});
       lsSet('webnile_dev_last',nm);
-      tst('💾 حُفظ في الهاتف: Documents/'+DEV_DIR+'/'+nm,'good');return true;
+      tst('حُفظ في الهاتف: Documents/'+DEV_DIR+'/'+nm,'good');return true;
     }catch(e){tst('تعذّر الحفظ: '+(e&&e.message||'تحقق من مساحة التخزين'),'bad');return false}
   }
   // المتصفح: تنزيل ملف HTML واحد فيه الملفات الثلاثة
@@ -285,7 +288,7 @@ async function devOpenFolder(nm){
   }
   if(!n){tst('لم أجد ملفات في هذا المجلد','bad');return}
   lsSet('webnile_dev_last',nm);
-  loadInto(out);tst('📂 فُتح "'+nm+'" من الهاتف','good');
+  loadInto(out);tst('فُتح "'+nm+'" من الهاتف','good');
 }
 function readText(file){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result||''))};r.onerror=no;r.readAsText(file)})}
 async function devPick(files){
@@ -296,26 +299,26 @@ async function devPick(files){
     try{var t=await readText(f);c[kindOf(f.name)]=t;got.push(f.name)}catch(e){}
   }
   if(!got.length)return;
-  loadInto(c);tst('📂 فُتح: '+got.join('، '),'good');
+  loadInto(c);tst('فُتح: '+got.join('، '),'good');
 }
 function devOpenSheet(){
-  pjSheet('<h3>📂 فتح من الهاتف</h3><p>اختر ملفات .html أو .css أو .js من أي مكان في هاتفك، وكل ملف يذهب لتبويبه في المحرر.</p><label class="btn p dev-pick" style="width:100%;margin-bottom:12px">📄 اختيار ملفات<input id="dev-file" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.txt,text/html,text/css,text/javascript,text/plain" hidden></label><div id="dev-dirs"></div><div class="sheet-btns"><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
+  pjSheet('<h3>'+I('folder-open')+' فتح من الهاتف</h3><p>اختر ملفات .html أو .css أو .js من أي مكان في هاتفك، وكل ملف يذهب لتبويبه في المحرر.</p><label class="btn p dev-pick" style="width:100%;margin-bottom:12px">'+I('file')+' اختيار ملفات<input id="dev-file" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.txt,text/html,text/css,text/javascript,text/plain" hidden></label><div id="dev-dirs"></div><div class="sheet-btns"><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
   var inp=document.getElementById('dev-file');
   inp.onchange=function(){var fl=[].slice.call(inp.files||[]);sheet.classList.remove('show');devPick(fl)};
   devList().then(function(a){
     var box=document.getElementById('dev-dirs');if(!box||!a.length)return;
-    box.innerHTML='<p style="margin:0 0 6px;font-weight:700;color:var(--ink)">مشاريعك في Documents/'+DEV_DIR+'</p><div class="pj-list">'+a.map(function(d){return '<div class="pj-item"><button data-pj="devdir" data-n="'+esc(d.name)+'"><b>📁 '+esc(d.name)+'</b>'+(d.at?'<small>'+new Date(d.at).toLocaleDateString('ar')+'</small>':'')+'</button></div>'}).join('')+'</div>';
+    box.innerHTML='<p style="margin:0 0 6px;font-weight:700;color:var(--ink)">مشاريعك في Documents/'+DEV_DIR+'</p><div class="pj-list">'+a.map(function(d){return '<div class="pj-item"><button data-pj="devdir" data-n="'+esc(d.name)+'"><b>'+I('folder')+' '+esc(d.name)+'</b>'+(d.at?'<small>'+new Date(d.at).toLocaleDateString('ar')+'</small>':'')+'</button></div>'}).join('')+'</div>';
   });
 }
 function devSaveSheet(){
   var last=lsGet('webnile_dev_last','');
-  pjSheet('<h3>💾 حفظ في الهاتف</h3><p>يُحفظ مشروعك كملفات حقيقية <b dir="ltr">index.html · style.css · script.js</b> في مجلد <b dir="ltr">Documents/'+DEV_DIR+'</b>، فتفتحها بأي محرر آخر أو ترفعها على GitHub.</p><input id="dev-name" class="pj-in" maxlength="60" placeholder="اسم المجلد، مثلاً: موقع-المقهى" value="'+esc(last)+'"><div class="sheet-btns"><button data-pj="devsave" style="background:var(--nile);color:#fff">حفظ</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إلغاء</button></div>');
+  pjSheet('<h3>'+I('save')+' حفظ في الهاتف</h3><p>يُحفظ مشروعك كملفات حقيقية <b dir="ltr">index.html · style.css · script.js</b> في مجلد <b dir="ltr">Documents/'+DEV_DIR+'</b>، فتفتحها بأي محرر آخر أو ترفعها على GitHub.</p><input id="dev-name" class="pj-in" maxlength="60" placeholder="اسم المجلد، مثلاً: موقع-المقهى" value="'+esc(last)+'"><div class="sheet-btns"><button data-pj="devsave" style="background:var(--nile);color:#fff">حفظ</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إلغاء</button></div>');
   setTimeout(function(){var i=document.getElementById('dev-name');if(i)i.focus()},300);
 }
 
 function playBar(){
   var n=projects().length,on=active();
-  return '<div class="pj-bar"><button data-pj="devopen">📂 فتح من الهاتف</button><button data-pj="devsave-sheet">💾 حفظ في الهاتف</button><button data-pj="list">📁 مشاريعي'+(on&&n?' ('+n+')':'')+(on?'':' <span class="pro-pill">برو</span>')+'</button><button data-pj="save">💾 حفظ باسم</button><button data-pj="export">⤴ تصدير HTML</button></div>';
+  return '<div class="pj-bar"><button data-pj="devopen">'+I('folder-open')+' فتح من الهاتف</button><button data-pj="devsave-sheet">'+I('save')+' حفظ في الهاتف</button><button data-pj="list">'+I('folder')+' مشاريعي'+(on&&n?' ('+n+')':'')+(on?'':' <span class="pro-pill">برو</span>')+'</button><button data-pj="save">'+I('save')+' حفظ باسم</button><button data-pj="export">'+I('upload')+' تصدير HTML</button></div>';
 }
 var sheet=null;
 function pjSheet(html){
@@ -326,10 +329,10 @@ function pjSheet(html){
 }
 function pjList(){
   var a=projects();
-  pjSheet('<h3>📁 مشاريعي</h3>'+(a.length?'<div class="pj-list">'+a.map(function(p,i){return '<div class="pj-item"><button data-pj="open" data-i="'+i+'"><b>'+esc(p.name)+'</b><small>'+new Date(p.at).toLocaleDateString('ar')+'</small></button><button data-pj="del" data-i="'+i+'" aria-label="حذف">🗑</button></div>'}).join('')+'</div>':'<p>لا توجد مشاريع محفوظة بعد. اضغط "حفظ باسم" لتحفظ مشروعك الحالي.</p>')+'<div class="sheet-btns"><button data-pj="new" style="background:var(--nile);color:#fff">＋ مشروع جديد</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
+  pjSheet('<h3>'+I('folder')+' مشاريعي</h3>'+(a.length?'<div class="pj-list">'+a.map(function(p,i){return '<div class="pj-item"><button data-pj="open" data-i="'+i+'"><b>'+esc(p.name)+'</b><small>'+new Date(p.at).toLocaleDateString('ar')+'</small></button><button data-pj="del" data-i="'+i+'" aria-label="حذف">'+I('trash')+'</button></div>'}).join('')+'</div>':'<p>لا توجد مشاريع محفوظة بعد. اضغط "حفظ باسم" لتحفظ مشروعك الحالي.</p>')+'<div class="sheet-btns"><button data-pj="new" style="background:var(--nile);color:#fff">＋ مشروع جديد</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
 }
 function pjSave(){
-  pjSheet('<h3>💾 حفظ المشروع</h3><p>اختر اسماً لمشروعك الحالي (الملفات الثلاثة معاً).</p><input id="pj-name" class="pj-in" maxlength="40" placeholder="مثلاً: موقع المقهى"><div class="sheet-btns"><button data-pj="dosave" style="background:var(--nile);color:#fff">حفظ</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إلغاء</button></div>');
+  pjSheet('<h3>'+I('save')+' حفظ المشروع</h3><p>اختر اسماً لمشروعك الحالي (الملفات الثلاثة معاً).</p><input id="pj-name" class="pj-in" maxlength="40" placeholder="مثلاً: موقع المقهى"><div class="sheet-btns"><button data-pj="dosave" style="background:var(--nile);color:#fff">حفظ</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إلغاء</button></div>');
   setTimeout(function(){var i=document.getElementById('pj-name');if(i)i.focus()},300);
 }
 function loadInto(p){lsSet(PK.html,p.html||'');lsSet(PK.css,p.css||'');lsSet(PK.js,p.js||'');if(typeof render==='function')render()}
@@ -343,16 +346,16 @@ function pjAct(e){
   if(k==='del'){if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='تأكيد؟';return}var n=a[i].name;a.splice(i,1);saveProjects(a);pjList();tst('حُذف "'+n+'"');return}
   if(k==='new'){var c=current();if(c.html||c.css)lsSet('webnile_play_backup',JSON.stringify(c));loadInto({html:'<h1>مشروع جديد</h1>\n',css:'body {\n  font-family: Cairo, sans-serif;\n}\n',js:'// اكتب JavaScript هنا\n'});sheet.classList.remove('show');return}
   if(k==='dosave'){var nm=(document.getElementById('pj-name').value||'').trim();if(!nm){tst('اكتب اسماً للمشروع','bad');return}
-    var cur=current();cur.name=nm;cur.at=Date.now();var j=a.findIndex(function(x){return x.name===nm});if(j>-1)a[j]=cur;else a.unshift(cur);saveProjects(a);sheet.classList.remove('show');tst('💾 حُفظ "'+nm+'"','good');return}
+    var cur=current();cur.name=nm;cur.at=Date.now();var j=a.findIndex(function(x){return x.name===nm});if(j>-1)a[j]=cur;else a.unshift(cur);saveProjects(a);sheet.classList.remove('show');tst('حُفظ "'+nm+'"','good');return}
 }
 function bindPlay(){
   var bar=document.querySelector('.pj-bar');if(!bar)return;
   bar.onclick=async function(e){
     var b=e.target.closest('[data-pj]');if(!b)return;
     var k=b.dataset.pj;
+    if(!active())return paywall(k==='devopen'||k==='devsave-sheet'?'storage':'files');
     if(k==='devopen')return devOpenSheet();
     if(k==='devsave-sheet')return devSaveSheet();
-    if(!active())return paywall('files');
     if(k==='list')pjList();
     else if(k==='save')pjSave();
     else if(k==='export'){var p=current();p.name='مشروعي';var ok=await shareFile('webnile-project.html',bundle(p),false,'text/html','مشروعي من ويب نايل');if(!ok)tst('تعذّر التصدير','bad')}
@@ -379,16 +382,16 @@ async function certImage(o){
   if(o.avg!=null){x.fillStyle='#F5B83D';x.font='700 32px '+F;x.fillText('متوسط اختبارات الوحدات: '+o.avg+'%',W/2,o.pro?672:620)}
   x.fillStyle='#9DB8C0';x.font='600 26px '+F;x.textAlign='right';x.fillText('تاريخ الإتمام: '+o.date,W-120,H-200);
   x.textAlign='left';x.direction='ltr';x.font='700 26px ui-monospace,Menlo,monospace';x.fillText('ID: '+o.id,120,H-200);
-  x.font='160px serif';x.textAlign='center';x.fillText('🎓',W/2,860);
+  try{var cap=(window.WN_ICON_PATHS||{}).grad;if(cap){x.save();x.translate(W/2-90,690);x.scale(7.5,7.5);x.strokeStyle='#F5B83D';x.lineWidth=1.6;x.lineCap='round';x.lineJoin='round';(cap.match(/d="([^"]+)"/g)||[]).forEach(function(m){x.stroke(new Path2D(m.slice(3,-1)))});x.restore()}}catch(e){}
   return cv.toDataURL('image/png');
 }
-function certBtn(){return '<button class="btn" style="width:100%;margin-top:8px;background:linear-gradient(90deg,#F5B83D,#FFD27A);color:#0B1F2A" id="pro-cert">👑 حمّل الشهادة الاحترافية (صورة)'+(active()?'':' <span class="pro-pill">برو</span>')+'</button>'}
+function certBtn(){return '<button class="btn" style="width:100%;margin-top:8px;background:linear-gradient(90deg,#F5B83D,#FFD27A);color:#0B1F2A" id="pro-cert">'+I('crown')+' حمّل الشهادة الاحترافية (صورة)'+(active()?'':' <span class="pro-pill">برو</span>')+'</button>'}
 function meCard(){
   if(active()){
     var life=st.plan==='life'||dev();
-    return '<div class="card pro-card on"><div class="pro-h"><span>👑</span><div><b>أنت مشترك في ويب نايل برو</b><small>'+(life?'اشتراك مدى الحياة':'يتجدد تلقائياً عبر Google Play')+'</small></div></div><div class="pro-stats"><div><b>'+freezesLeft()+'</b><small>❄️ حمايات السلسلة هذا الشهر</small></div><div><b>'+projects().length+'</b><small>📁 مشاريع محفوظة</small></div></div>'+(life?'':'<button class="btn" data-pw-open="manage" style="width:100%;margin-top:10px">إدارة الاشتراك</button>')+'</div>';
+    return '<div class="card pro-card on"><div class="pro-h"><span>'+I('crown')+'</span><div><b>أنت مشترك في ويب نايل برو</b><small>'+(life?'اشتراك مدى الحياة':'يتجدد تلقائياً عبر Google Play')+'</small></div></div><div class="pro-stats"><div><b>'+freezesLeft()+'</b><small>'+I('snowflake')+' حمايات السلسلة هذا الشهر</small></div><div><b>'+projects().length+'</b><small>'+I('folder')+' مشاريع محفوظة</small></div></div>'+(life?'':'<button class="btn" data-pw-open="manage" style="width:100%;margin-top:10px">إدارة الاشتراك</button>')+'</div>';
   }
-  return '<div class="card pro-card"><div class="pro-h"><span>👑</span><div><b>ويب نايل برو</b><small>6 مشاريع احترافية، وتنقل حر، وحماية السلسلة، ومشاريع غير محدودة، وشهادة احترافية</small></div></div><button class="btn s" data-pw-open="me" style="width:100%;margin-top:10px">اكتشف برو</button></div>';
+  return '<div class="card pro-card"><div class="pro-h"><span>'+I('crown')+'</span><div><b>ويب نايل برو</b><small>6 مشاريع احترافية، وأدوات المحرر الاحترافية، وتنقل حر، وحماية السلسلة، وشهادة احترافية</small></div></div><button class="btn s" data-pw-open="me" style="width:100%;margin-top:10px">اكتشف برو</button></div>';
 }
 function bindMe(ctx){
   document.querySelectorAll('[data-pw-open]').forEach(function(b){b.onclick=function(){b.dataset.pwOpen==='manage'?manage():paywall(b.dataset.pwOpen)}});
@@ -400,7 +403,7 @@ function bindMe(ctx){
     var id=code(ctx.name+'|'+ctx.date+'|'+ctx.lessons);
     var url=await certImage({name:ctx.name,lessons:ctx.lessons,pro:ctx.pro,avg:ctx.avg,date:ctx.date,id:id});
     var ok=await shareFile('webnile-certificate.png',url.split(',')[1],true,'image/png','🎓 أتممت دورة تطوير الويب في تطبيق ويب نايل! رمز الشهادة: '+id);
-    c.disabled=false;c.innerHTML='👑 حمّل الشهادة الاحترافية (صورة)';
+    c.disabled=false;c.innerHTML=I('crown')+' حمّل الشهادة الاحترافية (صورة)';
     if(!ok)tst('تعذّر حفظ الصورة','bad');
   };
 }
