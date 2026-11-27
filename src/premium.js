@@ -1,21 +1,22 @@
 /* ويب نايل برو — الاشتراك عبر Google Play Billing (cordova-plugin-purchase v13)
    المنتجات (أنشئها في Play Console بهذه المعرّفات حرفياً):
-     webnile_pro            اشتراك، فيه خطتان أساسيتان: monthly و yearly (ويمكن إضافة عرض تجربة مجانية)
-     webnile_pro_lifetime   منتج داخل التطبيق لمرة واحدة (اختياري)
+     webnile_pro            اشتراك واحد فقط: خطة أساسية شهرية "monthly" بسعر 2.99$، دفع فوري،
+                            بلا فترة تجريبية، بلا باقة سنوية، وبلا شراء مدى الحياة.
    المزايا تُقرأ دائماً من Premium.active()، والحالة تُحفظ في localStorage "webnile_pro". */
 (function(){
-var SUB='webnile_pro',LIFE='webnile_pro_lifetime',PKG='com.webnile.app';
+var SUB='webnile_pro',PKG='com.webnile.app';
 var GRACE=7*864e5;           // نثق بآخر تحقق ناجح 7 أيام إن لم يتصل الجهاز بـ Google Play
 var FREEZES=3;               // حمايات السلسلة كل شهر للمشتركين
 var KEY='webnile_pro',PKEY='webnile_projects';
 
 var st={};try{st=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
-function dev(){try{return localStorage.getItem('webnile_pro_dev')==='1'}catch(e){return false}}
+// مفتاح التجربة يعمل في المتصفح فقط أثناء التطوير، ولا يمنح برو أبداً داخل التطبيق المثبّت
+function native(){try{return !!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch(e){return false}}
+function dev(){if(native())return false;try{return localStorage.getItem('webnile_pro_dev')==='1'}catch(e){return false}}
 function active(){
   if(dev())return true;
   if(!st.on)return false;
-  if(st.plan==='life')return true;
   return Date.now()-(st.at||0)<GRACE;
 }
 var listeners=[];
@@ -35,7 +36,6 @@ var store=null,ready=false,busy=false,initErr=null;
 function C(){return window.CdvPurchase}
 function owned(){
   if(!store)return null;
-  if(store.owned(LIFE))return 'life';
   if(store.owned(SUB))return 'sub';
   return false;
 }
@@ -50,8 +50,7 @@ function initStore(){
   var GP=P.Platform.GOOGLE_PLAY;
   store.verbosity=P.LogLevel?P.LogLevel.WARNING:1;
   store.register([
-    {id:SUB,type:P.ProductType.PAID_SUBSCRIPTION,platform:GP},
-    {id:LIFE,type:P.ProductType.NON_CONSUMABLE,platform:GP}
+    {id:SUB,type:P.ProductType.PAID_SUBSCRIPTION,platform:GP}
   ]);
   store.when()
     .approved(function(t){return t.verify()})
@@ -70,33 +69,19 @@ function initStore(){
 document.addEventListener('deviceready',initStore,false);
 if(C())setTimeout(initStore,0);
 
-/* خطط العرض: نقرأ العروض الحقيقية من Google Play (السعر بعملة المستخدم) */
+/* الخطة الوحيدة: برو الشهري. نقرأ السعر الحقيقي من Google Play (بعملة المستخدم).
+   نختار عرضاً شهرياً مدفوعاً من أول يوم، ونتجاهل أي عرض فيه مرحلة مجانية أو مخفّضة لو أُضيف بالخطأ في Play Console. */
 function plans(){
-  var out=[];
-  if(!store)return out;
-  var sub=store.get(SUB),life=store.get(LIFE);
-  if(sub&&sub.offers){
-    var by={};
-    sub.offers.forEach(function(o){
-      var ph=o.pricingPhases||[];if(!ph.length)return;
-      var base=ph[ph.length-1];
-      var per=/Y/.test(base.billingPeriod||'')?'y':/M/.test(base.billingPeriod||'')?'m':null;if(!per)return;
-      var trial=ph.find(function(x){return x.priceMicros===0});
-      var cur=by[per];
-      if(!cur||(trial&&!cur.trial))by[per]={per:per,offer:o,price:base.price,micros:base.priceMicros,trial:trial?trial.billingPeriod:null};
-    });
-    if(by.y)out.push(by.y);
-    if(by.m)out.push(by.m);
-    if(by.y&&by.m&&by.m.micros>0)by.y.save=Math.round((1-by.y.micros/(by.m.micros*12))*100);
-  }
-  if(life&&life.offers&&life.offers[0]){
-    var lp=(life.offers[0].pricingPhases||[])[0];
-    out.push({per:'l',offer:life.offers[0],price:lp?lp.price:life.pricing&&life.pricing.price});
-  }
-  return out;
+  if(!store)return [];
+  var sub=store.get(SUB);if(!sub||!sub.offers)return [];
+  var pick=null;
+  sub.offers.forEach(function(o){
+    var ph=o.pricingPhases||[];if(ph.length!==1)return;
+    var b=ph[0];if(!/^P1M$/.test(b.billingPeriod||'')||!(b.priceMicros>0))return;
+    if(!pick)pick={per:'m',offer:o,price:b.price,micros:b.priceMicros};
+  });
+  return pick?[pick]:[];
 }
-function period(p){var m=/P(\d+)([DWMY])/.exec(p||'');if(!m)return '';var n=+m[1],u=m[2];
-  if(u==='D')return n===7?'أسبوع':n+' أيام';if(u==='W')return n===1?'أسبوع':n===2?'أسبوعين':n+' أسابيع';if(u==='M')return n===1?'شهر':n+' أشهر';return 'سنة'}
 function buy(plan){
   if(!plan||busy)return;
   busy=true;PW.paint();
@@ -154,17 +139,13 @@ PW.paint=function(){
   var plansH;
   if(ps.length){
     plansH=ps.map(function(x,i){
-      var name=x.per==='y'?'سنوي':x.per==='m'?'شهري':'مدى الحياة';
-      var pr='<bdi>'+esc(x.price)+'</bdi>',sub=x.per==='y'?pr+' / سنة':x.per==='m'?pr+' / شهر':pr+' مرة واحدة';
-      var tag=x.per==='y'&&x.save>0?'<span class="pw-tag">وفّر <bdi>'+x.save+'%</bdi></span>':x.per==='l'?'<span class="pw-tag alt">بلا تجديد</span>':'';
-      var tr=x.trial?'<small>'+period(x.trial)+' مجاناً ثم '+sub+'</small>':'<small>'+sub+'</small>';
-      return '<button class="pw-plan'+(i===PW.sel?' on':'')+'" data-pi="'+i+'"><i></i><span><b>'+name+'</b>'+tr+'</span>'+tag+'</button>';
+      return '<button class="pw-plan on" data-pi="'+i+'"><i></i><span><b>برو الشهري</b><small><bdi>'+esc(x.price)+'</bdi> / شهر · يتجدد شهرياً</small></span></button>';
     }).join('');
   }else{
     var why=!C()?'الاشتراك متاح عند تثبيت التطبيق من Google Play.':!ready?'جارٍ تحميل الأسعار من Google Play…':'تعذّر تحميل الأسعار. تحقق من اتصالك ثم أعد فتح الصفحة.';
     plansH='<div class="pw-na">'+why+'</div>';
   }
-  var cta=on?'أنت مشترك بالفعل':busy?'جارٍ التنفيذ…':p?(p.trial?'ابدأ '+period(p.trial)+' مجاناً':p.per==='l'?'اشترِ برو مدى الحياة':'اشترك الآن'):'غير متاح الآن';
+  var cta=on?'أنت مشترك بالفعل':busy?'جارٍ التنفيذ…':p?'اشترك الآن':'غير متاح الآن';
   PW.el.querySelector('.pw-box').innerHTML=
     '<button class="pw-x" data-pw="close" aria-label="إغلاق">'+I('x')+'</button>'+
     '<div class="pw-head"><div class="pw-crown">'+I('crown')+'</div><h2>ويب نايل <b>برو</b></h2><p>'+esc(REASON[PW.why]||REASON.me)+'</p></div>'+
@@ -172,8 +153,8 @@ PW.paint=function(){
     '<div class="pw-free">'+I('circle-check')+'<span>يبقى مجاناً للجميع: كل دروس الدورة الأساسية، والاختبارات، والتلميحات، والمحرر وتشغيل الكود، وشهادة الإتمام.</span></div>'+
     '<div class="pw-plans">'+plansH+'</div>'+
     '<button class="pw-cta" data-pw="buy"'+(on||busy||!p?' disabled':'')+'>'+cta+'</button>'+
-    '<div class="pw-links"><button data-pw="restore">استعادة المشتريات</button>'+(on&&st.plan!=='life'?'<button data-pw="manage">إدارة الاشتراك</button>':'')+'</div>'+
-    '<p class="pw-legal">'+(p&&p.per!=='l'?'يتجدد الاشتراك تلقائياً بنفس السعر حتى تلغيه. ألغِ في أي وقت من Google Play ← الاشتراكات، قبل 24 ساعة من موعد التجديد. '+(p.trial?'لن تُحاسَب إن ألغيت قبل نهاية الفترة المجانية. ':''):'')+'الدفع عبر حسابك في Google Play.</p>';
+    '<div class="pw-links"><button data-pw="restore">استعادة المشتريات</button>'+(on?'<button data-pw="manage">إدارة الاشتراك</button>':'')+'</div>'+
+    '<p class="pw-legal">تُحاسَب فور الاشتراك، ويتجدد شهرياً بنفس السعر حتى تلغيه. ألغِ في أي وقت من Google Play ← الاشتراكات قبل 24 ساعة من موعد التجديد. عند انتهاء الاشتراك تبقى مشاريعك وأكوادك محفوظة. الدفع عبر حسابك في Google Play.</p>';
 };
 function paywall(why){
   if(!PW.el){
@@ -388,8 +369,8 @@ async function certImage(o){
 function certBtn(){return '<button class="btn" style="width:100%;margin-top:8px;background:linear-gradient(90deg,#F5B83D,#FFD27A);color:#0B1F2A" id="pro-cert">'+I('crown')+' حمّل الشهادة الاحترافية (صورة)'+(active()?'':' <span class="pro-pill">برو</span>')+'</button>'}
 function meCard(){
   if(active()){
-    var life=st.plan==='life'||dev();
-    return '<div class="card pro-card on"><div class="pro-h"><span>'+I('crown')+'</span><div><b>أنت مشترك في ويب نايل برو</b><small>'+(life?'اشتراك مدى الحياة':'يتجدد تلقائياً عبر Google Play')+'</small></div></div><div class="pro-stats"><div><b>'+freezesLeft()+'</b><small>'+I('snowflake')+' حمايات السلسلة هذا الشهر</small></div><div><b>'+projects().length+'</b><small>'+I('folder')+' مشاريع محفوظة</small></div></div>'+(life?'':'<button class="btn" data-pw-open="manage" style="width:100%;margin-top:10px">إدارة الاشتراك</button>')+'</div>';
+    var life=dev();
+    return '<div class="card pro-card on"><div class="pro-h"><span>'+I('crown')+'</span><div><b>أنت مشترك في ويب نايل برو</b><small>'+(life?'وضع التجربة في المتصفح':'برو الشهري · يتجدد تلقائياً عبر Google Play')+'</small></div></div><div class="pro-stats"><div><b>'+freezesLeft()+'</b><small>'+I('snowflake')+' حمايات السلسلة هذا الشهر</small></div><div><b>'+projects().length+'</b><small>'+I('folder')+' مشاريع محفوظة</small></div></div>'+(life?'':'<button class="btn" data-pw-open="manage" style="width:100%;margin-top:10px">إدارة الاشتراك</button>')+'</div>';
   }
   return '<div class="card pro-card"><div class="pro-h"><span>'+I('crown')+'</span><div><b>ويب نايل برو</b><small>6 مشاريع احترافية، وأدوات المحرر الاحترافية، وتنقل حر، وحماية السلسلة، وشهادة احترافية</small></div></div><button class="btn s" data-pw-open="me" style="width:100%;margin-top:10px">اكتشف برو</button></div>';
 }

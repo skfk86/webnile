@@ -147,6 +147,38 @@ function typeText(view, text) {
   view.dispatch(view.state.replaceSelection(text), {userEvent: 'input.type', scrollIntoView: true});
 }
 
+// الإدراج السريع لوسم HTML من الشريط: يستبدل بداية وسم ناقصة قبل المؤشر ("<h" أو "<h1" أو "di")،
+// ويحيط النص المحدد بالوسم، ويضع المؤشر داخل الوسمين. كل ذلك في معاملة واحدة (تراجع واحد).
+const ATTR_TAGS = {a: ' href="#"'};
+const VOID_TAGS = {img: ['<img src="', '" alt="', '">'], input: ['<input type="text" placeholder="', '', '">'],
+  br: ['<br>', '', ''], hr: ['<hr>', '', ''], meta: ['<meta name="', '" content="', '">'], link: ['<link rel="stylesheet" href="', '', '">']};
+export function tagEdit(state, name) {
+  name = String(name).toLowerCase();
+  const r = state.selection.main;
+  let from = r.from, to = r.to;
+  const sel = state.sliceDoc(r.from, r.to);
+  if (r.empty) {
+    const line = state.doc.lineAt(r.from), before = state.sliceDoc(line.from, r.from);
+    const m = before.match(/<\/?([a-zA-Z][\w-]*)?$/) || before.match(/(?:^|[\s>])([a-zA-Z][\w-]*)$/);
+    if (m) {
+      const word = (m[1] || '').toLowerCase(), raw = m[0].replace(/^[\s>]/, '');
+      if (raw.startsWith('<') || (word && name.startsWith(word))) from = r.from - raw.length;
+    }
+  }
+  const v = VOID_TAGS[name];
+  let insert, anchor, head;
+  if (v) {
+    if (name === 'br' || name === 'hr') { insert = sel + v[0]; anchor = head = from + insert.length; }
+    else if (name === 'img') { insert = v[0] + v[1] + sel + v[2]; anchor = head = from + v[0].length; }
+    else { insert = v[0] + sel + v[1] + v[2]; anchor = head = from + v[0].length + sel.length; }
+  } else {
+    const open = '<' + name + (ATTR_TAGS[name] || '') + '>', close = '</' + name + '>';
+    insert = open + sel + close;
+    anchor = from + open.length; head = anchor + sel.length;
+  }
+  return {changes: {from, to, insert}, selection: {anchor, head}, userEvent: 'input.type', scrollIntoView: true};
+}
+
 function load(k, d) { try { const v = localStorage.getItem(k); return v == null ? d : v; } catch (e) { return d; } }
 function store(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
 
@@ -232,16 +264,20 @@ export function create(parent, o) {
       if (o.onCursor) o.onCursor(cursorInfo(view.state));
     },
     onInput(f) { listeners.push(f); },
+    // أوامر الشريط لا تستدعي focus: لو كانت لوحة المفاتيح مغلقة تبقى مغلقة، ولو كانت مفتوحة
+    // فالتطبيق يعيد التركيز فقط إن سُرق (انظر keepFocus في index.html). بذلك لا تقفز لوحة المفاتيح.
+    get hasFocus() { return view.hasFocus; },
     focus() { view.focus(); },
-    type(text) { typeText(view, text); view.focus(); },
-    tab() { if (completionStatus(view.state) === 'active') acceptCompletion(view); else indentMore(view); view.focus(); },
-    undo() { undo(view); view.focus(); },
-    redo() { redo(view); view.focus(); },
-    left() { cursorCharLeft(view); view.focus(); },
-    right() { cursorCharRight(view); view.focus(); },
-    up() { cursorLineUp(view); view.focus(); },
-    down() { cursorLineDown(view); view.focus(); },
-    enter() { insertNewlineAndIndent(view); view.focus(); },
+    type(text) { typeText(view, text); },
+    tag(name) { view.dispatch(tagEdit(view.state, name)); },
+    tab() { if (completionStatus(view.state) === 'active') acceptCompletion(view); else indentMore(view); },
+    undo() { undo(view); },
+    redo() { redo(view); },
+    left() { cursorCharLeft(view); },
+    right() { cursorCharRight(view); },
+    up() { cursorLineUp(view); },
+    down() { cursorLineDown(view); },
+    enter() { insertNewlineAndIndent(view); },
     suggest() { view.focus(); startCompletion(view); },
     search() { view.focus(); openSearchPanel(view); },
     format() {
@@ -261,7 +297,6 @@ export function create(parent, o) {
     pick(i) {
       view.dispatch({effects: setSelectedCompletion(i)});
       acceptCompletion(view);
-      view.focus();
     },
     get wrap() { return wrapOn; },
     toggleWrap() {

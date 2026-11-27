@@ -105,3 +105,19 @@ button.xrow:active{background:#2A2D35}
 .xsg small{margin-left:auto;color:#6E737D;font:11px var(--mono)}
 .xsnip .xrow span{flex:1}
 .xsnip .xrow small{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* المرحلة A: شريط الأدوات السفلي داكن دائماً.
+   السبب الجذري لظهوره أبيض: قاعدة body.typing .ekb العامة (خلفية var(--bg) الفاتحة) كانت تطغى على
+   قاعدة المحرر لأن لها نفس الأولوية وتأتي بعدها. استُثني المحرر منها في index.html، وهنا نرفع الأولوية أيضاً. */
+body .xide .ekb,body.typing .xide .ekb{position:static;margin:0;padding:0;background:#1F2128;border-top:1px solid #2A2D35;box-shadow:none}
+.xide .estat{background:#1F2128}
+.xide .keys button,.xide .keys button:focus,.xide .keys button:hover{background:#2A2D35;color:#E6E6E6;border:1px solid #33373F;box-shadow:none;outline:none}
+.xide .keys button:active{background:#3A3E48}
+.xide .xkeys button:focus,.xide .xkeys button:hover{background:transparent;outline:none}
+.xide .xkeys button:active{background:#2C2F38}
+.keys .qt{min-width:0;padding:0 10px;font:600 14px var(--mono);color:var(--nile)}
+.xide .keys .qt{color:#E06C75}
+.qsep{flex:none;width:1px;margin:6px 2px;background:var(--line)}
+.xide .qsep{background:#3A3E48}
+/* ترتفع الواجهة فوق لوحة المفاتيح (--kb يحسبه index.html) */
+.xide{bottom:var(--kb,0px)}
+body.kb-open .xide{padding-bottom:0}
