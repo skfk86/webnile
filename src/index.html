@@ -287,6 +287,8 @@ nav button.on .i{background:rgba(18,181,166,.16)}
 .exl{border-color:var(--line);background:transparent}
 .exr{padding:6px 16px 4px}
 </style>
+<link rel="stylesheet" href="textzoom.css">
+<script src="textzoom.js"></script>
 </head>
 <body>
 <svg width="0" height="0" style="position:absolute" aria-hidden="true">
@@ -433,7 +435,7 @@ task:'لوّن `h1` بأي لون غير الأسود، وأعطِ `body` لون
 'خصائص النص الأساسية: `font-size` للحجم، `font-weight` للسماكة، `font-family` لنوع الخط، `text-align` للمحاذاة، و`line-height` لارتفاع السطر.',{c:'p {\n  font-family: Cairo, sans-serif;\n  font-size: 18px;\n  line-height: 1.8;\n}\nh1 {\n  font-weight: 900;\n  text-align: center;\n}'},
 'اكتب `line-height` كرقم بلا وحدة، فيُحسب نسبةً لحجم الخط. القيمة بين 1.5 و1.8 مريحة للقراءة، خصوصاً في العربية.',
 {tip:'اذكر خطاً بديلاً دائماً في `font-family` (مثل `sans-serif`)، فيستخدمه الجهاز إن لم يجد الخط الأول.'}],
-task:'اجعل حجم `h1` أكبر من `30px` وموسّطاً، وارتفاع سطر `p` لا يقل عن `1.5`.',start:'<style>\n  h1 {\n    \n  }\n  p {\n    \n  }\n</style>\n<h1>عنوان كبير</h1>\n<p>فقرة تجريبية لاختبار ارتفاع السطر.</p>',checks:[['حجم h1 أكبر من 30px',d=>px(gcs(d,'h1').fontSize)>30],['محاذاة h1 center',d=>gcs(d,'h1').textAlign==='center'],['ارتفاع سطر p ≥ 1.5',d=>px(gcs(d,'p').lineHeight)/px(gcs(d,'p').fontSize)>=1.49]]},
+task:'اجعل حجم `h1` أكبر من `30px` وموسّطاً، وارتفاع سطر `p` لا يقل عن `1.5`.',start:'<style>\n  h1 {\n    \n  }\n  p {\n    \n  }\n</style>\n<h1>عنوان كبير</h1>\n<p>فقرة تجريبية لاختبار ارتفاع السطر.</p>',checks:[['حجم h1 أكبر من 30px',d=>px(gcs(d,'h1').fontSize)/(window.__tz||1)>30],['محاذاة h1 center',d=>gcs(d,'h1').textAlign==='center'],['ارتفاع سطر p ≥ 1.5',d=>px(gcs(d,'p').lineHeight)/px(gcs(d,'p').fontSize)>=1.49]]},
 {id:'c3',k:'css',ic:'box',t:'الصندوق Box Model',body:[
 'كل عنصر في الصفحة صندوق مكوّن من أربع طبقات من الداخل للخارج: المحتوى، ثم `padding` (حشوة داخلية)، ثم `border` (الحد)، ثم `margin` (مسافة خارجية تفصله عن غيره).',{c:'.card {\n  padding: 16px;   /* داخل الحد */\n  margin: 12px;    /* خارج الحد */\n}'},
 'يمكن تحديد كل جهة على حدة: `padding-top` و`margin-bottom`، أو كتابة أربع قيم بالترتيب (أعلى، يمين، أسفل، يسار): `padding: 8px 16px 8px 16px;`.',

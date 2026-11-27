@@ -1,0 +1,103 @@
+/* ويب نايل — التوافق مع حجم خط النظام (textzoom.js يضبط --tz وأصناف tz-*)
+ *
+ * أندرويد يضرب كل أحجام الخط في نسبة خط النظام (حتى 200%).
+ * - نص القراءة (الدروس، الشرح، الأسئلة، الأزرار) يكبر بالكامل كما يريد المستخدم.
+ * - العناوين الكبيرة والأرقام والرموز وعناصر الواجهة الثابتة (الشريط السفلي، المحرر)
+ *   يُحدّ تكبيرها، تماماً كما يفعل أندرويد 14 مع الخطوط الكبيرة (تكبير غير خطي).
+ *   الحجم المكتوب هنا يُضرب لاحقاً في --tz، لذا: الحجم الفعلي = الأساس × min(tz, الحد).
+ * - كل القواعد داخل .tz-l / .tz-xl فلا يتغير شيء عند الحجم العادي.
+ */
+:root{--tz:1;--k12:calc(min(var(--tz),1.2) / var(--tz));--k13:calc(min(var(--tz),1.3) / var(--tz));--k15:calc(min(var(--tz),1.5) / var(--tz))}
+
+/* ---------- عام: لا شيء يخرج من الشاشة ---------- */
+.tz-l body{overflow-wrap:break-word}
+.tz-l .card,.tz-l .cta .cx,.tz-l .uinfo,.tz-l .stat,.tz-l .node .t{min-width:0}
+
+/* ---------- عناوين وأرقام كبيرة (حد 1.3) ---------- */
+.tz-l .logo{font-size:calc(25px * var(--k13))}
+.tz-l .stat b{font-size:calc(22px * var(--k13))}
+.tz-l .h2{font-size:calc(19px * var(--k13))}
+.tz-l .unit .h2{font-size:calc(17px * var(--k13))}
+.tz-l .unum{font-size:calc(18px * var(--k13))}
+.tz-l .bar2 h1{font-size:calc(17.5px * var(--k13))}
+.tz-l .bar2 h1 small{font-size:calc(12px * var(--k15))}
+.tz-l .big,.tz-l .xpc .big{font-size:calc(38px * var(--k12))}
+.tz-l .big small{font-size:calc(15px * var(--k13))!important}
+.tz-l [style*="font-size:34px"]{font-size:calc(34px * var(--k12))!important}
+.tz-l [style*="font-size:38px"]{font-size:calc(38px * var(--k12))!important}
+.tz-l .sheet{max-height:100vh;overflow-y:auto}
+.tz-l .pw-perk b{font-size:calc(14px * var(--k15))}
+.tz-l .sheet h3{font-size:calc(1.17em * var(--k13))}
+.tz-l .pw-crown{font-size:calc(44px * var(--k12))}
+.tz-l .pw-head h2{font-size:calc(24px * var(--k13))}
+.tz-l .pw-perk span{font-size:calc(22px * var(--k13))}
+.tz-l .pro-h span{font-size:calc(30px * var(--k12))}
+.tz-l .pro-stats b{font-size:calc(20px * var(--k13))}
+
+/* ---------- الواجهة الرئيسية ---------- */
+.tz-l .hero .hi{font-size:calc(12.5px * var(--k13));white-space:normal}
+.tz-l .stats{flex-wrap:wrap}
+.tz-l .stat{flex:1 1 0;min-width:0;padding-inline:10px}
+.tz-l .stat span{font-size:calc(12px * var(--k13));flex-wrap:wrap;line-height:1.4}
+.tz-l .prog small{font-size:calc(12px * var(--k13))}
+.tz-l .cta .cx b{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.tz-l .un{font-size:calc(11.5px * var(--k15))}
+/* عقد المسار: نعرض الصندوق كاملاً بدل الإزاحة المتعرجة حين يكبر النص */
+.tz-xl .node{width:auto;margin-inline:16px;transform:none!important}
+.tz-xl .path:before{right:calc(16px + 32px)}
+.tz-l .node .t{line-height:1.4}
+
+/* ---------- الشريط السفلي ---------- */
+.tz-l nav button{font-size:calc(11.5px * var(--k13));line-height:1.25;white-space:nowrap;min-width:0}
+.tz-l nav button .i{box-sizing:content-box;padding:3px 14px}
+
+/* ---------- الدروس والاختبارات ---------- */
+.tz-l .ex{font-size:calc(13px * var(--k13))}
+.tz-l .con{font-size:calc(14px * var(--k13))}
+.tz-l .keys button{font-size:calc(15px * var(--k13));height:auto;min-height:38px}
+.tz-l .sug button{font-size:calc(14px * var(--k13));height:auto;min-height:38px}
+.tz-l .sug{min-height:0}
+.tz-l .cmh .cm-editor{font-size:calc(var(--wn-fs, 15px) * var(--k13))!important}
+.tz-l .btn{height:auto;line-height:1.45}
+.tz-l .row{flex-wrap:wrap}
+.tz-l .row>.btn{flex:1 1 auto}
+.tz-l .chips{flex-wrap:wrap}
+.tz-l .thm{flex-wrap:wrap}
+.tz-l .thm .seg button{font-size:calc(13px * var(--k13))}
+.tz-l .seg button{min-width:0;font-size:calc(14px * var(--k13))}
+.tz-l .etl button,.tz-l .ft{font-size:calc(12.5px * var(--k13))}
+.tz-l .estat{font-size:calc(11px * var(--k13));overflow-x:auto;scrollbar-width:none}
+.tz-l .efs .efsbar b{font-size:calc(15px * var(--k13))}
+
+/* ---------- المحرر بملء الشاشة ---------- */
+.tz-l .xfile{font-size:calc(17px * var(--k12))}
+.tz-l .xide .ft{font-size:calc(12.5px * var(--k13))}
+.tz-l .xide .estat{font-size:calc(13px * var(--k12));overflow-x:auto;scrollbar-width:none}
+.tz-l .xide .estat::-webkit-scrollbar{display:none}
+.tz-l .xide .keys button{height:auto;min-height:38px}
+.tz-l .xide .sug button{height:auto;min-height:34px}
+.tz-l .xph{font-size:calc(11px * var(--k13))}
+.tz-l .xph small,.tz-l .xrow small,.tz-l .xsg small{font-size:calc(11px * var(--k13))}
+.tz-l .xrow{font-size:calc(14px * var(--k13))}
+.tz-l .xide .etl.xset button.xrow{font-size:calc(14px * var(--k13))}
+.tz-l .xdir,.tz-l .xdir b,.tz-l .xsg{font-size:calc(13px * var(--k13))}
+.tz-l .xleaf{font-size:calc(14px * var(--k13))}
+.tz-l .xsnip .xrow span{flex:1 0 auto;max-width:100%}
+.tz-l .xsnip .xrow small{flex:1 1 0;min-width:0;max-width:none}
+.tz-l .xrow em{font-size:calc(10px * var(--k13))}
+.tz-l .xact button small{font-size:calc(10px * var(--k12))}
+.tz-l .xide .etl.xset .xstep button{font-size:calc(17px * var(--k13))}
+
+/* ---------- برو والشارات ---------- */
+.tz-l .probadge,.tz-l .pro-pill,.tz-l .pw-tag{font-size:calc(11px * var(--k13));white-space:nowrap}
+.tz-l .pw-plan{flex-wrap:wrap}
+.tz-l .pw-x{font-size:calc(16px * var(--k13))}
+
+/* ---------- نيلو ---------- */
+.tz-l .nilo-name{font-size:calc(11px * var(--k13))}
+.tz-l .nilo-x{font-size:calc(16px * var(--k13))}
+.tz-l .nilo-bub{font-size:calc(15px * var(--k15));max-height:45vh;overflow:auto}
+
+/* ---------- الخط الصغير: لا نصوص أصغر من المقروء ---------- */
+.tz-s .xact button small,.tz-s .xrow em{font-size:calc(10px / var(--tz))}
+.tz-s .nilo-name,.tz-s .xph{font-size:calc(11px / var(--tz))}
