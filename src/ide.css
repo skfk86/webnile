@@ -1,0 +1,107 @@
+/* التجربة الحرة: محرر احترافي بملء الشاشة (ألوان داكنة ثابتة مثل محررات الجوال) */
+body.ide-on{overflow:hidden}
+body.ide-on nav,body.ide-on .nilo{display:none}
+.xide{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:#1B1D23;color:#D7DAE0;padding:var(--st) 0 var(--sb)}
+.xide svg.fi{width:22px;height:22px;flex:none}
+.xtop,.xprev{flex:none;display:flex;align-items:center;gap:4px;height:58px;padding:0 6px;background:#1F2128}
+.xi{flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:12px;color:#AEB4BE}
+.xi:active,.xfile:active{background:#2A2D35}
+.xi svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.xi .i{width:22px;height:22px}
+.xrun svg{fill:#22C55E;stroke:#22C55E;stroke-width:1.5}
+.xfile{display:flex;align-items:center;gap:9px;min-width:0;padding:8px 10px;border-radius:12px;color:#E6E6E6;font:500 17px/1.2 system-ui,'Cairo',sans-serif}
+.xfile span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xsp{flex:1}
+.xide[data-v=c] .xprev{display:none}
+.xide:not([data-v=c]) .xtop,.xide:not([data-v=c]) .ekb{display:none}
+.xprev .seg{flex:1;margin:0;background:#2A2D35}
+.xprev .seg button{color:#9AA3B2}.xprev .seg button.on{background:#1B1D23;color:#fff}
+.xide .ide{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:0;background:#1B1D23;box-shadow:none}
+.xide .ide.hide{display:none}
+.xide .etabs{background:#1B1D23;border-bottom:1px solid #2A2D35;min-height:36px}
+.xide .ft{padding:7px 14px;font-size:12.5px;border-right-color:#2A2D35}
+.xide .ft.on{background:#23262E}
+.xide .cmh{flex:1;height:auto;min-height:0;background:#1B1D23}
+.xide .cmh .cm-editor,.xide .cmh .cm-gutters{background:#1B1D23}
+.xide .cmh .cm-gutters{border-right:0}
+.xide .pv{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:0;box-shadow:none;background:#fff}
+.xide .pv.off,.xide .pv.hide{display:none}
+.xide .frame{flex:1;height:auto}
+.xide .con{flex:1;max-height:none;min-height:0}
+#pcn{background:#07141A}
+body .xide .ekb{position:static;flex:none;margin:0;padding:0;background:#1F2128;border-top:1px solid #2A2D35;box-shadow:none}
+.xide .sug{padding:6px 8px 0;min-height:0}
+.xide .sug:has(.h){display:none}
+.xide .sug button{height:34px;background:#2A2D35;color:#E6E6E6}
+.xide .estat{direction:ltr;display:flex;gap:16px;background:transparent;color:#9AA0A6;font:13px/1 system-ui,sans-serif;padding:11px 14px;border-bottom:1px solid #2A2D35;white-space:nowrap;overflow:hidden}
+.xide .estat .xs{flex:1}
+.xkeys{display:flex;justify-content:space-around;align-items:center;height:54px;padding:0 4px}
+.xkeys button{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;color:#C9CDD4}
+.xkeys button svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.xkeys button:active{background:#2C2F38}
+.xkeys button.on{color:#12B5A6}
+.xide .keys{padding:0 8px 8px}
+.xide .keys button{background:#2A2D35;color:#E6E6E6;box-shadow:none;height:38px}
+.xide .efsbar{display:none!important}
+/* الشريط الجانبي على طريقة VS Code و Acode */
+.xdrawer{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.45);opacity:0;pointer-events:none;transition:opacity .2s}
+.xdrawer.open{opacity:1;pointer-events:all}
+.xdpanel{position:absolute;top:0;bottom:0;left:0;width:min(84vw,330px);display:flex;background:#1F2128;color:#C9CDD4;transform:translateX(-100%);transition:transform .22s ease-out;box-shadow:8px 0 24px rgba(0,0,0,.35);font-family:system-ui,'Cairo',sans-serif}
+.xdrawer.open .xdpanel{transform:none}
+.xact{flex:none;width:52px;display:flex;flex-direction:column;align-items:center;gap:2px;padding:calc(var(--st) + 8px) 0 calc(var(--sb) + 8px);background:#18191E;border-right:1px solid #2A2D35}
+.xact button{position:relative;width:52px;height:50px;display:grid;place-items:center;color:#6E737D}
+.xact button.on{color:#E6E6E6}
+.xact button.on:before{content:"";position:absolute;left:0;top:10px;bottom:10px;width:2px;background:#12B5A6;border-radius:2px}
+.xact svg,.xrow svg,.xph-i svg{fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.xact svg{width:24px;height:24px}
+.xact .xsp{flex:1}
+.xpanes{flex:1;min-width:0;overflow:auto;padding:calc(var(--st) + 6px) 0 calc(var(--sb) + 10px)}
+.xpanes section[hidden]{display:none}
+.xph{display:flex;align-items:center;gap:2px;height:36px;padding:0 6px 0 16px;font-size:11px;font-weight:700;letter-spacing:.9px;color:#8B8F98}
+.xph span{flex:1}
+.xph-i{width:32px;height:32px;display:grid;place-items:center;border-radius:6px;color:#8B8F98}
+.xph-i svg{width:17px;height:17px}
+.xph-i:active{background:#2A2D35}
+.xrow{display:flex;align-items:center;gap:10px;width:100%;min-height:36px;padding:0 14px 0 16px;color:#C9CDD4;font-size:14px;text-align:start;border-left:2px solid transparent}
+.xrow svg{width:17px;height:17px;flex:none;color:#8B8F98}
+.xrow span{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xrow small{color:#6E737D;font:11px var(--mono)}
+.xrow em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.5px;color:#0B1F2A;background:#F5B83D;border-radius:4px;padding:1px 5px}
+button.xrow:active{background:#2A2D35}
+.xdir{color:#E6E6E6;font-size:13px;gap:4px;padding-left:8px}.xdir svg{width:16px;height:16px}.xdir b{font-weight:700;font:600 13px var(--mono)}
+.xleaf{padding-left:30px;font:14px var(--mono);gap:8px}
+.xleaf .fi{width:17px!important;height:17px!important}
+.xleaf.on{background:#2A2D3A;color:#fff;border-left-color:#12B5A6}
+.xpanes .chips{display:block;margin:0}
+.xide .xpanes .chips button.xrow{display:flex;background:none;box-shadow:none;border-radius:0;padding:0 14px 0 16px;font-weight:400;color:#C9CDD4}
+.xide .etl.xset{display:block;background:none;border:0;padding:0;overflow:visible}
+.xide .etl.xset button.xrow{height:auto;background:none;border-radius:0;color:#C9CDD4;font-weight:400;font-size:14px}
+.xsw i{flex:none;width:34px;height:20px;border-radius:20px;background:#3A3E48;position:relative;transition:background .2s}
+.xsw i:after{content:"";position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#C9CDD4;transition:transform .2s}
+.xsw.on i{background:#0E7C86}.xsw.on i:after{transform:translateX(14px);background:#fff}
+.xide .xstep{gap:6px}
+.xstep span{display:flex;align-items:center;gap:10px}
+.xide .etl.xset .xstep button{flex:none;width:34px;height:30px;border-radius:6px;background:#2A2D35;color:#E6E6E6;font:600 17px/1 system-ui;padding:0}
+/* تصفير أنماط الأزرار العامة داخل الشريط الجانبي */
+.xide .xdrawer .xpanes button{flex:none;height:auto;background:none;box-shadow:none;border-radius:0;font-weight:400;white-space:normal;padding-top:0;padding-bottom:0}
+.xide .xdrawer .xpanes button.xrow{padding:0 14px 0 16px;min-height:36px}
+.xide .xdrawer .xpanes button.xleaf{padding-left:30px}
+.xide .xdrawer .xpanes .xph-i{width:32px;height:32px;padding:0;border-radius:6px}
+.xide .xdrawer .xpanes .xleaf.on{background:#2A2D3A}
+.xide .xdrawer .xpanes .xstep button{width:34px;height:30px;border-radius:6px;background:#2A2D35;padding:0}
+.xide .xdrawer .xpanes button.xrow:active{background:#2A2D35}
+.xpanes{overflow-x:hidden}
+.xide .xdrawer .xpanes.pj-bar{display:block;margin:0}
+/* أسماء أيقونات الشريط العمودي */
+.xact{width:60px}
+.xact button{width:60px;height:58px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:3px}
+.xact button svg{width:22px;height:22px}
+.xact button small{font:600 10px/1 'Cairo',system-ui,sans-serif;color:inherit}
+.xact button.on:before{top:12px;bottom:12px}
+/* الإدراج السريع */
+.xph small{font:400 11px 'Cairo',system-ui,sans-serif;letter-spacing:0;color:#6E737D}
+.xsg{display:flex;align-items:center;gap:8px;padding:12px 16px 4px;color:#E6E6E6;font-size:13px}
+.xsg .fi{width:16px!important;height:16px!important}
+.xsg small{margin-left:auto;color:#6E737D;font:11px var(--mono)}
+.xsnip .xrow span{flex:1}
+.xsnip .xrow small{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
