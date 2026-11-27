@@ -1,0 +1,64 @@
+/* التجربة الحرة: محرر احترافي بملء الشاشة (ألوان داكنة ثابتة مثل محررات الجوال) */
+body.ide-on{overflow:hidden}
+body.ide-on nav,body.ide-on .nilo{display:none}
+.xide{position:fixed;inset:0;z-index:50;display:flex;flex-direction:column;background:#1B1D23;color:#D7DAE0;padding:var(--st) 0 var(--sb)}
+.xide svg.fi{width:22px;height:22px;flex:none}
+.xtop,.xprev{flex:none;display:flex;align-items:center;gap:4px;height:58px;padding:0 6px;background:#1F2128}
+.xi{flex:none;width:46px;height:46px;display:grid;place-items:center;border-radius:12px;color:#AEB4BE}
+.xi:active,.xfile:active{background:#2A2D35}
+.xi svg{width:25px;height:25px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
+.xi .i{width:22px;height:22px}
+.xrun svg{fill:#22C55E;stroke:#22C55E;stroke-width:1.5}
+.xfile{display:flex;align-items:center;gap:9px;min-width:0;padding:8px 10px;border-radius:12px;color:#E6E6E6;font:500 17px/1.2 system-ui,'Cairo',sans-serif}
+.xfile span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.xsp{flex:1}
+.xide[data-v=c] .xprev{display:none}
+.xide:not([data-v=c]) .xtop,.xide:not([data-v=c]) .ekb{display:none}
+.xprev .seg{flex:1;margin:0;background:#2A2D35}
+.xprev .seg button{color:#9AA3B2}.xprev .seg button.on{background:#1B1D23;color:#fff}
+.xide .ide{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:0;background:#1B1D23;box-shadow:none}
+.xide .ide.hide{display:none}
+.xide .etabs{background:#1B1D23;border-bottom:1px solid #2A2D35;min-height:36px}
+.xide .ft{padding:7px 14px;font-size:12.5px;border-right-color:#2A2D35}
+.xide .ft.on{background:#23262E}
+.xide .cmh{flex:1;height:auto;min-height:0;background:#1B1D23}
+.xide .cmh .cm-editor,.xide .cmh .cm-gutters{background:#1B1D23}
+.xide .cmh .cm-gutters{border-right:0}
+.xide .pv{flex:1;min-height:0;display:flex;flex-direction:column;border-radius:0;box-shadow:none;background:#fff}
+.xide .pv.off,.xide .pv.hide{display:none}
+.xide .frame{flex:1;height:auto}
+.xide .con{flex:1;max-height:none;min-height:0}
+#pcn{background:#07141A}
+body .xide .ekb{position:static;flex:none;margin:0;padding:0;background:#1F2128;border-top:1px solid #2A2D35;box-shadow:none}
+.xide .sug{padding:6px 8px 0;min-height:0}
+.xide .sug:has(.h){display:none}
+.xide .sug button{height:34px;background:#2A2D35;color:#E6E6E6}
+.xide .estat{direction:ltr;display:flex;gap:16px;background:transparent;color:#9AA0A6;font:13px/1 system-ui,sans-serif;padding:11px 14px;border-bottom:1px solid #2A2D35;white-space:nowrap;overflow:hidden}
+.xide .estat .xs{flex:1}
+.xkeys{display:flex;justify-content:space-around;align-items:center;height:54px;padding:0 4px}
+.xkeys button{width:44px;height:44px;display:grid;place-items:center;border-radius:12px;color:#C9CDD4}
+.xkeys button svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+.xkeys button:active{background:#2C2F38}
+.xkeys button.on{color:#12B5A6}
+.xide .keys{padding:0 8px 8px}
+.xide .keys button{background:#2A2D35;color:#E6E6E6;box-shadow:none;height:38px}
+.xide .efsbar{display:none!important}
+/* القائمة الجانبية */
+.xdrawer{position:fixed;inset:0;z-index:70;background:rgba(0,0,0,.5);opacity:0;pointer-events:none;transition:opacity .2s}
+.xdrawer.open{opacity:1;pointer-events:all}
+.xdpanel{position:absolute;top:0;bottom:0;right:0;width:min(86vw,340px);background:#1F2128;color:#D7DAE0;padding:calc(var(--st) + 16px) 14px calc(var(--sb) + 14px);overflow:auto;transform:translateX(100%);transition:transform .25s;display:flex;flex-direction:column;gap:8px}
+.xdrawer.open .xdpanel{transform:none}
+.xdh{display:flex;align-items:center;gap:8px;font-size:17px;color:#fff}.xdh .i{color:#12B5A6}.xdh small{margin-inline-start:auto;color:#7F848E;font-size:12px}
+.xdsec{font-size:12px;font-weight:700;color:#7F848E;margin-top:10px}
+.xdfiles{display:grid;gap:2px}
+.xdfiles button{display:flex;align-items:center;gap:10px;width:100%;padding:10px;border-radius:10px;font:15px var(--mono);color:#D7DAE0}
+.xdfiles button.on{background:#2A2D35;color:#fff}
+.xide .pj-bar{flex-direction:column;overflow:visible;margin:0;gap:6px}
+.xide .pj-bar button{flex:none;background:#2A2D35;color:#E6E6E6;box-shadow:none;text-align:start;padding:11px 12px}
+.xide .chips{margin:0}
+.xide .chips button{background:#2A2D35;color:#E6E6E6;box-shadow:none}
+.xide .etl{display:grid;grid-template-columns:1fr 1fr;gap:6px;background:none;border:0;padding:0;overflow:visible}
+.xide .etl button{background:#2A2D35;color:#E6E6E6;height:40px}
+.xide .etl button.on{background:#0E7C86;color:#fff}
+.xdexit{margin-top:auto;padding:12px;border-radius:12px;background:#2A2D35;color:#E6E6E6;display:flex;gap:8px;align-items:center;justify-content:center;font-weight:700}
+.xprev .seg button[hidden]{display:none}
