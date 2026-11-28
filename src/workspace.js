@@ -28,6 +28,7 @@ var IC={
   save:SV('<path d="M12 15V3M7 10l5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>'),
   plus:SV('<path d="M12 5v14M5 12h14"/>'),
   x:SV('<path d="M18 6 6 18M6 6l12 12"/>'),
+  target:SV('<circle cx="12" cy="12" r="7"/><circle cx="12" cy="12" r="2"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3"/>'),
   check:SV('<path d="M20 6 9 17l-5-5"/>')
 };
 function ficon(p,isDir,openDir){
@@ -137,6 +138,8 @@ function attach(E,order){
   var dr=document.querySelector('#xdrawer');
   dr.querySelector('.xpanes').addEventListener('click',onDrawerClick);
   dr.querySelector('.xpanes').addEventListener('input',onDrawerInput);
+  dr.querySelector('.xpanes').addEventListener('contextmenu',onLongPress);
+  document.querySelector('#ftabs').addEventListener('contextmenu',onLongPress);
   // حفظ فوري عند مغادرة التطبيق أو إغلاقه
   document.addEventListener('visibilitychange',flushIfHidden);
   window.addEventListener('pagehide',flush);
@@ -207,6 +210,48 @@ function closeTab(p,silent){
   if(W.dirty[p]){clearTimeout(saveT[p]);saveFile(p).then(go)}else go();
 }
 
+// إغلاق عدة تبويبات: نحفظ المعدَّل أولاً، ويبقى تبويب واحد على الأقل
+function closeMany(list){
+  return Promise.all(list.filter(function(t){return W.dirty[t]}).map(function(t){clearTimeout(saveT[t]);return saveFile(t)})).then(function(){
+    list.forEach(function(t){if(!W.dirty[t]&&W.tabs.indexOf(t)>-1)closeTab(t,true)});
+  });
+}
+function tabMenu(p){
+  var i=W.tabs.indexOf(p),items=[{id:'close',label:'إغلاق'}];
+  if(W.tabs.length>1)items.push({id:'others',label:'إغلاق الباقي'},{id:'all',label:'إغلاق الكل (يبقى الملف الحالي)'});
+  if(i>-1&&i<W.tabs.length-1)items.push({id:'right',label:'إغلاق التبويبات التالية'});
+  items.push(null,{id:'reveal',label:'إظهاره في شجرة الملفات'},{id:'rename',label:'إعادة تسمية'});
+  return menu(p,items).then(function(a){
+    if(a==='close')return closeTab(p);
+    if(a==='others')return openFile(p).then(function(){return closeMany(W.tabs.filter(function(t){return t!==p}))});
+    if(a==='all')return closeMany(W.tabs.filter(function(t){return t!==W.active}));
+    if(a==='right'){var r=W.tabs.slice(i+1);return (r.indexOf(W.active)>-1?openFile(p):Promise.resolve()).then(function(){return closeMany(r)})}
+    if(a==='reveal')return reveal(p);
+    if(a==='rename')return rename(p);
+  });
+}
+// يفتح اللوحة على مجلد الملف ويمرّر إليه
+function reveal(p){
+  if(!p||!W.map[p])return;
+  W.filter='';
+  var d=V.dirname(p);while(d){W.expanded[d]=1;d=V.dirname(d)}
+  saveState();renderTree();
+  var dr=document.querySelector('#xdrawer'),b=dr.querySelector('[data-p=files]');
+  if(!dr.classList.contains('open'))document.querySelector('[data-x=menu]').click();
+  if(b)b.click();
+  setTimeout(function(){var r=dr.querySelector('#wsx .wrow[data-path="'+cssq(p)+'"]');if(r){r.scrollIntoView({block:'center'});r.classList.add('flash');setTimeout(function(){r.classList.remove('flash')},1200)}},60);
+}
+/* ملف التشغيل الافتراضي لكل مشروع */
+function getLaunch(){var p=(lsGet().launch||{})[W.pid];return p&&W.map[p]&&V.langOf(p)==='html'?p:null}
+function setLaunch(p){var o=lsGet();o.launch=o.launch||{};if(p)o.launch[W.pid]=p;else delete o.launch[W.pid];lsSet(o);renderTree()}
+// الضغط المطوّل على ملف أو تبويب يفتح قائمته
+function onLongPress(e){
+  var t=e.target.closest('#ftabs [data-f]');
+  if(t){e.preventDefault();return tabMenu(t.dataset.f)}
+  var r=e.target.closest('#wsx .wrow[data-path]');
+  if(r){e.preventDefault();return itemMenu(r.dataset.path)}
+}
+
 /* ---------- شجرة الملفات ---------- */
 function children(dir){
   var pre=dir?dir+'/':'';
@@ -216,7 +261,7 @@ function children(dir){
 function rowHTML(f,depth){
   var name=V.basename(f.path),isDir=f.type==='dir',open=!!W.expanded[f.path];
   return '<div class="wrow'+(isDir?' wdir':'')+(f.path===W.active?' on':'')+(W.clip&&W.clip.op==='cut'&&W.clip.path===f.path?' cut':'')+'" style="--d:'+depth+'" data-path="'+esc(f.path)+'">'+
-    '<button class="wmain" data-open="'+esc(f.path)+'">'+(isDir?'<span class="wch'+(open?' o':'')+'">'+IC.chev+'</span>':'<span class="wch"></span>')+ficon(f.path,isDir,open)+'<span class="wn">'+esc(name)+'</span>'+(isDir?'':'<small>'+(W.dirty[f.path]?'●':'')+'</small>')+'</button>'+
+    '<button class="wmain" data-open="'+esc(f.path)+'">'+(isDir?'<span class="wch'+(open?' o':'')+'">'+IC.chev+'</span>':'<span class="wch"></span>')+ficon(f.path,isDir,open)+'<span class="wn">'+esc(name)+'</span>'+(isDir?'':'<small>'+(f.path===getLaunch()?'<em class="wrun" title="ملف التشغيل">▶</em>':'')+(W.dirty[f.path]?'●':'')+'</small>')+'</button>'+
     '<button class="wmore" data-menu="'+esc(f.path)+'" aria-label="خيارات">'+IC.more+'</button></div>';
 }
 function tree(dir,depth){
@@ -236,7 +281,8 @@ function renderTree(){
   var focused=document.activeElement&&document.activeElement.id==='ws-filter',pos=focused?document.activeElement.selectionStart:0;
   box.innerHTML='<div class="xph"><span title="'+esc(W.name)+'">'+esc(W.name)+'</span>'+
     '<button class="xph-i" data-ws="newfile" aria-label="ملف جديد">'+IC.fileNew+'</button><button class="xph-i" data-ws="newdir" aria-label="مجلد جديد">'+IC.dirNew+'</button>'+
-    '<button class="xph-i" data-ws="upload" aria-label="إضافة ملفات من الجهاز">'+IC.upload+'</button><button class="xph-i" data-ws="collapse" aria-label="طي الكل">'+IC.collapse+'</button></div>'+
+    '<button class="xph-i" data-ws="upload" aria-label="إضافة ملفات من الجهاز">'+IC.upload+'</button><button class="xph-i" data-ws="collapse" aria-label="طي الكل">'+IC.collapse+'</button>'+
+    '<button class="xph-i" data-ws="locate" aria-label="تحديد الملف المفتوح">'+IC.target+'</button></div>'+
     '<div class="wfil"><input id="ws-filter" type="search" dir="auto" placeholder="ابحث عن ملف بالاسم…" value="'+esc(W.filter)+'"></div>'+
     (W.clip?'<div class="wclip">'+IC.paste+'<span>'+(W.clip.op==='cut'?'نقل':'نسخ')+': <b dir="ltr">'+esc(V.basename(W.clip.path))+'</b></span><button data-ws="paste" data-dir="">لصق في الجذر</button><button data-ws="clipx" aria-label="إلغاء">'+IC.x+'</button></div>':'')+
     '<div class="wtree" dir="ltr">'+(W.filter?filtered():tree('',0)||'<p class="wempty">المشروع فارغ</p>')+'</div>'+
@@ -304,6 +350,8 @@ function rename(p){
 }
 // تحديث التبويبات المفتوحة بعد نقل أو إعادة تسمية ملف أو مجلد
 function retab(from,to){
+  var lp=(lsGet().launch||{})[W.pid];
+  if(lp&&(lp===from||lp.indexOf(from+'/')===0)){var o=lsGet();o.launch[W.pid]=to+lp.slice(from.length);lsSet(o)}
   var cm=W.E&&W.E.cm;if(!cm)return;
   W.tabs=W.tabs.map(function(t){
     if(t===from||t.indexOf(from+'/')===0){var n=to+t.slice(from.length);cm.renameFile(t,n,V.basename(n),V.langOf(n)||'txt');if(W.active===t)W.active=n;if(W.dirty[t]){W.dirty[n]=1;delete W.dirty[t]}return n}
@@ -344,11 +392,14 @@ function itemMenu(p){
   if(!isDir)items.push({id:'open',label:V.isText(p)?'فتح':'معاينة'});
   if(isDir)items.push({id:'newfile',label:'ملف جديد هنا'},{id:'newdir',label:'مجلد جديد هنا'},{id:'upload',label:'رفع ملفات من الجهاز هنا'});
   if(!isDir&&V.kindOf(p)==='image'||!isDir&&V.isText(p))items.push({id:'path',label:'إدراج مساره في الملف المفتوح'});
+  if(!isDir&&V.langOf(p)==='html')items.push(getLaunch()===p?{id:'unlaunch',label:'إلغاء تعيينه ملفَّ التشغيل'}:{id:'launch',label:'تعيينه ملفَّ التشغيل'});
   items.push(null,{id:'rename',label:'إعادة تسمية'},{id:'copy',label:'نسخ'},{id:'cut',label:'قص (للنقل)'});
   if(isDir&&W.clip)items.push({id:'paste',label:'لصق هنا: '+V.basename(W.clip.path)});
   items.push(null,{id:'del',label:'حذف',danger:true});
   return menu(p,items).then(function(a){
     if(a==='open')return openFile(p).then(closeDrawerIfText(p));
+    if(a==='launch'){setLaunch(p);return T('زر التشغيل سيفتح '+V.basename(p),'good')}
+    if(a==='unlaunch')return setLaunch(null);
     if(a==='newfile')return newItem(p,false);
     if(a==='newdir')return newItem(p,true);
     if(a==='upload')return upload(p);
@@ -553,7 +604,7 @@ function inlineUrls(text,base){
 }
 function build(){
   if(!W.E)return null;
-  var entry=W.active&&V.langOf(W.active)==='html'?W.active:W.map['index.html']?'index.html':(W.items.find(function(f){return V.langOf(f.path)==='html'})||{}).path;
+  var entry=getLaunch()||(W.active&&V.langOf(W.active)==='html'?W.active:W.map['index.html']?'index.html':(W.items.find(function(f){return V.langOf(f.path)==='html'})||{}).path);
   if(!entry)return {page:'<p style="font-family:sans-serif">أضف ملف HTML (مثل index.html) لترى النتيجة.</p>',js:[]};
   return textOf(entry).then(function(html){
     var scripts=[],jobs=[];
@@ -662,6 +713,7 @@ function onDrawerClick(e){
   if(a==='newfile')return newItem('',false);
   if(a==='newdir')return newItem('',true);
   if(a==='upload')return upload(null);
+  if(a==='locate')return reveal(W.active);
   if(a==='collapse'){W.expanded={};saveState();return renderTree()}
   if(a==='paste')return paste(d.dir||'');
   if(a==='clipx'){W.clip=null;return renderTree()}
