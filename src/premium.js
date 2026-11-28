@@ -288,7 +288,7 @@ async function devOpenFolder(nm){
   }
   if(!n){tst('لم أجد ملفات في هذا المجلد','bad');return}
   lsSet('webnile_dev_last',nm);
-  loadInto(out);tst('فُتح "'+nm+'" من الهاتف','good');
+  out.name=nm;loadInto(out);tst('فُتح "'+nm+'" من الهاتف','good');
 }
 function readText(file){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result||''))};r.onerror=no;r.readAsText(file)})}
 async function devPick(files){
@@ -329,13 +329,18 @@ function pjSheet(html){
 }
 function pjList(){
   var a=projects();
-  pjSheet('<h3>'+I('folder')+' مشاريعي</h3>'+(a.length?'<div class="pj-list">'+a.map(function(p,i){return '<div class="pj-item"><button data-pj="open" data-i="'+i+'"><b>'+esc(p.name)+'</b><small>'+new Date(p.at).toLocaleDateString('ar')+'</small></button><button data-pj="del" data-i="'+i+'" aria-label="حذف">'+I('trash')+'</button></div>'}).join('')+'</div>':'<p>لا توجد مشاريع محفوظة بعد. اضغط "حفظ باسم" لتحفظ مشروعك الحالي.</p>')+'<div class="sheet-btns"><button data-pj="new" style="background:var(--nile);color:#fff">＋ مشروع جديد</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
+  pjSheet('<h3>'+I('folder')+' مشاريعي</h3>'+(a.length?'<div class="pj-list">'+a.map(function(p,i){return '<div class="pj-item"><button data-pj="open" data-i="'+i+'"><b>'+esc(p.name)+'</b><small>'+new Date(p.at).toLocaleDateString('ar')+'</small></button><button data-pj="ren" data-i="'+i+'" aria-label="إعادة تسمية">'+I('pen')+'</button><button data-pj="del" data-i="'+i+'" aria-label="حذف">'+I('trash')+'</button></div>'}).join('')+'</div>':'<p>لا توجد مشاريع محفوظة بعد. اضغط "حفظ باسم" لتحفظ مشروعك الحالي.</p>')+'<div class="sheet-btns"><button data-pj="new" style="background:var(--nile);color:#fff">＋ مشروع جديد</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
+}
+function pjRename(i){
+  var p=projects()[i];if(!p)return pjList();
+  pjSheet('<h3>'+I('pen')+' إعادة تسمية المشروع</h3><input id="pj-name" class="pj-in" maxlength="40" value="'+esc(p.name).replace(/"/g,'&quot;')+'"><div class="sheet-btns"><button data-pj="doren" data-i="'+i+'" style="background:var(--nile);color:#fff">حفظ الاسم</button><button data-pj="list" style="background:var(--line);color:var(--ink)">رجوع</button></div>');
 }
 function pjSave(){
   pjSheet('<h3>'+I('save')+' حفظ المشروع</h3><p>اختر اسماً لمشروعك الحالي (الملفات الثلاثة معاً).</p><input id="pj-name" class="pj-in" maxlength="40" placeholder="مثلاً: موقع المقهى"><div class="sheet-btns"><button data-pj="dosave" style="background:var(--nile);color:#fff">حفظ</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إلغاء</button></div>');
   setTimeout(function(){var i=document.getElementById('pj-name');if(i)i.focus()},300);
 }
-function loadInto(p){lsSet(PK.html,p.html||'');lsSet(PK.css,p.css||'');lsSet(PK.js,p.js||'');if(typeof render==='function')render()}
+function setName(n){lsSet('webnile_play_name',n||'');var el=document.querySelector('.xtree .xdir b');if(el)el.textContent=n||'my-project'}
+function loadInto(p){lsSet('webnile_play_name',p.name||'');lsSet(PK.html,p.html||'');lsSet(PK.css,p.css||'');lsSet(PK.js,p.js||'');if(typeof render==='function')render()}
 function pjAct(e){
   var b=e.target.closest('[data-pj]');if(!b)return;
   var k=b.dataset.pj,i=+b.dataset.i,a=projects();
@@ -343,10 +348,15 @@ function pjAct(e){
   if(k==='devdir'){sheet.classList.remove('show');devOpenFolder(b.dataset.n);return}
   if(k==='devsave'){var v=document.getElementById('dev-name').value;devSave(v).then(function(ok){if(ok)sheet.classList.remove('show')});return}
   if(k==='open'){loadInto(a[i]);sheet.classList.remove('show');tst('فُتح "'+a[i].name+'"','good');return}
-  if(k==='del'){if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='تأكيد؟';return}var n=a[i].name;a.splice(i,1);saveProjects(a);pjList();tst('حُذف "'+n+'"');return}
+  if(k==='ren'){pjRename(i);return}
+  if(k==='list'&&sheet&&sheet.contains(b)){pjList();return}
+  if(k==='doren'){var to=(document.getElementById('pj-name').value||'').trim();if(!to){tst('اكتب اسماً للمشروع','bad');return}
+    if(a.some(function(x,j){return j!==i&&x.name===to})){tst('يوجد مشروع بهذا الاسم','bad');return}
+    var old=a[i].name;a[i].name=to;saveProjects(a);if(lsGet('webnile_play_name','')===old)setName(to);pjList();tst('تغيّر الاسم','good');return}
+  if(k==='del'){if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='تأكيد؟';return}var n=a[i].name;a.splice(i,1);saveProjects(a);if(lsGet('webnile_play_name','')===n)setName('');pjList();tst('حُذف "'+n+'"');return}
   if(k==='new'){var c=current();if(c.html||c.css)lsSet('webnile_play_backup',JSON.stringify(c));loadInto({html:'<h1>مشروع جديد</h1>\n',css:'body {\n  font-family: Cairo, sans-serif;\n}\n',js:'// اكتب JavaScript هنا\n'});sheet.classList.remove('show');return}
   if(k==='dosave'){var nm=(document.getElementById('pj-name').value||'').trim();if(!nm){tst('اكتب اسماً للمشروع','bad');return}
-    var cur=current();cur.name=nm;cur.at=Date.now();var j=a.findIndex(function(x){return x.name===nm});if(j>-1)a[j]=cur;else a.unshift(cur);saveProjects(a);sheet.classList.remove('show');tst('حُفظ "'+nm+'"','good');return}
+    var cur=current();cur.name=nm;cur.at=Date.now();var j=a.findIndex(function(x){return x.name===nm});if(j>-1)a[j]=cur;else a.unshift(cur);saveProjects(a);setName(nm);sheet.classList.remove('show');tst('حُفظ "'+nm+'"','good');return}
 }
 function bindPlay(){
   var bar=document.querySelector('.pj-bar');if(!bar)return;
