@@ -105,3 +105,11 @@ button.xrow:active{background:#2A2D35}
 .xsg small{margin-left:auto;color:#6E737D;font:11px var(--mono)}
 .xsnip .xrow span{flex:1}
 .xsnip .xrow small{flex:none;max-width:45%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+/* لوحة المفاتيح ظاهرة فوق الصفحة: يتقلص المحرر والنوافذ إلى المساحة المرئية */
+body.kb-open .xide,body.kb-open .efs{top:var(--vvt,0px);bottom:var(--kb,0px);padding-bottom:0}
+body.kb-open .overlay{top:var(--vvt,0px);bottom:var(--kb,0px)}
+body.kb-open .overlay .sheet{max-height:100%;overflow:auto}
+/* مساحة أكبر للكود أثناء الكتابة */
+body.kb-open .xide .estat{display:none}
+body.kb-open .xide .xtop{height:46px}
+.xide .sug{overflow-x:auto}

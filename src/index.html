@@ -1101,7 +1101,43 @@ function ctx(b){
   m=t.match(/^<([\w-]+)([\s\S]*)$/);if(!m)return null;const r=m[2],tag=m[1].toLowerCase();
   if((r.match(/"/g)||[]).length%2){const q=r.match(/([\w:-]+)="([^"]*)$/);return q?{k:'av',a:q[1].toLowerCase(),w:q[2]}:null}
   const q=r.match(/\s([\w:-]*)$/);return q?{k:'a',tag,w:q[1].toLowerCase(),used:r}:null}
+/* اختصارات الكتابة على طريقة Emmet: h1+p ، ul>li*3 ، div#box.card ، a{نص} */
+const ETAGS=new Set('div span p a img ul ol li h1 h2 h3 h4 h5 h6 button input label form select option textarea table thead tbody tr th td header footer nav main section article aside strong em small br hr video audio iframe figure figcaption canvas link meta script style'.split(' '));
+const EATTR={a:'href=""',img:'src="" alt=""',input:'type="text"',label:'for=""',link:'rel="stylesheet" href=""',iframe:'src=""',video:'src="" controls',audio:'src="" controls'};
+const EVOID=new Set(['img','input','br','hr','link','meta']);
+function emmet(b,a){
+  const line=b.slice(b.lastIndexOf('\n')+1),m=line.match(/^(\s*)(\S.*)$/);
+  if(!m||/^\S/.test(a||'')||line.includes('<')||line.includes('|')||stOpen(b)>-1)return null;
+  const ind=m[1],src=m[2],low=b.toLowerCase();
+  if(low.lastIndexOf('<script')>low.lastIndexOf('</script')||low.lastIndexOf('<!--')>low.lastIndexOf('-->'))return null;
+  const re=/([a-z][a-z0-9]*)?((?:[#.][A-Za-z_][\w-]*)*)(\{[^{}]*\})?(?:\*(\d{1,2}))?(\s*[+>]\s*|$)/y;
+  const root={kids:[]};let par=root,n=0,special=false,m2;
+  while(re.lastIndex<src.length){
+    if(!(m2=re.exec(src)))return null;
+    const [all,tag,sel,text,times,op]=m2;
+    if((!tag&&!sel)||(tag&&!ETAGS.has(tag))||(times!=null&&(+times<1||+times>30)))return null;
+    const node={tag,id:'',cls:[],text:text?text.slice(1,-1):'',times:+times||1,kids:[]};
+    (sel.match(/[#.][\w-]+/g)||[]).forEach(x=>x[0]==='#'?node.id=x.slice(1):node.cls.push(x.slice(1)));
+    if(sel||text||times||op.trim())special=true;
+    par.kids.push(node);n++;
+    if(op.trim()){if(re.lastIndex>=src.length)return null;if(op.trim()==='>'){if(EVOID.has(tag))return null;par=node}}
+  }
+  if(!n||!special)return null;
+  let cur=false,count=0;const mark=()=>{if(cur)return'';cur=true;return'|'};
+  const out=(list,pad,pt)=>{const L=[];for(const x of list)for(let i=0;i<x.times;i++){
+    if(++count>200)return L;
+    const t=x.tag||(pt==='ul'||pt==='ol'?'li':'div');
+    let at=(x.id?` id="${x.id}"`:'')+(x.cls.length?` class="${x.cls.join(' ')}"`:'')+(EATTR[t]?' '+EATTR[t]:'');
+    if(at.includes('=""'))at=at.replace('=""',()=>'="'+mark()+'"');
+    const open=`<${t}${at}>`;
+    if(EVOID.has(t))L.push(pad+open);
+    else if(x.kids.length)L.push(pad+open,...(x.text?[pad+'  '+x.text]:[]),...out(x.kids,pad+'  ',t),pad+`</${t}>`);
+    else L.push(pad+open+(x.text||mark())+`</${t}>`)}
+    return L};
+  const code=out(root.kids,ind,'').join('\n').slice(ind.length);
+  return[{l:'⚡ '+src,t:'t',x:code,f:src.length}]}
 function ac(b,a){
+  const em=emmet(b,a);if(em)return em;
   const c=ctx(b);if(!c)return[];
   const pick=(arr,w)=>arr.filter(x=>x.toLowerCase().startsWith(w)&&x.toLowerCase()!==w);
   if(c.k==='t'){
@@ -1244,7 +1280,7 @@ function ideShell(files,drawer,CON){
     <div class="xpanes pj-bar">
       <section data-pane="files">
         <div class="xph"><span>EXPLORER</span><button data-pj="devopen" class="xph-i" aria-label="فتح من الهاتف">${XI('<path d="m6 14 1.5-2.9A2 2 0 0 1 9.2 10H20a2 2 0 0 1 1.9 2.5l-1.5 6A2 2 0 0 1 18.4 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.7.9l.8 1.2a2 2 0 0 0 1.7.9H18a2 2 0 0 1 2 2v2"/>')}</button><button data-pj="devsave-sheet" class="xph-i" aria-label="حفظ في الهاتف">${XI('<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>')}</button></div>
-        <div class="xtree"><div class="xrow xdir">${XI('<path d="m6 9 6 6 6-6"/>')}<b>my-project</b></div>${files.map(f=>`<button class="xrow xleaf" data-f="${f.key}">${FICON[f.lang]}<span>${esc(f.name)}</span></button>`).join('')}</div>
+        <div class="xtree"><div class="xrow xdir">${XI('<path d="m6 9 6 6 6-6"/>')}<b dir="auto">${esc((()=>{try{return localStorage.getItem('webnile_play_name')}catch(e){}})()||'my-project')}</b></div>${files.map(f=>`<button class="xrow xleaf" data-f="${f.key}">${FICON[f.lang]}<span>${esc(f.name)}</span></button>`).join('')}</div>
         <div class="xph"><span>DEVICE</span>${window.Premium&&!Premium.active()?'<em class="xpro">PRO</em>':''}</div>
         <button class="xrow" data-pj="devopen">${XI('<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>')}<span>فتح من الهاتف</span></button>
         <button class="xrow" data-pj="devsave-sheet">${XI('<path d="M12 15V3M7 10l5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>')}<span>حفظ في الهاتف</span></button>
@@ -1268,7 +1304,7 @@ function ideShell(files,drawer,CON){
 }
 function ideBind(host,cm,show,q){
   host.classList.add('xide');document.body.classList.add('ide-on');show('c',1);
-  const dr=q('#xdrawer'),drawer=on=>dr.classList.toggle('open',on);
+  const dr=q('#xdrawer'),hideKb=()=>{const a=document.activeElement;if(a&&a.blur)a.blur()},drawer=on=>{if(on)hideKb();dr.classList.toggle('open',on)};
   const fname=()=>{const b=q('#ftabs .ft.on');q('.xfile').innerHTML=FICON[cm.lang]+`<span>${esc(b?b.textContent:'index.html')}</span>`;
     host.querySelectorAll('.xtree [data-f]').forEach(x=>x.classList.toggle('on',!!b&&x.dataset.f===b.dataset.f))};
   const openF=k=>{const t=q(`#ftabs [data-f="${k}"]`);if(t)t.click();fname()};
@@ -1320,7 +1356,7 @@ function editor(host,code,onload,fname,o){
     sg.innerHTML=list.length?list.slice(0,30).map((x,i)=>`<button data-i="${i}" data-t="${CMT[x.type]||'s'}"${x.sel?' class="on"':''}>${esc(x.label)}</button>`).join(''):'<span class="h">الاقتراحات الذكية تظهر هنا أثناء الكتابة</span>'};
   let cm;
   const status=c=>{if(!cm)return;if(IDE){stat.innerHTML=`<span>Ln ${c.line}, Col ${c.col}${c.sel?` (${c.sel} sel)`:''}</span><span class="xs"></span><span>Sp: 2</span><span>${ELANG[cm.lang]==='JavaScript'?'JS':ELANG[cm.lang]}</span><span>LF</span><span>UTF-8</span>`;return}stat.innerHTML=`<span>سطر ${c.line}، عمود ${c.col}${c.sel?` (${c.sel} محدد)`:''}</span><span>${ELANG[cm.lang]} · مسافتان · UTF-8</span>`};
-  cm=CM.create(cmh,{files,onCompletions:chips,onCursor:status});
+  cm=CM.create(cmh,{files,onCompletions:chips,onCursor:status});window._cm=cm;
   setFs(fs);status(cm.cursor());
   // واجهة متوافقة مع textarea القديم: ed.value و حدث input
   const ed=new EventTarget();
@@ -1366,6 +1402,26 @@ function editor(host,code,onload,fname,o){
   if(IDE)ideBind(host,cm,show,q);
   return{ed,fr,run,paint:()=>{},show,main:o.page||MULTI?'r':'o',cm,full};
 }
+
+/* رفع أدوات المحرر فوق لوحة المفاتيح: نقيس المساحة الظاهرة فعلاً (visualViewport).
+   إن كان النظام يصغّر الصفحة بنفسه يكون الفرق صفراً فلا نضيف إزاحة مرتين */
+(function(){
+  const vv=window.visualViewport;if(!vv)return;
+  let raf,was=0,wasH=0;
+  const fit=()=>{raf=0;
+    const root=document.documentElement,zoomed=Math.abs(vv.scale-1)>.01;
+    const top=zoomed?0:Math.max(0,Math.round(vv.offsetTop));
+    const gap=zoomed?0:Math.max(0,Math.round(root.clientHeight-vv.height-top));
+    const kb=gap>100?gap:0;
+    document.body.classList.toggle('kb-open',!!kb);
+    root.style.setProperty('--kb',kb+'px');root.style.setProperty('--vvt',(kb?top:0)+'px');
+    const h=Math.round(vv.height);
+    if(kb!==was||h!==wasH){was=kb;wasH=h;
+      const el=document.activeElement;
+      if(el&&el.closest&&el.closest('.cm-editor'))setTimeout(()=>{if(window._cm&&el.isConnected)window._cm.view.dispatch({scrollIntoView:true})},60)}};
+  const ask=()=>{if(!raf)raf=requestAnimationFrame(fit)};
+  vv.addEventListener('resize',ask);vv.addEventListener('scroll',ask);addEventListener('resize',ask);
+})();
 
 /* ---------- Views ---------- */
 // ألوان الوحدات: درجات متناسقة مع هوية النيل
@@ -1582,6 +1638,7 @@ function bindPlay(){
       E.ed.value='<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n'+body+'  <script src="script.js"><\/script>\n</body>\n</html>\n';
       E.ed.dispatchEvent(new Event('input'));
     }else{const c=cm.cursor();cm.type((c.col>1?'\n':'')+x[2])}
+    if(document.activeElement)document.activeElement.blur();
     toast('أُدرج: '+x[0],'good')};
 }
 let armed=false;
