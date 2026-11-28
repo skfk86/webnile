@@ -7,11 +7,13 @@
 var SUB='webnile_pro',LIFE='webnile_pro_lifetime',PKG='com.webnile.app';
 var GRACE=7*864e5;           // نثق بآخر تحقق ناجح 7 أيام إن لم يتصل الجهاز بـ Google Play
 var FREEZES=3;               // حمايات السلسلة كل شهر للمشتركين
-var KEY='webnile_pro',PKEY='webnile_projects';
+var KEY='webnile_pro';
 
 var st={};try{st=JSON.parse(localStorage.getItem(KEY)||'{}')||{}}catch(e){}
 function persist(){try{localStorage.setItem(KEY,JSON.stringify(st))}catch(e){}}
-function dev(){try{return localStorage.getItem('webnile_pro_dev')==='1'}catch(e){return false}}
+// مفتاح التجربة يعمل في المتصفح فقط أثناء التطوير، ولا يمنح برو أبداً داخل التطبيق المثبّت
+function native(){try{return !!(window.Capacitor&&Capacitor.isNativePlatform&&Capacitor.isNativePlatform())}catch(e){return false}}
+function dev(){if(native())return false;try{return localStorage.getItem('webnile_pro_dev')==='1'}catch(e){return false}}
 function active(){
   if(dev())return true;
   if(!st.on)return false;
@@ -127,7 +129,7 @@ function manage(){
 /* ---------- المزايا ---------- */
 var PERKS=[
   ['rocket','6 مشاريع احترافية حصرية','صفحة هبوط، حاسبة، معرض بفلاتر، فاحص كلمات مرور، متتبّع مصاريف، مؤقت بومودورو. مع الحل النموذجي لكل مشروع.'],
-  ['code','أدوات المحرر الاحترافية','فتح الملفات من الهاتف وحفظها فيه، و27 نموذج كود جاهزاً، ومشاريع غير محدودة محفوظة بأسماء، وتصدير HTML.'],
+  ['code','أدوات المحرر الاحترافية','فتح الملفات من الهاتف وحفظها فيه، ومكتبة قوالب بمواضع تعديل مع قوالبك الخاصة، ومشاريع غير محدودة محفوظة بأسماء، وتصدير HTML.'],
   ['lock-open','تنقّل حر في كل الدروس','افتح أي درس أو تخطَّه دون أن تدفع نقاطك.'],
   ['snowflake',FREEZES+' حمايات للسلسلة كل شهر','فاتك يوم؟ تحمي الحماية سلسلتك تلقائياً.'],
   ['grad','شهادة احترافية كصورة','شهادة بتصميم فاخر ورمز تعريف فريد، تشاركها على LinkedIn وواتساب.'],
@@ -138,7 +140,7 @@ var REASON={
   unlock:'مع برو تفتح أي درس دون نقاط',
   files:'احفظ مشاريع غير محدودة وصدّرها',
   storage:'افتح ملفاتك من الهاتف واحفظ مشاريعك فيه',
-  snippets:'27 نموذج كود جاهزاً بضغطة واحدة',
+  snippets:'مكتبة القوالب وقوالبك الخاصة باختصار وزر Tab',
   cert:'شهادتك الاحترافية بانتظارك',
   me:'ارفع مستواك مع ويب نايل برو'
 };
@@ -216,21 +218,6 @@ function nextStreak(S,today,yesterday){
 }
 
 /* ---------- مشاريعي في التجربة الحرة ---------- */
-var PK={html:'webnile_play',css:'webnile_play_css',js:'webnile_play_js'};
-function lsGet(k,d){try{var v=localStorage.getItem(k);return v==null?d:v}catch(e){return d}}
-function lsSet(k,v){try{localStorage.setItem(k,v)}catch(e){}}
-function projects(){try{return JSON.parse(lsGet(PKEY,'[]'))||[]}catch(e){return[]}}
-function saveProjects(a){lsSet(PKEY,JSON.stringify(a))}
-function current(){return {html:lsGet(PK.html,''),css:lsGet(PK.css,''),js:lsGet(PK.js,'')}}
-function bundle(p){
-  var css=p.css&&p.css.trim()?'<style>\n'+p.css+'\n</style>\n':'',js=p.js&&p.js.trim()&&!/^\s*\/\/[^\n]*\s*$/.test(p.js)?'<script>\n'+p.js.replace(/<\/script/gi,'<\\/script')+'\n<\/script>\n':'';
-  var h=p.html||'';
-  if(/<html[\s>]/i.test(h)){
-    h=/<\/head>/i.test(h)?h.replace(/<\/head>/i,css+'</head>'):css+h;
-    return /<\/body>/i.test(h)?h.replace(/<\/body>/i,js+'</body>'):h+js;
-  }
-  return '<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n<meta charset="UTF-8">\n<meta name="viewport" content="width=device-width, initial-scale=1">\n<title>'+esc(p.name||'مشروعي')+'</title>\n'+css+'</head>\n<body>\n'+h+'\n'+js+'</body>\n</html>\n';
-}
 function plug(n){return window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins[n]}
 async function shareFile(name,data,isB64,mime,text){
   var FS=plug('Filesystem'),SH=plug('Share');
@@ -247,129 +234,12 @@ async function shareFile(name,data,isB64,mime,text){
     return true;
   }catch(e){return false}
 }
-/* ---------- الوصول لمساحة تخزين الهاتف (مجاني للجميع) ----------
-   الحفظ: Documents/WebNile/<اسم المشروع>/index.html + style.css + script.js
-   الفتح: منتقي ملفات النظام (أي مكان في الهاتف)، أو قائمة المشاريع المحفوظة في Documents/WebNile */
-var DEV_DIR='WebNile',DOCS='DOCUMENTS';
-function safeName(n){return String(n||'').trim().replace(/[\\/:*?"<>|\u0000-\u001f]+/g,'_').replace(/^\.+/,'').slice(0,60)}
-function kindOf(name){var m=/\.([a-z0-9]+)$/i.exec(name||'');var x=m?m[1].toLowerCase():'';return x==='css'?'css':(x==='js'||x==='mjs')?'js':'html'}
+/* ---------- الوصول لمساحة تخزين الهاتف (برو) ----------
+   مشاريع المحرر الحر صارت في src/workspace.js (نظام ملفات بمجلدات في IndexedDB)، وهو يستعمل fsReady و shareFile من هنا. */
 async function fsReady(){
   var FS=plug('Filesystem');if(!FS)return null;
   try{var p=await FS.checkPermissions();if(p&&p.publicStorage!=='granted'){p=await FS.requestPermissions();if(p&&p.publicStorage==='denied'){tst('اسمح للتطبيق بالوصول للتخزين من إعدادات الهاتف','bad');return null}}}catch(e){}
   return FS;
-}
-async function devSave(name){
-  var nm=safeName(name);if(!nm){tst('اكتب اسماً للمجلد','bad');return false}
-  var c=current(),files=[['index.html',c.html],['style.css',c.css],['script.js',c.js]];
-  var FS=await fsReady();
-  if(FS){
-    try{
-      for(var i=0;i<files.length;i++)await FS.writeFile({path:DEV_DIR+'/'+nm+'/'+files[i][0],data:files[i][1]||'',directory:DOCS,encoding:'utf8',recursive:true});
-      lsSet('webnile_dev_last',nm);
-      tst('حُفظ في الهاتف: Documents/'+DEV_DIR+'/'+nm,'good');return true;
-    }catch(e){tst('تعذّر الحفظ: '+(e&&e.message||'تحقق من مساحة التخزين'),'bad');return false}
-  }
-  // المتصفح: تنزيل ملف HTML واحد فيه الملفات الثلاثة
-  var p=current();p.name=nm;var ok=await shareFile(nm+'.html',bundle(p),false,'text/html','');
-  if(ok)tst('نُزّل '+nm+'.html','good');return ok;
-}
-async function devList(){
-  var FS=plug('Filesystem');if(!FS)return [];
-  try{
-    var r=await FS.readdir({path:DEV_DIR,directory:DOCS});
-    return (r.files||[]).filter(function(f){return typeof f==='string'||f.type==='directory'}).map(function(f){return typeof f==='string'?{name:f,at:0}:{name:f.name,at:+f.mtime||0}}).sort(function(a,b){return b.at-a.at});
-  }catch(e){return []}
-}
-async function devOpenFolder(nm){
-  var FS=await fsReady();if(!FS)return;
-  var out={html:'',css:'',js:''},n=0;
-  for(var f of [['html','index.html'],['css','style.css'],['js','script.js']]){
-    try{var r=await FS.readFile({path:DEV_DIR+'/'+nm+'/'+f[1],directory:DOCS,encoding:'utf8'});out[f[0]]=r.data;n++}catch(e){}
-  }
-  if(!n){tst('لم أجد ملفات في هذا المجلد','bad');return}
-  lsSet('webnile_dev_last',nm);
-  out.name=nm;loadInto(out);tst('فُتح "'+nm+'" من الهاتف','good');
-}
-function readText(file){return new Promise(function(ok,no){var r=new FileReader();r.onload=function(){ok(String(r.result||''))};r.onerror=no;r.readAsText(file)})}
-async function devPick(files){
-  if(!files||!files.length)return;
-  var c=current(),got=[];
-  for(var i=0;i<files.length;i++){
-    var f=files[i];if(f.size>2e6){tst('الملف '+f.name+' أكبر من 2MB','bad');continue}
-    try{var t=await readText(f);c[kindOf(f.name)]=t;got.push(f.name)}catch(e){}
-  }
-  if(!got.length)return;
-  loadInto(c);tst('فُتح: '+got.join('، '),'good');
-}
-function devOpenSheet(){
-  pjSheet('<h3>'+I('folder-open')+' فتح من الهاتف</h3><p>اختر ملفات .html أو .css أو .js من أي مكان في هاتفك، وكل ملف يذهب لتبويبه في المحرر.</p><label class="btn p dev-pick" style="width:100%;margin-bottom:12px">'+I('file')+' اختيار ملفات<input id="dev-file" type="file" multiple accept=".html,.htm,.css,.js,.mjs,.txt,text/html,text/css,text/javascript,text/plain" hidden></label><div id="dev-dirs"></div><div class="sheet-btns"><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
-  var inp=document.getElementById('dev-file');
-  inp.onchange=function(){var fl=[].slice.call(inp.files||[]);sheet.classList.remove('show');devPick(fl)};
-  devList().then(function(a){
-    var box=document.getElementById('dev-dirs');if(!box||!a.length)return;
-    box.innerHTML='<p style="margin:0 0 6px;font-weight:700;color:var(--ink)">مشاريعك في Documents/'+DEV_DIR+'</p><div class="pj-list">'+a.map(function(d){return '<div class="pj-item"><button data-pj="devdir" data-n="'+esc(d.name)+'"><b>'+I('folder')+' '+esc(d.name)+'</b>'+(d.at?'<small>'+new Date(d.at).toLocaleDateString('ar')+'</small>':'')+'</button></div>'}).join('')+'</div>';
-  });
-}
-function devSaveSheet(){
-  var last=lsGet('webnile_dev_last','');
-  pjSheet('<h3>'+I('save')+' حفظ في الهاتف</h3><p>يُحفظ مشروعك كملفات حقيقية <b dir="ltr">index.html · style.css · script.js</b> في مجلد <b dir="ltr">Documents/'+DEV_DIR+'</b>، فتفتحها بأي محرر آخر أو ترفعها على GitHub.</p><input id="dev-name" class="pj-in" maxlength="60" placeholder="اسم المجلد، مثلاً: موقع-المقهى" value="'+esc(last)+'"><div class="sheet-btns"><button data-pj="devsave" style="background:var(--nile);color:#fff">حفظ</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إلغاء</button></div>');
-  setTimeout(function(){var i=document.getElementById('dev-name');if(i)i.focus()},300);
-}
-
-function playBar(){
-  var n=projects().length,on=active();
-  return '<div class="pj-bar"><button data-pj="devopen">'+I('folder-open')+' فتح من الهاتف</button><button data-pj="devsave-sheet">'+I('save')+' حفظ في الهاتف</button><button data-pj="list">'+I('folder')+' مشاريعي'+(on&&n?' ('+n+')':'')+(on?'':' <span class="pro-pill">برو</span>')+'</button><button data-pj="save">'+I('save')+' حفظ باسم</button><button data-pj="export">'+I('upload')+' تصدير HTML</button></div>';
-}
-var sheet=null;
-function pjSheet(html){
-  if(!sheet){sheet=document.createElement('div');sheet.className='overlay';sheet.id='pj-sheet';sheet.innerHTML='<div class="sheet pj-sheet"></div>';document.body.appendChild(sheet);
-    sheet.addEventListener('click',function(e){if(e.target===sheet)sheet.classList.remove('show');pjAct(e)})}
-  sheet.querySelector('.sheet').innerHTML=html;
-  requestAnimationFrame(function(){sheet.classList.add('show')});
-}
-function pjList(){
-  var a=projects();
-  pjSheet('<h3>'+I('folder')+' مشاريعي</h3>'+(a.length?'<div class="pj-list">'+a.map(function(p,i){return '<div class="pj-item"><button data-pj="open" data-i="'+i+'"><b>'+esc(p.name)+'</b><small>'+new Date(p.at).toLocaleDateString('ar')+'</small></button><button data-pj="ren" data-i="'+i+'" aria-label="إعادة تسمية">'+I('pen')+'</button><button data-pj="del" data-i="'+i+'" aria-label="حذف">'+I('trash')+'</button></div>'}).join('')+'</div>':'<p>لا توجد مشاريع محفوظة بعد. اضغط "حفظ باسم" لتحفظ مشروعك الحالي.</p>')+'<div class="sheet-btns"><button data-pj="new" style="background:var(--nile);color:#fff">＋ مشروع جديد</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إغلاق</button></div>');
-}
-function pjRename(i){
-  var p=projects()[i];if(!p)return pjList();
-  pjSheet('<h3>'+I('pen')+' إعادة تسمية المشروع</h3><input id="pj-name" class="pj-in" maxlength="40" value="'+esc(p.name).replace(/"/g,'&quot;')+'"><div class="sheet-btns"><button data-pj="doren" data-i="'+i+'" style="background:var(--nile);color:#fff">حفظ الاسم</button><button data-pj="list" style="background:var(--line);color:var(--ink)">رجوع</button></div>');
-}
-function pjSave(){
-  pjSheet('<h3>'+I('save')+' حفظ المشروع</h3><p>اختر اسماً لمشروعك الحالي (الملفات الثلاثة معاً).</p><input id="pj-name" class="pj-in" maxlength="40" placeholder="مثلاً: موقع المقهى"><div class="sheet-btns"><button data-pj="dosave" style="background:var(--nile);color:#fff">حفظ</button><button data-pj="x" style="background:var(--line);color:var(--ink)">إلغاء</button></div>');
-  setTimeout(function(){var i=document.getElementById('pj-name');if(i)i.focus()},300);
-}
-function setName(n){lsSet('webnile_play_name',n||'');var el=document.querySelector('.xtree .xdir b');if(el)el.textContent=n||'my-project'}
-function loadInto(p){lsSet('webnile_play_name',p.name||'');lsSet(PK.html,p.html||'');lsSet(PK.css,p.css||'');lsSet(PK.js,p.js||'');if(typeof render==='function')render()}
-function pjAct(e){
-  var b=e.target.closest('[data-pj]');if(!b)return;
-  var k=b.dataset.pj,i=+b.dataset.i,a=projects();
-  if(k==='x'){sheet.classList.remove('show');return}
-  if(k==='devdir'){sheet.classList.remove('show');devOpenFolder(b.dataset.n);return}
-  if(k==='devsave'){var v=document.getElementById('dev-name').value;devSave(v).then(function(ok){if(ok)sheet.classList.remove('show')});return}
-  if(k==='open'){loadInto(a[i]);sheet.classList.remove('show');tst('فُتح "'+a[i].name+'"','good');return}
-  if(k==='ren'){pjRename(i);return}
-  if(k==='list'&&sheet&&sheet.contains(b)){pjList();return}
-  if(k==='doren'){var to=(document.getElementById('pj-name').value||'').trim();if(!to){tst('اكتب اسماً للمشروع','bad');return}
-    if(a.some(function(x,j){return j!==i&&x.name===to})){tst('يوجد مشروع بهذا الاسم','bad');return}
-    var old=a[i].name;a[i].name=to;saveProjects(a);if(lsGet('webnile_play_name','')===old)setName(to);pjList();tst('تغيّر الاسم','good');return}
-  if(k==='del'){if(b.dataset.armed!=='1'){b.dataset.armed='1';b.textContent='تأكيد؟';return}var n=a[i].name;a.splice(i,1);saveProjects(a);if(lsGet('webnile_play_name','')===n)setName('');pjList();tst('حُذف "'+n+'"');return}
-  if(k==='new'){var c=current();if(c.html||c.css)lsSet('webnile_play_backup',JSON.stringify(c));loadInto({html:'<h1>مشروع جديد</h1>\n',css:'body {\n  font-family: Cairo, sans-serif;\n}\n',js:'// اكتب JavaScript هنا\n'});sheet.classList.remove('show');return}
-  if(k==='dosave'){var nm=(document.getElementById('pj-name').value||'').trim();if(!nm){tst('اكتب اسماً للمشروع','bad');return}
-    var cur=current();cur.name=nm;cur.at=Date.now();var j=a.findIndex(function(x){return x.name===nm});if(j>-1)a[j]=cur;else a.unshift(cur);saveProjects(a);setName(nm);sheet.classList.remove('show');tst('حُفظ "'+nm+'"','good');return}
-}
-function bindPlay(){
-  var bar=document.querySelector('.pj-bar');if(!bar)return;
-  bar.onclick=async function(e){
-    var b=e.target.closest('[data-pj]');if(!b)return;
-    var k=b.dataset.pj;
-    if(!active())return paywall(k==='devopen'||k==='devsave-sheet'?'storage':'files');
-    if(k==='devopen')return devOpenSheet();
-    if(k==='devsave-sheet')return devSaveSheet();
-    if(k==='list')pjList();
-    else if(k==='save')pjSave();
-    else if(k==='export'){var p=current();p.name='مشروعي';var ok=await shareFile('webnile-project.html',bundle(p),false,'text/html','مشروعي من ويب نايل');if(!ok)tst('تعذّر التصدير','bad')}
-  };
 }
 
 /* ---------- الشهادة الاحترافية ---------- */
@@ -395,6 +265,7 @@ async function certImage(o){
   try{var cap=(window.WN_ICON_PATHS||{}).grad;if(cap){x.save();x.translate(W/2-90,690);x.scale(7.5,7.5);x.strokeStyle='#F5B83D';x.lineWidth=1.6;x.lineCap='round';x.lineJoin='round';(cap.match(/d="([^"]+)"/g)||[]).forEach(function(m){x.stroke(new Path2D(m.slice(3,-1)))});x.restore()}}catch(e){}
   return cv.toDataURL('image/png');
 }
+function projCount(){try{return +localStorage.getItem('wn_ws_count')||1}catch(e){return 1}}
 function certBtn(){return '<button class="btn" style="width:100%;margin-top:8px;background:linear-gradient(90deg,#F5B83D,#FFD27A);color:#0B1F2A" id="pro-cert">'+I('crown')+' حمّل الشهادة الاحترافية (صورة)'+(active()?'':' <span class="pro-pill">برو</span>')+'</button>'}
 function meCard(){
   if(active()){
@@ -421,9 +292,9 @@ function bindMe(ctx){
 window.Premium={
   active:active,paywall:paywall,onChange:function(f){listeners.push(f)},
   nextStreak:nextStreak,freezesLeft:freezesLeft,
-  playBar:playBar,bindPlay:bindPlay,devSave:devSave,devPick:devPick,
+  fsReady:fsReady,share:shareFile,
   meCard:meCard,certBtn:certBtn,bindMe:bindMe,
   restore:restore,manage:manage,
-  _bundle:bundle,_code:code,_plans:plans
+  _code:code,_plans:plans
 };
 })();

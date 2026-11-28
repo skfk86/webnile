@@ -111,7 +111,7 @@ code{direction:ltr;unicode-bidi:embed;font-family:var(--mono);font-size:.86em;ba
 .keys .k2{background:var(--deep);color:#D8EEF0;font-size:18px}
 .sug button.on{background:var(--nile)}
 body.typing nav{display:none}
-body.typing .ekb{position:sticky;bottom:0;z-index:15;background:var(--bg);margin:0 -16px;padding:0 16px;box-shadow:0 -6px 14px -10px rgba(0,0,0,.35)}
+body.typing:not(.ide-on) .ekb{position:sticky;bottom:0;z-index:15;background:var(--bg);margin:0 -16px;padding:0 16px;box-shadow:0 -6px 14px -10px rgba(0,0,0,.35)}
 .efsbar{display:none}
 body.efs-on{overflow:hidden}
 body.efs-on nav{display:none}
@@ -361,6 +361,9 @@ nav button.on .i{background:rgba(18,181,166,.16)}
 <script src="course.js"></script>
 <script src="pro-course.js"></script>
 <script src="premium.js"></script>
+<script src="snippets.js"></script>
+<script src="vfs.js"></script>
+<script src="workspace.js"></script>
 <script>
 const $=s=>document.querySelector(s);
 const ic=n=>`<svg class="i"><use href="#i-${n}"/></svg>`;
@@ -1101,43 +1104,7 @@ function ctx(b){
   m=t.match(/^<([\w-]+)([\s\S]*)$/);if(!m)return null;const r=m[2],tag=m[1].toLowerCase();
   if((r.match(/"/g)||[]).length%2){const q=r.match(/([\w:-]+)="([^"]*)$/);return q?{k:'av',a:q[1].toLowerCase(),w:q[2]}:null}
   const q=r.match(/\s([\w:-]*)$/);return q?{k:'a',tag,w:q[1].toLowerCase(),used:r}:null}
-/* اختصارات الكتابة على طريقة Emmet: h1+p ، ul>li*3 ، div#box.card ، a{نص} */
-const ETAGS=new Set('div span p a img ul ol li h1 h2 h3 h4 h5 h6 button input label form select option textarea table thead tbody tr th td header footer nav main section article aside strong em small br hr video audio iframe figure figcaption canvas link meta script style'.split(' '));
-const EATTR={a:'href=""',img:'src="" alt=""',input:'type="text"',label:'for=""',link:'rel="stylesheet" href=""',iframe:'src=""',video:'src="" controls',audio:'src="" controls'};
-const EVOID=new Set(['img','input','br','hr','link','meta']);
-function emmet(b,a){
-  const line=b.slice(b.lastIndexOf('\n')+1),m=line.match(/^(\s*)(\S.*)$/);
-  if(!m||/^\S/.test(a||'')||line.includes('<')||line.includes('|')||stOpen(b)>-1)return null;
-  const ind=m[1],src=m[2],low=b.toLowerCase();
-  if(low.lastIndexOf('<script')>low.lastIndexOf('</script')||low.lastIndexOf('<!--')>low.lastIndexOf('-->'))return null;
-  const re=/([a-z][a-z0-9]*)?((?:[#.][A-Za-z_][\w-]*)*)(\{[^{}]*\})?(?:\*(\d{1,2}))?(\s*[+>]\s*|$)/y;
-  const root={kids:[]};let par=root,n=0,special=false,m2;
-  while(re.lastIndex<src.length){
-    if(!(m2=re.exec(src)))return null;
-    const [all,tag,sel,text,times,op]=m2;
-    if((!tag&&!sel)||(tag&&!ETAGS.has(tag))||(times!=null&&(+times<1||+times>30)))return null;
-    const node={tag,id:'',cls:[],text:text?text.slice(1,-1):'',times:+times||1,kids:[]};
-    (sel.match(/[#.][\w-]+/g)||[]).forEach(x=>x[0]==='#'?node.id=x.slice(1):node.cls.push(x.slice(1)));
-    if(sel||text||times||op.trim())special=true;
-    par.kids.push(node);n++;
-    if(op.trim()){if(re.lastIndex>=src.length)return null;if(op.trim()==='>'){if(EVOID.has(tag))return null;par=node}}
-  }
-  if(!n||!special)return null;
-  let cur=false,count=0;const mark=()=>{if(cur)return'';cur=true;return'|'};
-  const out=(list,pad,pt)=>{const L=[];for(const x of list)for(let i=0;i<x.times;i++){
-    if(++count>200)return L;
-    const t=x.tag||(pt==='ul'||pt==='ol'?'li':'div');
-    let at=(x.id?` id="${x.id}"`:'')+(x.cls.length?` class="${x.cls.join(' ')}"`:'')+(EATTR[t]?' '+EATTR[t]:'');
-    if(at.includes('=""'))at=at.replace('=""',()=>'="'+mark()+'"');
-    const open=`<${t}${at}>`;
-    if(EVOID.has(t))L.push(pad+open);
-    else if(x.kids.length)L.push(pad+open,...(x.text?[pad+'  '+x.text]:[]),...out(x.kids,pad+'  ',t),pad+`</${t}>`);
-    else L.push(pad+open+(x.text||mark())+`</${t}>`)}
-    return L};
-  const code=out(root.kids,ind,'').join('\n').slice(ind.length);
-  return[{l:'⚡ '+src,t:'t',x:code,f:src.length}]}
 function ac(b,a){
-  const em=emmet(b,a);if(em)return em;
   const c=ctx(b);if(!c)return[];
   const pick=(arr,w)=>arr.filter(x=>x.toLowerCase().startsWith(w)&&x.toLowerCase()!==w);
   if(c.k==='t'){
@@ -1189,7 +1156,9 @@ function pairJS(ed,e){
     if(nx===d){ed.setRangeText('',p,p+1,'end');return}
     if(!/[\w]/.test(pv||''))ed.setRangeText(d,p,p,'start')}}
 function runner(code,page,tests){
-  const g=code.replace(/<\/script/gi,'<\\/script').replace(/\b(while|for)\s*\(([^)]*)\)\s*\{/g,'$&__g();');
+  // code: نص واحد، أو مصفوفة سكربتات (مشروع متعدد الملفات) تُنفّذ كل واحدة في وسم مستقل وبالترتيب كما في المتصفح
+  const guard=c=>String(c||'').replace(/<\/script/gi,'<\\/script').replace(/\b(while|for)\s*\(([^)]*)\)\s*\{/g,'$&__g();');
+  const g=Array.isArray(code)?code.map(guard).join('\n<\/script><script>\n'):guard(code);
   return `<!doctype html><html dir="rtl"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width"><style>body{font-family:system-ui,sans-serif;margin:14px;line-height:1.7}</style></head><body>${page||''}<script>
 var __L=[],__E=null,__T=[],__c=0;
 function __g(){if(++__c>200000)throw new Error('حلقة لا نهائية')}
@@ -1253,13 +1222,22 @@ function editorLegacy(host,code,onload,fname,o){
 /* ---------- Editor (CodeMirror 6 بشكل IDE: تبويبات ملفات، ملء الشاشة، تلوين، إكمال تلقائي) ---------- */
 const CMT={type:'t',keyword:'t',property:'a',text:'s',constant:'s',function:'p',method:'p',variable:'p',class:'p'};
 const EKEYS={html:['<','>','/','"','=','{','}',';',':','#','.','(',')','-','!'],css:['{','}',':',';','#','.','-','%','(',')','"',',','!','>','*'],js:['(',')','{','}','[',']',';','"',"'",'`','=','>','<','.',',','!','+','-','*','/','&','|','?',':','$','_']};
-const ELANG={html:'HTML',css:'CSS',js:'JavaScript'};
+const ELANG={html:'HTML',css:'CSS',js:'JavaScript',json:'JSON',md:'Markdown',txt:'Text',svg:'SVG'};
+EKEYS.json=['{','}','[',']',':',',','"','-','.','true','false','null'];EKEYS.md=['#','*','-','`','[',']','(',')','>','!','_','|'];EKEYS.txt=EKEYS.svg=EKEYS.html;
+// الإدراج السريع للوسوم (ملفات HTML فقط): يُدرج <h1></h1> والمؤشر بينهما، ويستبدل بداية وسم ناقصة مثل "<h"
+const QTAGS=['h1','h2','h3','h4','h5','h6','p','div','span','a','img','ul','li','button','input','section','br'];
 const ecss=(b,a)=>ac('<style>\n'+b,a);
 /* ---------- التجربة الحرة: واجهة محرر احترافي بملء الشاشة ---------- */
 const FICON={html:'<svg viewBox="0 0 24 24" class="fi"><path fill="#E44D26" d="M3 2h18l-1.6 18L12 22l-7.4-2z"/><path fill="#fff" d="M7.4 6.5h9.2l-.2 2.3H9.8l.2 2.3h6.2l-.5 5.4L12 17.6l-3.7-1.1-.2-2.6h2.2l.1 1.2 1.6.5 1.6-.5.2-1.9H8z"/></svg>',
   css:'<svg viewBox="0 0 24 24" class="fi"><path fill="#1572B6" d="M3 2h18l-1.6 18L12 22l-7.4-2z"/><path fill="#fff" d="M7.4 6.5h9.2l-.2 2.3h-6.6l.2 2.3h6.2l-.5 5.4L12 17.6l-3.7-1.1-.2-2.6h2.2l.1 1.2 1.6.5 1.6-.5.2-1.9H8.2z"/></svg>',
   js:'<svg viewBox="0 0 24 24" class="fi"><rect width="20" height="20" x="2" y="2" rx="2" fill="#F0DB4F"/><path fill="#323330" d="M8.5 17.6c.4.7.9 1.2 1.8 1.2s1.4-.4 1.4-1.9V11h1.8v5.9c0 2.3-1.3 3.3-3.2 3.3-1.7 0-2.7-.9-3.2-2zm6.4-.2 1.5-.9c.4.7 1 1.2 1.9 1.2.8 0 1.3-.4 1.3-1 0-.7-.5-.9-1.4-1.3l-.5-.2c-1.4-.6-2.3-1.3-2.3-2.9 0-1.4 1.1-2.5 2.8-2.5 1.2 0 2.1.4 2.7 1.5l-1.5.9c-.3-.6-.7-.8-1.2-.8s-.9.3-.9.8.3.8 1.2 1.1l.5.2c1.6.7 2.5 1.4 2.5 3 0 1.8-1.4 2.7-3.2 2.7-1.8 0-3-.9-3.5-2z"/></svg>'};
 const XI=d=>`<svg viewBox="0 0 24 24">${d}</svg>`;
+FICON.json='<svg viewBox="0 0 24 24" class="fi"><rect width="20" height="20" x="2" y="2" rx="3" fill="#CBCB41"/><path fill="none" stroke="#323330" stroke-width="2" stroke-linecap="round" d="M9 7c-2 0-2 1.5-2 3s-1 2-2 2c1 0 2 .5 2 2s0 3 2 3M15 7c2 0 2 1.5 2 3s1 2 2 2c-1 0-2 .5-2 2s0 3-2 3"/></svg>';
+FICON.md='<svg viewBox="0 0 24 24" class="fi"><rect width="22" height="16" x="1" y="4" rx="3" fill="#519ABA"/><path fill="none" stroke="#fff" stroke-width="2" stroke-linejoin="round" d="M5 16V8l3 3.5L11 8v8M16 8v7m-2.5-2.5L16 15l2.5-2.5"/></svg>';
+FICON.txt=FICON.svg='<svg viewBox="0 0 24 24" class="fi"><path fill="#8B8F98" d="M5 2h9l5 5v15H5z"/><path fill="#C9CDD4" d="M14 2v5h5z"/><path stroke="#1F2128" stroke-width="1.6" d="M8 12h8M8 15h8M8 18h5"/></svg>';
+FICON.image='<svg viewBox="0 0 24 24" class="fi"><rect width="20" height="18" x="2" y="3" rx="3" fill="#A074C4"/><circle cx="8" cy="9" r="2" fill="#fff"/><path fill="#fff" d="m4 19 5-6 3 3 3-4 5 7z"/></svg>';
+FICON.font='<svg viewBox="0 0 24 24" class="fi"><rect width="20" height="20" x="2" y="2" rx="3" fill="#E37933"/><path fill="#fff" d="M11 6h2l4.5 12h-2.2l-1-2.8H9.7l-1 2.8H6.5zm-.6 7.3h3.2L12 8.8z"/></svg>';
+FICON.media=FICON.bin=FICON.txt;
 function ideShell(files,drawer,CON){
   const f0=files[0];
   return `<div class="xtop" dir="ltr"><button data-x="menu" class="xi" aria-label="القائمة">${XI('<path d="M4 6h16M4 12h16M4 18h16"/>')}</button><button data-x="file" class="xfile" dir="ltr">${FICON[f0.lang]}<span>${esc(f0.name)}</span></button><span class="xsp"></span><button data-x="find" class="xi" aria-label="بحث">${XI('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>')}</button><button data-x="run" class="xi xrun" aria-label="تشغيل">${XI('<path d="M7 4v16l13-8z"/>')}</button></div>
@@ -1271,6 +1249,7 @@ function ideShell(files,drawer,CON){
   <div class="xdrawer" id="xdrawer" dir="ltr"><div class="xdpanel">
     <div class="xact">
       <button data-p="files" class="on" aria-label="المستكشف">${XI('<path d="M15 2H8a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7z"/><path d="M15 2v5h5"/><path d="M4 7v13a2 2 0 0 0 2 2h9"/>')}<small>الملفات</small></button>
+      <button data-p="find" aria-label="بحث في المشروع">${XI('<circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/>')}<small>بحث</small></button>
       <button data-p="proj" aria-label="المشاريع">${XI('<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>')}<small>المشاريع</small></button>
       <button data-p="snip" aria-label="إدراج">${XI('<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><path d="M17.5 14v7M14 17.5h7"/>')}<small>إدراج</small></button>
       <button data-p="set" aria-label="الإعدادات">${XI('<path d="M12.2 2h-.4a2 2 0 0 0-2 2v.2a2 2 0 0 1-1 1.7l-.4.3a2 2 0 0 1-2 0l-.2-.1a2 2 0 0 0-2.7.7l-.2.4a2 2 0 0 0 .7 2.7l.2.1a2 2 0 0 1 1 1.7v.5a2 2 0 0 1-1 1.7l-.2.1a2 2 0 0 0-.7 2.7l.2.4a2 2 0 0 0 2.7.7l.2-.1a2 2 0 0 1 2 0l.4.3a2 2 0 0 1 1 1.7v.2a2 2 0 0 0 2 2h.4a2 2 0 0 0 2-2v-.2a2 2 0 0 1 1-1.7l.4-.3a2 2 0 0 1 2 0l.2.1a2 2 0 0 0 2.7-.7l.2-.4a2 2 0 0 0-.7-2.7l-.2-.1a2 2 0 0 1-1-1.7v-.5a2 2 0 0 1 1-1.7l.2-.1a2 2 0 0 0 .7-2.7l-.2-.4a2 2 0 0 0-2.7-.7l-.2.1a2 2 0 0 1-2 0l-.4-.3a2 2 0 0 1-1-1.7V4a2 2 0 0 0-2-2z"/><circle cx="12" cy="12" r="3"/>')}<small>الإعدادات</small></button>
@@ -1278,45 +1257,42 @@ function ideShell(files,drawer,CON){
       <button data-x="exit" aria-label="العودة للدروس">${XI('<path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5"/><path d="M21 12H9"/>')}<small>خروج</small></button>
     </div>
     <div class="xpanes pj-bar">
-      <section data-pane="files">
-        <div class="xph"><span>EXPLORER</span><button data-pj="devopen" class="xph-i" aria-label="فتح من الهاتف">${XI('<path d="m6 14 1.5-2.9A2 2 0 0 1 9.2 10H20a2 2 0 0 1 1.9 2.5l-1.5 6A2 2 0 0 1 18.4 20H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.7.9l.8 1.2a2 2 0 0 0 1.7.9H18a2 2 0 0 1 2 2v2"/>')}</button><button data-pj="devsave-sheet" class="xph-i" aria-label="حفظ في الهاتف">${XI('<path d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z"/><path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"/><path d="M7 3v4a1 1 0 0 0 1 1h7"/>')}</button></div>
-        <div class="xtree"><div class="xrow xdir">${XI('<path d="m6 9 6 6 6-6"/>')}<b dir="auto">${esc((()=>{try{return localStorage.getItem('webnile_play_name')}catch(e){}})()||'my-project')}</b></div>${files.map(f=>`<button class="xrow xleaf" data-f="${f.key}">${FICON[f.lang]}<span>${esc(f.name)}</span></button>`).join('')}</div>
-        <div class="xph"><span>DEVICE</span>${window.Premium&&!Premium.active()?'<em class="xpro">PRO</em>':''}</div>
-        <button class="xrow" data-pj="devopen">${XI('<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>')}<span>فتح من الهاتف</span></button>
-        <button class="xrow" data-pj="devsave-sheet">${XI('<path d="M12 15V3M7 10l5 5 5-5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>')}<span>حفظ في الهاتف</span></button>
-      </section>
+      <section data-pane="files"><div id="wsx" class="wsx"></div></section>
+      <section data-pane="find" hidden><div id="wss" class="wss"></div></section>
       <section data-pane="proj" hidden>
-        <div class="xph"><span>PROJECTS</span></div>
-        ${drawer}
+        <div id="wsp" class="wsp"></div>
       </section>
       <section data-pane="snip" hidden>
-        <div class="xph"><span>SNIPPETS</span>${window.Premium&&!Premium.active()?'<em class="xpro">PRO</em>':'<small>تُدرج عند المؤشر</small>'}</div>
-        <div class="chips xsnip">${Object.keys(XSNIP).map(lang=>`<div class="xsg" dir="ltr">${FICON[lang]}<b>${lang==='js'?'JavaScript':lang.toUpperCase()}</b><small>${{html:'index.html',css:'style.css',js:'script.js'}[lang]}</small></div>${XSNIP[lang].map((x,i)=>`<button class="xrow" data-sx="${lang}:${i}"><span>${x[0]}</span><small>${x[1]}</small></button>`).join('')}`).join('')}</div>
+        <div class="xph"><span>SNIPPETS</span>${window.Premium&&!Premium.active()?'<em class="xpro">PRO</em>':''}<button data-sn="new" class="xph-i" aria-label="قالب جديد">${XI('<path d="M12 5v14M5 12h14"/>')}</button></div>
+        <div class="xsn" id="xsn"></div>
       </section>
       <section data-pane="set" hidden>
         <div class="xph"><span>SETTINGS</span></div>
         <div class="etl xset"><button class="xrow" data-a="fmt">${XI('<path d="M21 6H3M15 12H3M17 18H3"/>')}<span>تنسيق المستند</span></button><button class="xrow xsw" data-a="wrap">${XI('<path d="M3 6h18M3 12h15a3 3 0 1 1 0 6h-4"/><path d="m16 16-2 2 2 2"/><path d="M3 18h7"/>')}<span>التفاف الأسطر</span><i></i></button><div class="xrow xstep"><span>${XI('<path d="M4 7V4h16v3M9 20h6M12 4v16"/>')}حجم الخط</span><button data-a="fs-" aria-label="تصغير الخط">−</button><button data-a="fs+" aria-label="تكبير الخط">+</button></div></div>
+        <button class="xrow" data-x="goto">${XI('<path d="M4 6h16M4 12h10M4 18h7"/><path d="m17 15 3 3-3 3"/>')}<span>انتقال إلى سطر</span></button>
+        <button class="xrow" data-x="def">${XI('<circle cx="11" cy="11" r="7"/><path d="M11 8v6M8 11h6"/>')}<span>الانتقال إلى التعريف</span></button>
+        <button class="xrow" data-x="next">${XI('<path d="M4 7h10M4 12h10M4 17h6"/><path d="M18 9v8M14 13h8"/>')}<span>تحديد التكرار التالي</span></button>
+        <button class="xrow" data-x="problems">${XI('<path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>')}<span>الأخطاء والتحذيرات</span></button>
         <button class="xrow xsw" data-x="sym">${XI('<path d="m6 17 5-5-5-5M13 17l5-5-5-5"/>')}<span>صف الرموز</span><i></i></button>
       </section>
     </div>
     <div class="efsbar"></div>
   </div></div>`;
 }
-function ideBind(host,cm,show,q){
+function ideBind(host,cm,show,q,keep,act){
   host.classList.add('xide');document.body.classList.add('ide-on');show('c',1);
-  const dr=q('#xdrawer'),hideKb=()=>{const a=document.activeElement;if(a&&a.blur)a.blur()},drawer=on=>{if(on)hideKb();dr.classList.toggle('open',on)};
-  const fname=()=>{const b=q('#ftabs .ft.on');q('.xfile').innerHTML=FICON[cm.lang]+`<span>${esc(b?b.textContent:'index.html')}</span>`;
+  const dr=q('#xdrawer'),drawer=on=>{if(on){const f=document.activeElement;if(f&&f.closest&&f.closest('.cm-editor,textarea'))f.blur()}dr.classList.toggle('open',on)};
+  const fname=()=>{const b=q('#ftabs .ft.on');q('.xfile').innerHTML=FICON[cm.lang]+`<span>${esc(b?(b.dataset.f||'').split('/').pop():'index.html')}</span>`;
     host.querySelectorAll('.xtree [data-f]').forEach(x=>x.classList.toggle('on',!!b&&x.dataset.f===b.dataset.f))};
-  const openF=k=>{const t=q(`#ftabs [data-f="${k}"]`);if(t)t.click();fname()};
+  const openF=k=>{if(window.WS&&WS.state.E)return WS.openFile(k).then(fname);const t=q(`#ftabs [data-f="${k}"]`);if(t)t.click();fname()};
   q('#ftabs').addEventListener('click',()=>setTimeout(fname));fname();
   let sym=true;try{sym=localStorage.getItem('wn_ide_sym')!=='0'}catch(e){}
   const setSym=v=>{sym=v;q('#keys').classList.toggle('hide',!v);host.querySelectorAll('[data-x=sym]').forEach(x=>x.classList.toggle('on',v));try{localStorage.setItem('wn_ide_sym',v?'1':'0')}catch(e){}};
   setSym(sym);
-  const keep=e=>{if(e.target.closest('button'))e.preventDefault()};
   ['.xkeys','.xtop'].forEach(s=>{q(s).addEventListener('pointerdown',keep);q(s).addEventListener('mousedown',keep)});
   host.addEventListener('click',e=>{
     const b=e.target.closest('button');if(!b)return;
-    if(b.closest('.xkeys')&&b.dataset.c){cm[b.dataset.c]();return}
+    if(b.closest('.xkeys')&&b.dataset.c){act(()=>cm[b.dataset.c]());return}
     if(b.closest('.xtree')&&b.dataset.f){openF(b.dataset.f);drawer(false);return}
     if(b.dataset.p){host.querySelectorAll('.xact [data-p]').forEach(x=>x.classList.toggle('on',x===b));host.querySelectorAll('.xpanes [data-pane]').forEach(x=>x.hidden=x.dataset.pane!==b.dataset.p);return}
     const x=b.dataset.x;if(!x)return;
@@ -1327,6 +1303,10 @@ function ideBind(host,cm,show,q){
     else if(x==='code')show('c',1);
     else if(x==='reload')show(host.dataset.v==='o'?'o':'r');
     else if(x==='sym')setSym(!sym);
+    else if(x==='goto'){drawer(false);setTimeout(()=>cm.gotoLine(),80)}
+    else if(x==='next'){drawer(false);act(()=>cm.selectNext())}
+    else if(x==='problems'||x==='diag'){drawer(false);cm.problems()}
+    else if(x==='def'){drawer(false);const d=cm.definition();if(!d)return toast('لم أجد تعريفاً للكلمة عند المؤشر','bad');Promise.resolve(openF(d.key)).then(()=>{cm.select(d.pos);toast('التعريف في '+d.name)})}
     else if(x==='exit')go('home');
   });
   dr.addEventListener('click',e=>{if(e.target===dr)drawer(false);else if(e.target.closest('.chips button,.etl button[data-a=fmt]'))setTimeout(()=>drawer(false),60);else if(e.target.closest('[data-pj]'))drawer(false)});
@@ -1336,7 +1316,7 @@ function editor(host,code,onload,fname,o){
   if(!window.CM||!CM.create)return editorLegacy(host,code,onload,fname,o);
   o=o||{};const JS=!!o.js,MULTI=!!o.files,LIVE=!JS||MULTI,CON=JS||MULTI;
   const files=MULTI?o.files:[{key:'main',name:fname||(JS?'script.js':'index.html'),lang:JS?'js':'html',doc:code}];
-  files.forEach(f=>f.complete=f.lang==='js'?(b=>acJS(b)):f.lang==='css'?ecss:ac);
+  files.forEach(f=>f.complete=f.lang==='js'?(b=>acJS(b)):f.lang==='css'?ecss:f.lang==='html'?ac:null);
   const sb=MULTI?'allow-scripts allow-forms allow-modals':JS?'allow-scripts allow-forms':'allow-same-origin';
   const chk=!!document.querySelector('#ck');
   const IDE=!!o.ide&&MULTI;
@@ -1355,8 +1335,12 @@ function editor(host,code,onload,fname,o){
   const chips=list=>{const k=list.map(x=>x.label+(x.sel?'*':'')).join('\n');if(k===last)return;last=k;
     sg.innerHTML=list.length?list.slice(0,30).map((x,i)=>`<button data-i="${i}" data-t="${CMT[x.type]||'s'}"${x.sel?' class="on"':''}>${esc(x.label)}</button>`).join(''):'<span class="h">الاقتراحات الذكية تظهر هنا أثناء الكتابة</span>'};
   let cm;
-  const status=c=>{if(!cm)return;if(IDE){stat.innerHTML=`<span>Ln ${c.line}, Col ${c.col}${c.sel?` (${c.sel} sel)`:''}</span><span class="xs"></span><span>Sp: 2</span><span>${ELANG[cm.lang]==='JavaScript'?'JS':ELANG[cm.lang]}</span><span>LF</span><span>UTF-8</span>`;return}stat.innerHTML=`<span>سطر ${c.line}، عمود ${c.col}${c.sel?` (${c.sel} محدد)`:''}</span><span>${ELANG[cm.lang]} · مسافتان · UTF-8</span>`};
-  cm=CM.create(cmh,{files,onCompletions:chips,onCursor:status});window._cm=cm;
+  const status=c=>{if(!cm)return;if(IDE){stat.innerHTML=`<span>Ln ${c.line}, Col ${c.col}${c.sel?` (${c.sel} sel)`:''}</span>${diagH()}<span class="xs"></span><span>Sp: 2</span><span>${ELANG[cm.lang]==='JavaScript'?'JS':ELANG[cm.lang]}</span><span>LF</span><span>UTF-8</span>`;return}stat.innerHTML=`<span>سطر ${c.line}، عمود ${c.col}${c.sel?` (${c.sel} محدد)`:''}</span><span>${ELANG[cm.lang]} · مسافتان · UTF-8</span>`};
+  // عدّاد الأخطاء في شريط الحالة (يُضغط لفتح لوحة الأخطاء)
+  let dg={error:0,warning:0};
+  const diagH=()=>dg.error||dg.warning?`<button class="xdg" data-x="diag" aria-label="الأخطاء">${dg.error?`<b class="e">✕ ${dg.error}</b>`:''}${dg.warning?`<b class="w">! ${dg.warning}</b>`:''}</button>`:'';
+  const snips=lang=>window.Snips&&(!window.Premium||Premium.active())?Snips.forLang(lang):[];
+  cm=CM.create(cmh,{files,onCompletions:chips,onCursor:c=>status(c),snippets:snips,onDiagnostics:d=>{dg=d;if(cm)status(cm.cursor())}});
   setFs(fs);status(cm.cursor());
   // واجهة متوافقة مع textarea القديم: ed.value و حدث input
   const ed=new EventTarget();
@@ -1364,14 +1348,19 @@ function editor(host,code,onload,fname,o){
   ed.focus=()=>cm.focus();
   cm.onInput(()=>ed.dispatchEvent(new Event('input')));
   const ka=k=>esc(k).replace(/"/g,'&quot;');
-  const keys=()=>{if(IDE){q('#keys').innerHTML=EKEYS[cm.lang].map(k=>`<button data-k="${ka(k)}">${esc(k)}</button>`).join('');return}q('#keys').innerHTML='<button class="k2" data-c="tab" aria-label="Tab">'+ic('tab')+'</button><button class="k2" data-c="undo" aria-label="تراجع">'+ic('undo')+'</button><button class="k2" data-c="redo" aria-label="إعادة">'+ic('redo')+'</button><button class="k2" data-c="left" aria-label="يسار">'+ic('chev-l')+'</button><button class="k2" data-c="right" aria-label="يمين">'+ic('chev-r')+'</button>'+EKEYS[cm.lang].map(k=>`<button data-k="${ka(k)}">${esc(k)}</button>`).join('')};
+  const tags=()=>cm.lang==='html'?QTAGS.map(t=>`<button class="qt" data-t="${t}" aria-label="إدراج وسم ${t}">&lt;${t}&gt;</button>`).join('')+'<span class="qsep"></span>':'';
+  const keys=()=>{if(IDE){q('#keys').innerHTML=tags()+EKEYS[cm.lang].map(k=>`<button data-k="${ka(k)}">${esc(k)}</button>`).join('');return}q('#keys').innerHTML='<button class="k2" data-c="tab" aria-label="Tab">'+ic('tab')+'</button><button class="k2" data-c="undo" aria-label="تراجع">'+ic('undo')+'</button><button class="k2" data-c="redo" aria-label="إعادة">'+ic('redo')+'</button><button class="k2" data-c="left" aria-label="يسار">'+ic('chev-l')+'</button><button class="k2" data-c="right" aria-label="يمين">'+ic('chev-r')+'</button>'+tags()+EKEYS[cm.lang].map(k=>`<button data-k="${ka(k)}">${esc(k)}</button>`).join('')};
   keys();
-  // الأزرار لا تسرق التركيز من المحرر، فتبقى لوحة المفاتيح مفتوحة
-  const keep=e=>{if(e.target.closest('button'))e.preventDefault()};
+  // أزرار الشريط لا تغيّر حالة لوحة المفاتيح: نحفظ هل كان المحرر مركّزاً لحظة اللمس (قبل أي تغيير تركيز)،
+  // ننفّذ الأمر على حالة المحرر مباشرة (دون focus)، ثم نعيد التركيز فقط لو كان موجوداً وسُرق.
+  // فإن كانت لوحة المفاتيح مغلقة تبقى مغلقة، وإن كانت مفتوحة تبقى مفتوحة والمؤشر/التحديد كما هما.
+  let hadF=false;
+  const keep=e=>{if(e.target.closest('button')){e.preventDefault();if(e.type==='pointerdown'||!hadF)hadF=cm.hasFocus}};
+  const act=fn=>{const f=hadF;hadF=false;fn();if(f&&!cm.hasFocus)cm.focus()};
   ['#keys','#sug','.etl','#ftabs'].forEach(s=>{q(s).addEventListener('pointerdown',keep);q(s).addEventListener('mousedown',keep)});
-  q('#keys').onclick=e=>{const b=e.target.closest('button');if(!b)return;if(b.dataset.c)cm[b.dataset.c]();else cm.type(b.dataset.k)};
-  sg.onclick=e=>{const b=e.target.closest('button');if(b)cm.pick(+b.dataset.i)};
-  q('#ftabs').onclick=e=>{const b=e.target.closest('[data-f]');if(!b)return;cm.open(b.dataset.f);host.querySelectorAll('#ftabs .ft').forEach(x=>x.classList.toggle('on',x===b));keys();show('c',1)};
+  q('#keys').onclick=e=>{const b=e.target.closest('button');if(!b)return;act(()=>{if(b.dataset.c)cm[b.dataset.c]();else if(b.dataset.t)cm.tag(b.dataset.t);else cm.type(b.dataset.k)})};
+  sg.onclick=e=>{const b=e.target.closest('button');if(b)act(()=>cm.pick(+b.dataset.i))};
+  q('#ftabs').onclick=e=>{const b=e.target.closest('[data-f]');if(!b||e.target.closest('[data-close]'))return;cm.open(b.dataset.f);host.querySelectorAll('#ftabs .ft').forEach(x=>x.classList.toggle('on',x===b));keys();show('c',1)};
   // ملء الشاشة
   const full=on=>{host.classList.toggle('efs',on);document.body.classList.toggle('efs-on',on);q('[data-a=full]').classList.toggle('on',on);window._efsExit=on?()=>{full(false);return true}:null;setTimeout(()=>cm.measure(),50)};
   q('.efsbar').onclick=e=>{const b=e.target.closest('button');if(!b)return;full(false);if(b.dataset.x==='check')setTimeout(()=>{const c=document.querySelector('#ck');if(c){c.scrollIntoView({block:'center'});c.click()}},60)};
@@ -1386,7 +1375,10 @@ function editor(host,code,onload,fname,o){
   const show=(v,nr)=>{host.dataset.v=v;host.querySelectorAll('.seg button').forEach(x=>x.classList.toggle('on',x.dataset.s===v));q('#pc').classList.toggle('hide',v!=='c');q('#kb').classList.toggle('hide',v!=='c');q('#pr').classList.toggle('off',v!=='r');const cn=q('#pcn');if(cn)cn.classList.toggle('hide',v!=='o');if(v!=='c'){document.body.classList.remove('typing');if(!nr)run()}};
   host.querySelector('.seg').onclick=e=>{const b=e.target.closest('button');if(b)show(b.dataset.s)};
   const page=()=>{const h=cm.get('html'),c=cm.get('css');return(c.trim()?`<style>\n${c}\n</style>\n`:'')+h};
-  let w;const run=()=>{fr.srcdoc=MULTI?runner(cm.get('js'),page(),''):JS?runner(cm.value,o.page,o.tests):wrap(cm.value)};
+  let w,rs=0;const run=()=>{
+    // مشروع بملفات ومجلدات: o.build يجمع الصفحة مع ملفات CSS/JS والأصول المرتبطة بها
+    if(o.build){const n=++rs;Promise.resolve(o.build()).then(b=>{if(n===rs&&b)fr.srcdoc=runner(b.js,b.page,'')}).catch(e=>{con&&(con.innerHTML=`<div class="er">${esc(e.message||e)}</div>`)});return}
+    fr.srcdoc=MULTI?runner(cm.get('js'),page(),''):JS?runner(cm.value,o.page,o.tests):wrap(cm.value)};
   if(CON){
     con.innerHTML='<div class="mu">'+(MULTI?'مخرجات console.log من script.js تظهر هنا':'اضغط «تشغيل» لترى النتيجة هنا')+'</div>';
     if(window._wn)removeEventListener('message',window._wn);
@@ -1399,29 +1391,10 @@ function editor(host,code,onload,fname,o){
   ed.addEventListener('input',()=>{if(LIVE){clearTimeout(w);w=setTimeout(run,MULTI?600:350)}});
   fr.onload=()=>{if(!JS&&!MULTI&&onload)onload(fr.contentDocument)};
   chips([]);if(LIVE)run();
-  if(IDE)ideBind(host,cm,show,q);
-  return{ed,fr,run,paint:()=>{},show,main:o.page||MULTI?'r':'o',cm,full};
+  if(IDE)ideBind(host,cm,show,q,keep,act);
+  const mk=f=>{f.complete=f.lang==='js'?(b=>acJS(b)):f.lang==='css'?ecss:f.lang==='html'?ac:null;return f};
+  return{ed,fr,run,paint:()=>{},show,main:o.page||MULTI?'r':'o',cm,full,keys,mk};
 }
-
-/* رفع أدوات المحرر فوق لوحة المفاتيح: نقيس المساحة الظاهرة فعلاً (visualViewport).
-   إن كان النظام يصغّر الصفحة بنفسه يكون الفرق صفراً فلا نضيف إزاحة مرتين */
-(function(){
-  const vv=window.visualViewport;if(!vv)return;
-  let raf,was=0,wasH=0;
-  const fit=()=>{raf=0;
-    const root=document.documentElement,zoomed=Math.abs(vv.scale-1)>.01;
-    const top=zoomed?0:Math.max(0,Math.round(vv.offsetTop));
-    const gap=zoomed?0:Math.max(0,Math.round(root.clientHeight-vv.height-top));
-    const kb=gap>100?gap:0;
-    document.body.classList.toggle('kb-open',!!kb);
-    root.style.setProperty('--kb',kb+'px');root.style.setProperty('--vvt',(kb?top:0)+'px');
-    const h=Math.round(vv.height);
-    if(kb!==was||h!==wasH){was=kb;wasH=h;
-      const el=document.activeElement;
-      if(el&&el.closest&&el.closest('.cm-editor'))setTimeout(()=>{if(window._cm&&el.isConnected)window._cm.view.dispatch({scrollIntoView:true})},60)}};
-  const ask=()=>{if(!raf)raf=requestAnimationFrame(fit)};
-  vv.addEventListener('resize',ask);vv.addEventListener('scroll',ask);addEventListener('resize',ask);
-})();
 
 /* ---------- Views ---------- */
 // ألوان الوحدات: درجات متناسقة مع هوية النيل
@@ -1583,63 +1556,60 @@ function nextSteps(){
   return `<div class="card nxs"><h3>${ic('rocket')} ماذا بعد الدورة؟</h3>${N.map(x=>`<div class="ns"><span>${/^[a-z-]+$/.test(x[0])?ic(x[0]):x[0]}</span><div><b>${x[1]}</b><small>${x[2]}</small></div></div>`).join('')}</div>`;
 }
 const SNIP={'هيكل':['code','<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n</head>\n<body>\n  \n</body>\n</html>\n'],'عنوان':['heading','<h1>عنوان</h1>\n'],'فقرة':['type','<p>نص الفقرة</p>\n'],'زر':['cursor','<button>اضغط</button>\n'],'بطاقة':['box','<style>\n  .card {\n    padding: 16px;\n    border-radius: 16px;\n    background: #e8f7f5;\n  }\n</style>\n<div class="card">بطاقة</div>\n']};
-// الإدراج السريع في التجربة الحرة: [الاسم، وصف قصير، الكود]
-const XSNIP={
-html:[
-['هيكل صفحة كامل','DOCTYPE + head + body','__PAGE__'],
-['عنوان وفقرة','h1 + p','<h1>عنوان الصفحة</h1>\n<p>اكتب هنا وصفاً قصيراً.</p>\n'],
-['زر','button#btn','<button id="btn">اضغط هنا</button>\n'],
-['رابط','a href','<a href="https://example.com" target="_blank">زر الموقع</a>\n'],
-['صورة','img + alt','<img src="https://picsum.photos/400/240" alt="وصف الصورة">\n'],
-['قائمة','ul > li','<ul>\n  <li>العنصر الأول</li>\n  <li>العنصر الثاني</li>\n  <li>العنصر الثالث</li>\n</ul>\n'],
-['بطاقة','div.card','<div class="card">\n  <h3>عنوان البطاقة</h3>\n  <p>وصف قصير للبطاقة.</p>\n</div>\n'],
-['نموذج تسجيل','form + input','<form id="form">\n  <label for="name">الاسم</label>\n  <input id="name" placeholder="اسمك" required>\n  <label for="email">البريد</label>\n  <input id="email" type="email" placeholder="you@mail.com" required>\n  <button type="submit">إرسال</button>\n</form>\n<p id="msg"></p>\n'],
-['جدول','table','<table>\n  <tr><th>الاسم</th><th>الدرجة</th></tr>\n  <tr><td>سارة</td><td>95</td></tr>\n  <tr><td>علي</td><td>88</td></tr>\n</table>\n']],
-css:[
-['أساسيات الصفحة','box-sizing + body','* {\n  box-sizing: border-box;\n}\nbody {\n  margin: 0;\n  padding: 16px;\n  font-family: Cairo, system-ui, sans-serif;\n  line-height: 1.7;\n}\n'],
-['متغيرات الألوان',':root --vars',':root {\n  --main: #0E7C86;\n  --bg: #F1F6F5;\n  --text: #0B1F2A;\n}\n'],
-['توسيط بـ Flexbox','display: flex','.center {\n  display: flex;\n  align-items: center;\n  justify-content: center;\n  min-height: 100vh;\n}\n'],
-['شبكة Grid متجاوبة','grid auto-fit','.grid {\n  display: grid;\n  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));\n  gap: 12px;\n}\n'],
-['زر جميل','button:hover','button {\n  padding: 10px 20px;\n  border: 0;\n  border-radius: 99px;\n  background: #0E7C86;\n  color: white;\n  cursor: pointer;\n  transition: transform .2s;\n}\nbutton:hover {\n  transform: scale(1.05);\n}\n'],
-['بطاقة بظل','.card','.card {\n  padding: 16px;\n  border-radius: 16px;\n  background: white;\n  box-shadow: 0 4px 16px rgba(0, 0, 0, .08);\n}\n'],
-['شاشات الجوال','@media','@media (max-width: 600px) {\n  body {\n    padding: 8px;\n  }\n}\n'],
-['حركة ظهور','@keyframes','@keyframes fadeIn {\n  from { opacity: 0; transform: translateY(10px); }\n  to { opacity: 1; transform: none; }\n}\n.fade {\n  animation: fadeIn .5s ease;\n}\n']],
-js:[
-['حدث نقر','addEventListener','const btn = document.querySelector("#btn");\nbtn.addEventListener("click", () => {\n  console.log("تم الضغط!");\n});\n'],
-['تغيير نص عنصر','textContent','const title = document.querySelector("h1");\ntitle.textContent = "عنوان جديد";\n'],
-['إنشاء عنصر','createElement','const item = document.createElement("p");\nitem.textContent = "فقرة جديدة";\ndocument.body.appendChild(item);\n'],
-['دالة','function','function greet(name) {\n  return "أهلاً " + name;\n}\nconsole.log(greet("سارة"));\n'],
-['حلقة على مصفوفة','forEach','const fruits = ["تفاح", "موز", "برتقال"];\nfruits.forEach((fruit, i) => {\n  console.log(i + 1, fruit);\n});\n'],
-['شرط','if / else','const score = 75;\nif (score >= 50) {\n  console.log("ناجح");\n} else {\n  console.log("راسب");\n}\n'],
-['حفظ في الجهاز','localStorage','localStorage.setItem("name", "سارة");\nconst saved = localStorage.getItem("name");\nconsole.log(saved);\n'],
-['مؤقت','setTimeout / setInterval','setTimeout(() => {\n  console.log("بعد ثانية");\n}, 1000);\n'],
-['التحقق من نموذج','submit','document.querySelector("#form").addEventListener("submit", (e) => {\n  e.preventDefault();\n  const name = document.querySelector("#name").value.trim();\n  document.querySelector("#msg").textContent = name ? "شكراً " + name : "اكتب اسمك";\n});\n'],
-['جلب بيانات','fetch + async','async function load() {\n  try {\n    const res = await fetch("https://jsonplaceholder.typicode.com/users");\n    const data = await res.json();\n    console.log(data.length + " مستخدمين");\n  } catch (e) {\n    console.log("تعذّر الاتصال");\n  }\n}\nload();\n']]
-};
 function play(){return `<div id="edh"></div>`}
-const playDrawer=()=>{const pro=window.Premium&&Premium.active(),tag=pro?'':'<em>PRO</em>',I=d=>`<svg viewBox="0 0 24 24">${d}</svg>`;
-  return `<button class="xrow" data-pj="list">${I('<path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.7-.9l-.8-1.2A2 2 0 0 0 7.9 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2z"/>')}<span>مشاريعي المحفوظة</span>${tag}</button><button class="xrow" data-pj="save">${I('<path d="M12 5v14M5 12h14"/>')}<span>حفظ المشروع باسم</span>${tag}</button><button class="xrow" data-pj="export">${I('<path d="M12 3v12M7 8l5-5 5 5"/><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/>')}<span>تصدير كملف HTML واحد</span>${tag}</button>`};
+// التجربة الحرة = مساحة عمل لمشروع حقيقي بمجلدات وملفات (src/workspace.js فوق src/vfs.js)
+let playSeq=0;
 function bindPlay(){
-  const ld=(k,d)=>{try{return localStorage.getItem(k)||d}catch(e){return d}};
-  const sv=(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}};
-  const html=ld('webnile_play','<h1>أهلاً بك</h1>\n<p>جرّب أي كود HTML هنا، والتنسيق في style.css، والبرمجة في script.js.</p>\n<button id="btn">اضغط</button>');
-  const F=[['html','index.html','webnile_play',html],['css','style.css','webnile_play_css','body {\n  font-family: Cairo, sans-serif;\n}\n'],['js','script.js','webnile_play_js','// اكتب JavaScript هنا\n']];
-  const E=editor($('#edh'),html,null,'index.html',{ide:1,drawer:playDrawer(),files:F.map(f=>({key:f[0],name:f[1],lang:f[0],doc:f[0]==='html'?html:ld(f[2],f[3])}))});
-  const multi=!!E.cm;
-  E.ed.addEventListener('input',()=>{if(!multi)return sv('webnile_play',E.ed.value);F.forEach(f=>sv(f[2],E.cm.get(f[0])))});
-  const chp=document.querySelector('.chips');if(chp&&multi)chp.onclick=e=>{const b=e.target.closest('[data-sx]');if(!b)return;
-    if(window.Premium&&!Premium.active())return Premium.paywall('snippets');
-    const [lang,n]=b.dataset.sx.split(':'),x=XSNIP[lang][+n];
-    const t=document.querySelector(`#ftabs [data-f=${lang}]`);if(t)t.click();
-    const cm=E.cm;
-    if(x[2]==='__PAGE__'){
-      const cur=cm.get('html');if(/<html[\s>]/i.test(cur)){toast('الملف فيه هيكل صفحة بالفعل','bad');return}
-      const body=cur.trim()?cur.trim().split('\n').map(l=>'  '+l).join('\n')+'\n':'  \n';
-      E.ed.value='<!DOCTYPE html>\n<html lang="ar" dir="rtl">\n<head>\n  <meta charset="UTF-8">\n  <meta name="viewport" content="width=device-width, initial-scale=1">\n  <title>صفحتي</title>\n  <link rel="stylesheet" href="style.css">\n</head>\n<body>\n'+body+'  <script src="script.js"><\/script>\n</body>\n</html>\n';
-      E.ed.dispatchEvent(new Event('input'));
-    }else{const c=cm.cursor();cm.type((c.col>1?'\n':'')+x[2])}
-    if(document.activeElement)document.activeElement.blur();
-    toast('أُدرج: '+x[0],'good')};
+  const n=++playSeq,host=$('#edh');
+  host.innerHTML='<div class="ws-loading">جارٍ فتح المشروع…</div>';
+  WS.load().then(r=>{
+    if(n!==playSeq||V.n!=='play'||!document.body.contains(host))return;
+    const E=editor(host,'',null,'index.html',{ide:1,files:r.files,build:()=>WS.build()});
+    if(!E.cm)return;
+    WS.attach(E,r.order);
+    bindSnips(E);
+  }).catch(e=>{host.innerHTML=`<div class="ws-loading">تعذّر فتح المشروع: ${esc(e.message||e)}</div>`});
+}
+/* ---------- مكتبة القوالب في اللوحة الجانبية: بحث، تصفية، إدراج، وإنشاء/تعديل/حذف قوالبك ---------- */
+function bindSnips(E){
+  const box=document.querySelector('#xsn');if(!box||!window.Snips)return;
+  const LN={html:'HTML',css:'CSS',js:'JS'};
+  let q='',f='',edit=null;
+  const pro=()=>!window.Premium||Premium.active();
+  const list=()=>{
+    const all=Snips.search(q,f==='mine'?'':f).filter(s=>f!=='mine'||!s.builtin);
+    return `<div class="xsn-bar"><input id="xsn-q" type="search" dir="auto" placeholder="ابحث في القوالب…" value="${esc(q)}"></div>
+    <div class="xsn-f">${[['','الكل'],['html','HTML'],['css','CSS'],['js','JS'],['mine','قوالبي']].map(x=>`<button data-sf="${x[0]}" class="${f===x[0]?'on':''}">${x[1]}</button>`).join('')}</div>
+    <p class="xsn-tip">اكتب الاختصار في المحرر ثم اضغط زر Tab، أو اختره من الاقتراحات. Tab ينقلك بين مواضع التعديل.</p>
+    ${all.length?all.map(s=>`<div class="xsn-row"><button class="xsn-i" data-si="${esc(s.id)}">${FICON[s.lang]}<span><b>${esc(s.name)}</b><small>${esc(s.desc||'')}</small></span><code dir="ltr">${esc(s.prefix)}</code></button>${s.builtin?'':`<button class="xsn-e" data-se="${esc(s.id)}" aria-label="تعديل">${XI('<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>')}</button>`}</div>`).join(''):`<p class="xsn-empty">${f==='mine'?'لا توجد قوالب خاصة بك بعد. اضغط + لإنشاء قالب.':'لا نتائج'}</p>`}`};
+  const form=s=>`<div class="xsn-form"><b>${s.id?'تعديل القالب':'قالب جديد'}</b>
+    <label>الاسم<input id="sn-n" value="${esc(s.name||'')}" placeholder="مثلاً: بطاقة منتج"></label>
+    <label>الاختصار<input id="sn-p" dir="ltr" value="${esc(s.prefix||'')}" placeholder="product" autocapitalize="off" autocorrect="off" spellcheck="false"></label>
+    <label>اللغة<select id="sn-l">${['html','css','js'].map(l=>`<option value="${l}"${(s.lang||E.cm.lang)===l?' selected':''}>${LN[l]}</option>`).join('')}</select></label>
+    <label>الوصف<input id="sn-d" value="${esc(s.desc||'')}" placeholder="اختياري"></label>
+    <label>المحتوى<textarea id="sn-b" dir="ltr" rows="7" spellcheck="false" autocapitalize="off" placeholder="&lt;div class=&quot;\${1:name}&quot;&gt;\$0&lt;/div&gt;">${esc(s.body||'')}</textarea></label>
+    <small>\$1 و \${1:نص} مواضع تعديل يُتنقّل بينها بـ Tab، و \$0 مكان المؤشر في النهاية.</small>
+    <div class="xsn-act"><button data-sv="save" class="ok">حفظ</button><button data-sv="cancel">إلغاء</button>${s.id?'<button data-sv="del" class="del">حذف</button>':''}</div></div>`;
+  const paint=()=>{box.innerHTML=edit?form(edit):list();const i=box.querySelector('#xsn-q');if(i)i.oninput=()=>{q=i.value;const pos=i.selectionStart;paint();const n=box.querySelector('#xsn-q');n.focus();n.setSelectionRange(pos,pos)}};
+  const head=document.querySelector('[data-sn=new]');
+  if(head)head.onclick=()=>{if(!pro())return Premium.paywall('snippets');edit={};paint()};
+  box.onclick=e=>{
+    const b=e.target.closest('button');if(!b)return;
+    if(b.dataset.sf!=null){f=b.dataset.sf;return paint()}
+    if(b.dataset.se){edit=Object.assign({},Snips.get(b.dataset.se));return paint()}
+    if(b.dataset.sv==='cancel'){edit=null;return paint()}
+    if(b.dataset.sv==='del'){Snips.remove(edit.id);edit=null;toast('حُذف القالب');return paint()}
+    if(b.dataset.sv==='save'){const v=id=>box.querySelector(id).value;const r=Snips.save({id:edit.id,name:v('#sn-n'),prefix:v('#sn-p'),lang:v('#sn-l'),desc:v('#sn-d'),body:v('#sn-b')});
+      if(typeof r==='string')return toast(r,'bad');edit=null;f='mine';q='';toast('حُفظ القالب: '+r.prefix,'good');return paint()}
+    if(b.dataset.si){
+      if(!pro())return Premium.paywall('snippets');
+      const sn=Snips.get(b.dataset.si);if(!sn)return;
+      const t=document.querySelector(`#ftabs [data-f=${sn.lang}]`);if(t&&E.cm.lang!==sn.lang)t.click();
+      if(E.cm.lang!==sn.lang)return toast('هذا القالب لملف '+LN[sn.lang],'bad');
+      document.querySelector('#xdrawer').classList.remove('open');
+      E.cm.insertSnippet(sn);setTimeout(()=>E.cm.focus(),80);toast('أُدرج: '+sn.name,'good')}
+  };
+  paint();
 }
 let armed=false;
 function me(){
@@ -1650,10 +1620,11 @@ function me(){
 }
 const NAV={home:['waves','الدروس'],play:['code','تجربة حرة'],me:['trophy','تقدمي']};
 function render(){
+  if(window.WS&&WS.state.E)WS.detach();
   if(document.body.classList.contains('ide-on')){document.body.classList.remove('ide-on','typing');window._efsExit=null}
   $('#app').innerHTML=V.n==='home'?home():V.n==='lesson'?lesson():V.n==='exam'?exam():V.n==='play'?play():me();
   document.querySelectorAll('#nav button').forEach(b=>{const n=NAV[b.dataset.v];b.innerHTML=ic(n[0])+n[1];b.classList.toggle('on',b.dataset.v===(V.n==='lesson'||V.n==='exam'?'home':V.n))});
-  if(V.n==='lesson')bindLesson();if(V.n==='exam')bindExam();if(V.n==='play'){bindPlay();window.Premium&&Premium.bindPlay()}
+  if(V.n==='lesson')bindLesson();if(V.n==='exam')bindExam();if(V.n==='play')bindPlay();
   applyTheme(getTheme());
   const th=$('#thm');if(th)th.onclick=e=>{const b=e.target.closest('[data-t]');if(!b)return;applyTheme(b.dataset.t);th.querySelectorAll('button').forEach(x=>x.classList.toggle('on',x===b))};
   const r=$('#rst');if(r)r.onclick=()=>{if(!armed){armed=true;r.textContent='اضغط مرة أخرى للتأكيد';setTimeout(()=>{armed=false;r.textContent='مسح التقدم'},3000);return}armed=false;S={done:{},unlocked:{},xp:0,streak:0,last:''};save();toast('تم مسح التقدم');render()};
@@ -1681,6 +1652,20 @@ document.addEventListener('click',e=>{
   if(e.target.closest('[data-back]'))return go('home');
 });
 $('#nav').onclick=e=>{const b=e.target.closest('button');if(b)go(b.dataset.v)};
+// لوحة المفاتيح: واجهة المحرر (والشريط السفلي) ترتفع فوقها بدل أن تُغطّى.
+// في Android 15+ (targetSdk 35+، edge-to-edge) قد لا يتقلّص WebView عند ظهور لوحة المفاتيح،
+// فنأخذ ارتفاعها من إضافة Keyboard، وفي المتصفح من visualViewport. ولو تقلّص WebView فعلاً نعطي 0 كي لا نرفع مرتين.
+(function(){
+  const R=document.documentElement,vv=window.visualViewport;let base=innerHeight,nat=false;
+  const set=h=>{h=Math.max(0,Math.round(h||0));if(h<40)h=0;R.style.setProperty('--kb',h+'px');document.body.classList.toggle('kb-open',h>0)};
+  const fromNative=k=>{if(k>innerHeight*.8)k/=devicePixelRatio||1;const shrunk=base-innerHeight;set(shrunk>k*.5?0:k)};
+  if(vv){const f=()=>{if(!nat)set(innerHeight-vv.height-vv.offsetTop)};vv.addEventListener('resize',f);vv.addEventListener('scroll',f)}
+  addEventListener('resize',()=>{if(!document.body.classList.contains('kb-open'))base=Math.max(base,innerHeight)});
+  addEventListener('orientationchange',()=>setTimeout(()=>{base=innerHeight},400));
+  try{const K=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.Keyboard;if(K){nat=true;
+    K.addListener('keyboardWillShow',i=>fromNative(i.keyboardHeight));K.addListener('keyboardDidShow',i=>fromNative(i.keyboardHeight));
+    K.addListener('keyboardWillHide',()=>set(0));K.addListener('keyboardDidHide',()=>set(0))}}catch(e){}
+})();
 try{const A=window.Capacitor&&Capacitor.Plugins&&Capacitor.Plugins.App;if(A)A.addListener('backButton',()=>{if(window._efsExit&&window._efsExit())return;V.n!=='home'?go('home'):A.exitApp()})}catch(e){}
 
 render();
