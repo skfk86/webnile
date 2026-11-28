@@ -1356,7 +1356,7 @@ function editor(host,code,onload,fname,o){
     sg.innerHTML=list.length?list.slice(0,30).map((x,i)=>`<button data-i="${i}" data-t="${CMT[x.type]||'s'}"${x.sel?' class="on"':''}>${esc(x.label)}</button>`).join(''):'<span class="h">الاقتراحات الذكية تظهر هنا أثناء الكتابة</span>'};
   let cm;
   const status=c=>{if(!cm)return;if(IDE){stat.innerHTML=`<span>Ln ${c.line}, Col ${c.col}${c.sel?` (${c.sel} sel)`:''}</span><span class="xs"></span><span>Sp: 2</span><span>${ELANG[cm.lang]==='JavaScript'?'JS':ELANG[cm.lang]}</span><span>LF</span><span>UTF-8</span>`;return}stat.innerHTML=`<span>سطر ${c.line}، عمود ${c.col}${c.sel?` (${c.sel} محدد)`:''}</span><span>${ELANG[cm.lang]} · مسافتان · UTF-8</span>`};
-  cm=CM.create(cmh,{files,onCompletions:chips,onCursor:status});
+  cm=CM.create(cmh,{files,onCompletions:chips,onCursor:status});window._cm=cm;
   setFs(fs);status(cm.cursor());
   // واجهة متوافقة مع textarea القديم: ed.value و حدث input
   const ed=new EventTarget();
@@ -1402,6 +1402,26 @@ function editor(host,code,onload,fname,o){
   if(IDE)ideBind(host,cm,show,q);
   return{ed,fr,run,paint:()=>{},show,main:o.page||MULTI?'r':'o',cm,full};
 }
+
+/* رفع أدوات المحرر فوق لوحة المفاتيح: نقيس المساحة الظاهرة فعلاً (visualViewport).
+   إن كان النظام يصغّر الصفحة بنفسه يكون الفرق صفراً فلا نضيف إزاحة مرتين */
+(function(){
+  const vv=window.visualViewport;if(!vv)return;
+  let raf,was=0,wasH=0;
+  const fit=()=>{raf=0;
+    const root=document.documentElement,zoomed=Math.abs(vv.scale-1)>.01;
+    const top=zoomed?0:Math.max(0,Math.round(vv.offsetTop));
+    const gap=zoomed?0:Math.max(0,Math.round(root.clientHeight-vv.height-top));
+    const kb=gap>100?gap:0;
+    document.body.classList.toggle('kb-open',!!kb);
+    root.style.setProperty('--kb',kb+'px');root.style.setProperty('--vvt',(kb?top:0)+'px');
+    const h=Math.round(vv.height);
+    if(kb!==was||h!==wasH){was=kb;wasH=h;
+      const el=document.activeElement;
+      if(el&&el.closest&&el.closest('.cm-editor'))setTimeout(()=>{if(window._cm&&el.isConnected)window._cm.view.dispatch({scrollIntoView:true})},60)}};
+  const ask=()=>{if(!raf)raf=requestAnimationFrame(fit)};
+  vv.addEventListener('resize',ask);vv.addEventListener('scroll',ask);addEventListener('resize',ask);
+})();
 
 /* ---------- Views ---------- */
 // ألوان الوحدات: درجات متناسقة مع هوية النيل
